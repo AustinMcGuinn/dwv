@@ -532,7 +532,7 @@ export declare class App {
      * @param {string} dataId The data id.
      */
     toggleOverlayListeners(dataId: string): void;
-    #private;
+
 }
 
 /**
@@ -665,7 +665,7 @@ export declare class ChangeSegmentColourCommand {
      * @param {object} _event The undo event with type and id.
      */
     onUndo(_event: object): void;
-    #private;
+
 }
 
 /**
@@ -873,7 +873,7 @@ export declare class DeleteSegmentCommand {
      * @param {object} _event The undo event with type and id.
      */
     onUndo(_event: object): void;
-    #private;
+
 }
 
 /**
@@ -978,7 +978,7 @@ export declare class DicomParser {
      * @param {ArrayBuffer} buffer The input array buffer.
      */
     parse(buffer: ArrayBuffer): void;
-    #private;
+
 }
 
 /**
@@ -1062,7 +1062,7 @@ export declare class DicomWriter {
     getBuffer(dataElements: {
         [x: string]: DataElement;
     }): ArrayBuffer;
-    #private;
+
 }
 
 /**
@@ -1160,7 +1160,7 @@ export declare class DrawController {
      * @returns {number} The total number of draws.
      */
     getNumberOfDraws(): number;
-    #private;
+
 }
 
 /**
@@ -1408,7 +1408,7 @@ export declare class DrawLayer {
      *   event type.
      */
     removeEventListener(type: string, callback: Function): void;
-    #private;
+
 }
 
 /**
@@ -1609,7 +1609,7 @@ export declare class Geometry {
      * @returns {Point3D} The corresponding point.
      */
     worldToPoint(point: Point): Point3D;
-    #private;
+
 }
 
 /**
@@ -2162,7 +2162,7 @@ declare class Image_2 {
      * Note: Uses the raw buffer values.
      */
     compose(rhs: Image_2, operator: Function): Image_2;
-    #private;
+
 }
 export { Image_2 as Image }
 
@@ -2244,7 +2244,7 @@ export declare class Index {
      * @returns {string} The string id.
      */
     toStringId(dims?: number[]): string;
-    #private;
+
 }
 
 /**
@@ -2586,7 +2586,7 @@ export declare class LayerGroup {
      *   event type.
      */
     removeEventListener(type: string, callback: Function): void;
-    #private;
+
 }
 
 export declare namespace logger {
@@ -2660,7 +2660,7 @@ export declare class MaskFactory {
     }): {
         [x: string]: DataElement;
     };
-    #private;
+
 }
 
 /**
@@ -2789,7 +2789,7 @@ export declare class MaskSegmentHelper {
      * @param {MaskSegment} segment The segment to update.
      */
     updateSegment(segment: MaskSegment): void;
-    #private;
+
 }
 
 /**
@@ -2827,7 +2827,7 @@ export declare class MaskSegmentViewHelper {
      * @returns {alphaFn} The corresponding alpha function.
      */
     getAlphaFunc(): (value: number[] | number, index: number) => number;
-    #private;
+
 }
 
 /**
@@ -2935,7 +2935,7 @@ export declare class Matrix33 {
      * @returns {number} The index of the absolute maximum of the last column.
      */
     getThirdColMajorDirection(): number;
-    #private;
+
 }
 
 /**
@@ -3013,7 +3013,7 @@ export declare class OverlayData {
      *   event type.
      */
     removeEventListener(type: string, callback: object): void;
-    #private;
+
 }
 
 /**
@@ -3108,7 +3108,7 @@ export declare class PlaneHelper {
      * @returns {number} The index.
      */
     getNativeScrollIndex(): number;
-    #private;
+
 }
 
 /**
@@ -3187,7 +3187,7 @@ export declare class Point {
      * @returns {Point} The merge result.
      */
     mergeWith3D(rhs: Point3D): Point;
-    #private;
+
 }
 
 /**
@@ -3224,7 +3224,7 @@ export declare class Point2D {
      * @returns {string} The point as a string.
      */
     toString(): string;
-    #private;
+
 }
 
 /**
@@ -3298,7 +3298,7 @@ export declare class Point3D {
      * @returns {Vector3D} The 3D vector from the input point to this one.
      */
     minus(point3D: Point3D): Vector3D;
-    #private;
+
 }
 
 /**
@@ -3357,7 +3357,7 @@ export declare class RescaleSlopeAndIntercept {
      * @returns {boolean} True if the RSI has a slope of 1 and no intercept.
      */
     isID(): boolean;
-    #private;
+
 }
 
 /**
@@ -3447,7 +3447,7 @@ export declare class ScrollWheel {
      * @param {WheelEvent} event The mouse wheel event.
      */
     wheel(event: WheelEvent): void;
-    #private;
+
 }
 
 /**
@@ -3558,7 +3558,7 @@ export declare class Size {
      * @returns {Scalar2D} The 2D base [0,1] as {x,y}.
      */
     get2D(): Scalar2D;
-    #private;
+
 }
 
 /**
@@ -3609,7 +3609,7 @@ export declare class Spacing {
      * @returns {Scalar2D} The 2D base [col,row] as {x,y}.
      */
     get2D(): Scalar2D;
-    #private;
+
 }
 
 /**
@@ -3695,7 +3695,7 @@ export declare class Tag {
      * @returns {string|undefined} The VR.
      */
     getNameFromDictionary(): string | undefined;
-    #private;
+
 }
 
 /**
@@ -3780,7 +3780,7 @@ export declare class ToolboxController {
      * @param {ViewLayer|DrawLayer} layer The layer to listen to.
      */
     bindLayerGroup(layerGroup: LayerGroup, layer: ViewLayer | DrawLayer): void;
-    #private;
+
 }
 
 /**
@@ -3885,7 +3885,7 @@ export declare class Vector3D {
      * @returns {boolean} True if codirectional, false is opposite.
      */
     isCodirectional(vector3D: Vector3D): boolean;
-    #private;
+
 }
 
 /**
@@ -4148,7 +4148,7 @@ export declare class View {
      * @returns {number} The index.
      */
     getScrollIndex(): number;
-    #private;
+
 }
 
 /**
@@ -4609,7 +4609,7 @@ export declare class ViewController {
      *   event type.
      */
     removeEventListener(type: string, callback: Function): void;
-    #private;
+
 }
 
 /**
@@ -4886,7 +4886,7 @@ export declare class ViewLayer {
      * Clear the context.
      */
     clear(): void;
-    #private;
+
 }
 
 /**
