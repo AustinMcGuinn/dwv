@@ -18,7 +18,7 @@ export class Size {
    *
    * @type {number[]}
    */
-  #values;
+  _values;
 
   /**
    * @param {number[]} values The size values.
@@ -36,7 +36,7 @@ export class Size {
     if (!values.every(valueCheck)) {
       throw new Error('Cannot create size with non number or zero values.');
     }
-    this.#values = values;
+    this._values = values;
   }
 
   /**
@@ -46,7 +46,7 @@ export class Size {
    * @returns {number} The value.
    */
   get(i) {
-    return this.#values[i];
+    return this._values[i];
   }
 
   /**
@@ -55,7 +55,7 @@ export class Size {
    * @returns {number} The length.
    */
   length() {
-    return this.#values.length;
+    return this._values.length;
   }
 
   /**
@@ -64,7 +64,7 @@ export class Size {
    * @returns {string} The Size as a string.
    */
   toString() {
-    return '(' + this.#values.toString() + ')';
+    return '(' + this._values.toString() + ')';
   }
 
   /**
@@ -73,7 +73,7 @@ export class Size {
    * @returns {number[]} The array of values.
    */
   getValues() {
-    return this.#values.slice();
+    return this._values.slice();
   }
 
   /**

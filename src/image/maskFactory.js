@@ -341,7 +341,7 @@ export class MaskFactory {
    *
    * @type {string|undefined}
    */
-  #warning;
+  _warning;
 
   /**
    * Get a warning string if elements are not as expected.
@@ -350,7 +350,7 @@ export class MaskFactory {
    * @returns {string|undefined} The warning.
    */
   getWarning() {
-    return this.#warning;
+    return this._warning;
   }
 
   /**

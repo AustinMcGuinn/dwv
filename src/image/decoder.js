@@ -56,21 +56,21 @@ class AsynchPixelBufferDecoder {
    *
    * @type {string}
    */
-  #script;
+  _script;
 
   /**
    * Associated thread pool.
    *
    * @type {ThreadPool}
    */
-  #pool = new ThreadPool(10);
+  _pool = new ThreadPool(10);
 
   /**
    * Flag to know if callbacks are set.
    *
    * @type {boolean}
    */
-  #areCallbacksSet = false;
+  _areCallbacksSet = false;
 
   /**
    * @param {string} script The path to the decoder script to be used
@@ -78,7 +78,7 @@ class AsynchPixelBufferDecoder {
    * @param {number} _numberOfData The anticipated number of data to decode.
    */
   constructor(script, _numberOfData) {
-    this.#script = script;
+    this._script = script;
   }
 
   /**
@@ -89,19 +89,19 @@ class AsynchPixelBufferDecoder {
    * @param {object} info Information object about the input data.
    */
   decode(pixelBuffer, pixelMeta, info) {
-    if (!this.#areCallbacksSet) {
-      this.#areCallbacksSet = true;
+    if (!this._areCallbacksSet) {
+      this._areCallbacksSet = true;
       // set event handlers
-      this.#pool.onworkstart = this.ondecodestart;
-      this.#pool.onworkitem = this.ondecodeditem;
-      this.#pool.onwork = this.ondecoded;
-      this.#pool.onworkend = this.ondecodeend;
-      this.#pool.onerror = this.onerror;
-      this.#pool.onabort = this.onabort;
+      this._pool.onworkstart = this.ondecodestart;
+      this._pool.onworkitem = this.ondecodeditem;
+      this._pool.onwork = this.ondecoded;
+      this._pool.onworkend = this.ondecodeend;
+      this._pool.onerror = this.onerror;
+      this._pool.onabort = this.onabort;
     }
     // create worker task
     const workerTask = new WorkerTask(
-      this.#script,
+      this._script,
       {
         buffer: pixelBuffer,
         meta: pixelMeta
@@ -109,7 +109,7 @@ class AsynchPixelBufferDecoder {
       info
     );
     // add it the queue and run it
-    this.#pool.addWorkerTask(workerTask);
+    this._pool.addWorkerTask(workerTask);
   }
 
   /**
@@ -117,7 +117,7 @@ class AsynchPixelBufferDecoder {
    */
   abort() {
     // abort the thread pool, will trigger pool.onabort
-    this.#pool.abort();
+    this._pool.abort();
   }
 
   /**
@@ -183,26 +183,26 @@ class SynchPixelBufferDecoder {
    *
    * @type {string}
    */
-  #algoName;
+  _algoName;
 
   /**
    * Number of data.
    *
    * @type {number}
    */
-  #numberOfData;
+  _numberOfData;
 
   /**
    * @param {string} algoName The decompression algorithm name.
    * @param {number} numberOfData The anticipated number of data to decode.
    */
   constructor(algoName, numberOfData) {
-    this.#algoName = algoName;
-    this.#numberOfData = numberOfData;
+    this._algoName = algoName;
+    this._numberOfData = numberOfData;
   }
 
   // decode count
-  #decodeCount = 0;
+  _decodeCount = 0;
 
   /**
    * Decode a pixel buffer.
@@ -215,11 +215,11 @@ class SynchPixelBufferDecoder {
    * @external JpxImage
    */
   decode(pixelBuffer, pixelMeta, info) {
-    ++this.#decodeCount;
+    ++this._decodeCount;
 
     let decoder = null;
     let decodedBuffer = null;
-    if (this.#algoName === 'jpeg-lossless') {
+    if (this._algoName === 'jpeg-lossless') {
       if (!hasJpegLosslessDecoder) {
         throw new Error('No JPEG Lossless decoder provided');
       }
@@ -242,7 +242,7 @@ class SynchPixelBufferDecoder {
           decodedBuffer = new Uint16Array(decoded.buffer);
         }
       }
-    } else if (this.#algoName === 'jpeg-baseline') {
+    } else if (this._algoName === 'jpeg-baseline') {
       if (!hasJpegBaselineDecoder) {
         throw new Error('No JPEG Baseline decoder provided');
       }
@@ -250,7 +250,7 @@ class SynchPixelBufferDecoder {
       decoder = new JpegImage();
       decoder.parse(pixelBuffer);
       decodedBuffer = decoder.getData(decoder.width, decoder.height);
-    } else if (this.#algoName === 'jpeg2000') {
+    } else if (this._algoName === 'jpeg2000') {
       if (!hasJpeg2000Decoder) {
         throw new Error('No JPEG 2000 decoder provided');
       }
@@ -260,7 +260,7 @@ class SynchPixelBufferDecoder {
       decoder.parse(pixelBuffer);
       // set the pixel buffer
       decodedBuffer = decoder.tiles[0].items;
-    } else if (this.#algoName === 'rle') {
+    } else if (this._algoName === 'rle') {
       // decode DICOM buffer
       // @ts-ignore
       decoder = new dwvdecoder.RleDecoder();
@@ -281,7 +281,7 @@ class SynchPixelBufferDecoder {
       itemNumber: info.itemNumber
     });
     // decode end?
-    if (this.#decodeCount === this.#numberOfData) {
+    if (this._decodeCount === this._numberOfData) {
       this.ondecoded({});
       this.ondecodeend({});
     }
@@ -363,7 +363,7 @@ export class PixelBufferDecoder {
    *
    * @type {boolean}
    */
-  #areCallbacksSet = false;
+  _areCallbacksSet = false;
 
   /**
    * Pixel decoder.
@@ -371,7 +371,7 @@ export class PixelBufferDecoder {
    *
    * @type {object}
    */
-  #pixelDecoder = null;
+  _pixelDecoder = null;
 
   /**
    * @param {string} algoName The decompression algorithm name.
@@ -381,10 +381,10 @@ export class PixelBufferDecoder {
     // initialise the asynch decoder (if possible)
     if (typeof decoderScripts !== 'undefined' &&
       typeof decoderScripts[algoName] !== 'undefined') {
-      this.#pixelDecoder = new AsynchPixelBufferDecoder(
+      this._pixelDecoder = new AsynchPixelBufferDecoder(
         decoderScripts[algoName], numberOfData);
     } else {
-      this.#pixelDecoder = new SynchPixelBufferDecoder(
+      this._pixelDecoder = new SynchPixelBufferDecoder(
         algoName, numberOfData);
     }
   }
@@ -397,18 +397,18 @@ export class PixelBufferDecoder {
    * @param {object} info Information object about the input data.
    */
   decode(pixelBuffer, pixelMeta, info) {
-    if (!this.#areCallbacksSet) {
-      this.#areCallbacksSet = true;
+    if (!this._areCallbacksSet) {
+      this._areCallbacksSet = true;
       // set callbacks
-      this.#pixelDecoder.ondecodestart = this.ondecodestart;
-      this.#pixelDecoder.ondecodeditem = this.ondecodeditem;
-      this.#pixelDecoder.ondecoded = this.ondecoded;
-      this.#pixelDecoder.ondecodeend = this.ondecodeend;
-      this.#pixelDecoder.onerror = this.onerror;
-      this.#pixelDecoder.onabort = this.onabort;
+      this._pixelDecoder.ondecodestart = this.ondecodestart;
+      this._pixelDecoder.ondecodeditem = this.ondecodeditem;
+      this._pixelDecoder.ondecoded = this.ondecoded;
+      this._pixelDecoder.ondecodeend = this.ondecodeend;
+      this._pixelDecoder.onerror = this.onerror;
+      this._pixelDecoder.onabort = this.onabort;
     }
     // decode and call the callback
-    this.#pixelDecoder.decode(pixelBuffer, pixelMeta, info);
+    this._pixelDecoder.decode(pixelBuffer, pixelMeta, info);
   }
 
   /**
@@ -416,7 +416,7 @@ export class PixelBufferDecoder {
    */
   abort() {
     // decoder classes should define an abort
-    this.#pixelDecoder.abort();
+    this._pixelDecoder.abort();
   }
 
   /**

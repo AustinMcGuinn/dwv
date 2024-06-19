@@ -205,59 +205,59 @@ export class App {
    *
    * @type {AppOptions}
    */
-  #options = null;
+  _options = null;
 
   /**
    * Data controller.
    *
    * @type {DataController}
    */
-  #dataController = null;
+  _dataController = null;
 
   /**
    * Toolbox controller.
    *
    * @type {ToolboxController}
    */
-  #toolboxController = null;
+  _toolboxController = null;
 
   /**
    * Load controller.
    *
    * @type {LoadController}
    */
-  #loadController = null;
+  _loadController = null;
 
   /**
    * Stage.
    *
    * @type {Stage}
    */
-  #stage = null;
+  _stage = null;
 
   /**
    * Undo stack.
    *
    * @type {UndoStack}
    */
-  #undoStack = null;
+  _undoStack = null;
 
   /**
    * Style.
    *
    * @type {Style}
    */
-  #style = new Style();
+  _style = new Style();
 
   // overlay datas
-  #overlayDatas = {};
+  _overlayDatas = {};
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Get the image.
@@ -267,8 +267,8 @@ export class App {
    */
   getImage(dataId) {
     let res;
-    if (typeof this.#dataController.get(dataId) !== 'undefined') {
-      res = this.#dataController.get(dataId).image;
+    if (typeof this._dataController.get(dataId) !== 'undefined') {
+      res = this._dataController.get(dataId).image;
     }
     return res;
   }
@@ -280,7 +280,7 @@ export class App {
    * @param {Image} img The associated image.
    */
   setImage(dataId, img) {
-    this.#dataController.setImage(dataId, img);
+    this._dataController.setImage(dataId, img);
   }
 
   /**
@@ -293,10 +293,10 @@ export class App {
    * @returns {string} The new image data id.
    */
   addNewImage(image, meta, source) {
-    const dataId = this.#dataController.getNextDataId();
+    const dataId = this._dataController.getNextDataId();
 
     // load start event
-    this.#fireEvent({
+    this._fireEvent({
       type: 'loadstart',
       loadtype: 'image',
       source: source,
@@ -304,10 +304,10 @@ export class App {
     });
 
     // add image to data controller
-    this.#dataController.addNew(dataId, image, meta);
+    this._dataController.addNew(dataId, image, meta);
 
     // load item event
-    this.#fireEvent({
+    this._fireEvent({
       type: 'loaditem',
       loadtype: 'image',
       data: meta,
@@ -317,18 +317,18 @@ export class App {
     });
 
     // optional render
-    if (this.#options.viewOnFirstLoadItem) {
+    if (this._options.viewOnFirstLoadItem) {
       this.render(dataId);
     }
 
     // load events
-    this.#fireEvent({
+    this._fireEvent({
       type: 'load',
       loadtype: 'image',
       source: source,
       dataid: dataId
     });
-    this.#fireEvent({
+    this._fireEvent({
       type: 'loadend',
       loadtype: 'image',
       source: source,
@@ -346,8 +346,8 @@ export class App {
    */
   getMetaData(dataId) {
     let res;
-    if (typeof this.#dataController.get(dataId) !== 'undefined') {
-      res = this.#dataController.get(dataId).meta;
+    if (typeof this._dataController.get(dataId) !== 'undefined') {
+      res = this._dataController.get(dataId).meta;
     }
     return res;
   }
@@ -358,7 +358,7 @@ export class App {
    * @returns {string[]} The list of data ids.
    */
   getDataIds() {
-    return this.#dataController.getDataIds();
+    return this._dataController.getDataIds();
   }
 
   /**
@@ -368,7 +368,7 @@ export class App {
    * @returns {string[]} The list of dataIds that contain the UIDs.
    */
   getDataIdsFromSopUids(uids) {
-    return this.#dataController.getDataIdsFromSopUids(uids);
+    return this._dataController.getDataIdsFromSopUids(uids);
   }
 
   /**
@@ -378,7 +378,7 @@ export class App {
    * @deprecated Please use the ViewController equivalent directly instead.
    */
   canScroll() {
-    const viewLayer = this.#stage.getActiveLayerGroup().getActiveViewLayer();
+    const viewLayer = this._stage.getActiveLayerGroup().getActiveViewLayer();
     const controller = viewLayer.getViewController();
     return controller.canScroll();
   }
@@ -391,7 +391,7 @@ export class App {
    * @deprecated Please use the ViewController equivalent directly instead.
    */
   canWindowLevel() {
-    const viewLayer = this.#stage.getActiveLayerGroup().getActiveViewLayer();
+    const viewLayer = this._stage.getActiveLayerGroup().getActiveViewLayer();
     const controller = viewLayer.getViewController();
     return controller.canWindowLevel();
   }
@@ -402,7 +402,7 @@ export class App {
    * @returns {Scalar3D} The scale as {x,y,z}.
    */
   getAddedScale() {
-    return this.#stage.getActiveLayerGroup().getAddedScale();
+    return this._stage.getActiveLayerGroup().getAddedScale();
   }
 
   /**
@@ -411,7 +411,7 @@ export class App {
    * @returns {Scalar3D} The scale as {x,y,z}.
    */
   getBaseScale() {
-    return this.#stage.getActiveLayerGroup().getBaseScale();
+    return this._stage.getActiveLayerGroup().getBaseScale();
   }
 
   /**
@@ -420,7 +420,7 @@ export class App {
    * @returns {Scalar3D} The offset as {x,y,z}.
    */
   getOffset() {
-    return this.#stage.getActiveLayerGroup().getOffset();
+    return this._stage.getActiveLayerGroup().getOffset();
   }
 
   /**
@@ -429,7 +429,7 @@ export class App {
    * @returns {ToolboxController} The controller.
    */
   getToolboxController() {
-    return this.#toolboxController;
+    return this._toolboxController;
   }
 
   /**
@@ -439,7 +439,7 @@ export class App {
    * @returns {LayerGroup|undefined} The layer group.
    */
   getActiveLayerGroup() {
-    return this.#stage.getActiveLayerGroup();
+    return this._stage.getActiveLayerGroup();
   }
 
   /**
@@ -448,7 +448,7 @@ export class App {
    * @param {number} index The layer group index.
    */
   setActiveLayerGroup(index) {
-    this.#stage.setActiveLayerGroup(index);
+    this._stage.setActiveLayerGroup(index);
   }
 
   /**
@@ -459,7 +459,7 @@ export class App {
    * @returns {ViewLayer[]} The layers.
    */
   getViewLayersByDataId(dataId) {
-    return this.#stage.getViewLayersByDataId(dataId);
+    return this._stage.getViewLayersByDataId(dataId);
   }
 
   /**
@@ -470,7 +470,7 @@ export class App {
    * @returns {DrawLayer[]} The layers.
    */
   getDrawLayersByDataId(dataId) {
-    return this.#stage.getDrawLayersByDataId(dataId);
+    return this._stage.getDrawLayersByDataId(dataId);
   }
 
   /**
@@ -481,7 +481,7 @@ export class App {
    * @returns {LayerGroup} The layer group.
    */
   getLayerGroupByDivId(divId) {
-    return this.#stage.getLayerGroupByDivId(divId);
+    return this._stage.getLayerGroupByDivId(divId);
   }
 
   /**
@@ -490,7 +490,7 @@ export class App {
    * @returns {number} The number of groups.
    */
   getNumberOfLayerGroups() {
-    return this.#stage.getNumberOfLayerGroups();
+    return this._stage.getNumberOfLayerGroups();
   }
 
   /**
@@ -499,19 +499,19 @@ export class App {
    * @returns {object} The app style.
    */
   getStyle() {
-    return this.#style;
+    return this._style;
   }
 
   /**
    * Add a command to the undo stack.
    *
    * @param {object} cmd The command to add.
-   * @fires UndoStack#undoadd
+   * @fires UndoStack_undoadd
    * @function
    */
   addToUndoStack = (cmd) => {
-    if (this.#undoStack !== null) {
-      this.#undoStack.add(cmd);
+    if (this._undoStack !== null) {
+      this._undoStack.add(cmd);
     }
   };
 
@@ -538,7 +538,7 @@ export class App {
    *   const button = document.getElementById('render');
    *   button.disabled = false;
    *   button.onclick = function () {
-   *     // render data #0
+   *     // render data _0
    *     app.render(0);
    *   };
    * });
@@ -549,29 +549,29 @@ export class App {
    */
   init(opt) {
     // store
-    this.#options = opt;
+    this._options = opt;
     // defaults
-    if (typeof this.#options.viewOnFirstLoadItem === 'undefined') {
-      this.#options.viewOnFirstLoadItem = true;
+    if (typeof this._options.viewOnFirstLoadItem === 'undefined') {
+      this._options.viewOnFirstLoadItem = true;
     }
-    if (typeof this.#options.dataViewConfigs === 'undefined') {
-      this.#options.dataViewConfigs = {};
+    if (typeof this._options.dataViewConfigs === 'undefined') {
+      this._options.dataViewConfigs = {};
     }
-    if (typeof this.#options.rootDocument === 'undefined') {
-      this.#options.rootDocument = document;
+    if (typeof this._options.rootDocument === 'undefined') {
+      this._options.rootDocument = document;
     }
 
     // undo stack
-    this.#undoStack = new UndoStack();
-    this.#undoStack.addEventListener('undoadd', this.#fireEvent);
-    this.#undoStack.addEventListener('undo', this.#fireEvent);
-    this.#undoStack.addEventListener('redo', this.#fireEvent);
+    this._undoStack = new UndoStack();
+    this._undoStack.addEventListener('undoadd', this._fireEvent);
+    this._undoStack.addEventListener('undo', this._fireEvent);
+    this._undoStack.addEventListener('redo', this._fireEvent);
 
     // tools
-    if (typeof this.#options.tools !== 'undefined') {
+    if (typeof this._options.tools !== 'undefined') {
       // setup the tool list
       const appToolList = {};
-      const keys = Object.keys(this.#options.tools);
+      const keys = Object.keys(this._options.tools);
       for (let t = 0; t < keys.length; ++t) {
         const toolName = keys[t];
         // find the tool in the default tool list
@@ -587,11 +587,11 @@ export class App {
           if (typeof appToolList[toolName].addEventListener !== 'undefined') {
             const names = appToolList[toolName].getEventNames();
             for (let j = 0; j < names.length; ++j) {
-              appToolList[toolName].addEventListener(names[j], this.#fireEvent);
+              appToolList[toolName].addEventListener(names[j], this._fireEvent);
             }
           }
           // tool options
-          const toolParams = this.#options.tools[toolName];
+          const toolParams = this._options.tools[toolName];
           if (typeof toolParams.options !== 'undefined' &&
             toolParams.options.length !== 0) {
             let type = 'raw';
@@ -628,26 +628,26 @@ export class App {
         }
       }
       // add tools to the controller
-      this.#toolboxController = new ToolboxController(appToolList);
+      this._toolboxController = new ToolboxController(appToolList);
     }
 
     // create load controller
-    this.#loadController =
-      new LoadController(this.#options.defaultCharacterSet);
-    this.#loadController.onloadstart = this.#onloadstart;
-    this.#loadController.onprogress = this.#onloadprogress;
-    this.#loadController.onloaditem = this.#onloaditem;
-    this.#loadController.onload = this.#onload;
-    this.#loadController.onloadend = this.#onloadend;
-    this.#loadController.onerror = this.#onloaderror;
-    this.#loadController.onabort = this.#onloadabort;
+    this._loadController =
+      new LoadController(this._options.defaultCharacterSet);
+    this._loadController.onloadstart = this._onloadstart;
+    this._loadController.onprogress = this._onloadprogress;
+    this._loadController.onloaditem = this._onloaditem;
+    this._loadController.onload = this._onload;
+    this._loadController.onloadend = this._onloadend;
+    this._loadController.onerror = this._onloaderror;
+    this._loadController.onabort = this._onloadabort;
 
     // create data controller
-    this.#dataController = new DataController();
+    this._dataController = new DataController();
     // create stage
-    this.#stage = new Stage();
-    if (typeof this.#options.binders !== 'undefined') {
-      this.#stage.setBinders(this.#options.binders);
+    this._stage = new Stage();
+    if (typeof this._options.binders !== 'undefined') {
+      this._stage.setBinders(this._options.binders);
     }
   }
 
@@ -656,15 +656,15 @@ export class App {
    */
   reset() {
     // clear objects
-    this.#dataController.reset();
-    this.#stage.empty();
-    this.#overlayDatas = {};
+    this._dataController.reset();
+    this._stage.empty();
+    this._overlayDatas = {};
     // reset undo/redo
-    if (this.#undoStack) {
-      this.#undoStack = new UndoStack();
-      this.#undoStack.addEventListener('undoadd', this.#fireEvent);
-      this.#undoStack.addEventListener('undo', this.#fireEvent);
-      this.#undoStack.addEventListener('redo', this.#fireEvent);
+    if (this._undoStack) {
+      this._undoStack = new UndoStack();
+      this._undoStack.addEventListener('undoadd', this._fireEvent);
+      this._undoStack.addEventListener('undo', this._fireEvent);
+      this._undoStack.addEventListener('redo', this._fireEvent);
     }
   }
 
@@ -672,8 +672,8 @@ export class App {
    * Reset the layout of the application.
    */
   resetLayout() {
-    this.#stage.reset();
-    this.#stage.draw();
+    this._stage.reset();
+    this._stage.draw();
   }
 
   /**
@@ -684,7 +684,7 @@ export class App {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -695,7 +695,7 @@ export class App {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   // load API [begin] -------------------------------------------------------
@@ -704,22 +704,22 @@ export class App {
    * Load a list of files. Can be image files or a state file.
    *
    * @param {File[]} files The list of files to load.
-   * @fires App#loadstart
-   * @fires App#loadprogress
-   * @fires App#loaditem
-   * @fires App#loadend
-   * @fires App#error
-   * @fires App#abort
+   * @fires App_loadstart
+   * @fires App_loadprogress
+   * @fires App_loaditem
+   * @fires App_loadend
+   * @fires App_error
+   * @fires App_abort
    * @function
    */
   loadFiles = (files) => {
     // Get new data id
-    const dataId = this.#dataController.getNextDataId();
+    const dataId = this._dataController.getNextDataId();
     if (files.length === 0) {
       logger.warn('Ignoring empty input file list.');
       return;
     }
-    this.#loadController.loadFiles(files, dataId);
+    this._loadController.loadFiles(files, dataId);
   };
 
   /**
@@ -730,22 +730,22 @@ export class App {
    * - requestHeaders: an array of {name, value} to use as request headers,
    * - withCredentials: boolean xhr.withCredentials flag to pass to the request,
    * - batchSize: the size of the request url batch.
-   * @fires App#loadstart
-   * @fires App#loadprogress
-   * @fires App#loaditem
-   * @fires App#loadend
-   * @fires App#error
-   * @fires App#abort
+   * @fires App_loadstart
+   * @fires App_loadprogress
+   * @fires App_loaditem
+   * @fires App_loadend
+   * @fires App_error
+   * @fires App_abort
    * @function
    */
   loadURLs = (urls, options) => {
     // Get new data id
-    const dataId = this.#dataController.getNextDataId();
+    const dataId = this._dataController.getNextDataId();
     if (urls.length === 0) {
       logger.warn('Ignoring empty input url list.');
       return;
     }
-    this.#loadController.loadURLs(urls, dataId, options);
+    this._loadController.loadURLs(urls, dataId, options);
   };
 
   /**
@@ -782,25 +782,25 @@ export class App {
    *
    * @param {Array} data The list of ArrayBuffers to load
    *   in the form of [{name: "", filename: "", data: data}].
-   * @fires App#loadstart
-   * @fires App#loadprogress
-   * @fires App#loaditem
-   * @fires App#loadend
-   * @fires App#error
-   * @fires App#abort
+   * @fires App_loadstart
+   * @fires App_loadprogress
+   * @fires App_loaditem
+   * @fires App_loadend
+   * @fires App_error
+   * @fires App_abort
    * @function
    */
   loadImageObject = (data) => {
     // Get new data id
-    const dataId = this.#dataController.getNextDataId();
-    this.#loadController.loadImageObject(data, dataId);
+    const dataId = this._dataController.getNextDataId();
+    this._loadController.loadImageObject(data, dataId);
   };
 
   /**
    * Abort all the current loads.
    */
   abortAllLoads() {
-    const ids = this.#loadController.getLoadingDataIds();
+    const ids = this._loadController.getLoadingDataIds();
     for (const id of ids) {
       this.abortLoad(id);
     }
@@ -813,11 +813,11 @@ export class App {
    */
   abortLoad(dataId) {
     // abort load
-    this.#loadController.abort(dataId);
+    this._loadController.abort(dataId);
     // remove data
-    this.#dataController.remove(dataId);
+    this._dataController.remove(dataId);
     // clean up stage
-    this.#stage.removeLayersByDataId(dataId);
+    this._stage.removeLayersByDataId(dataId);
   }
 
   // load API [end] ---------------------------------------------------------
@@ -827,7 +827,7 @@ export class App {
    * To be called once the image is loaded.
    */
   fitToContainer() {
-    this.#stage.fitToContainer();
+    this._stage.fitToContainer();
   }
 
   /**
@@ -837,7 +837,7 @@ export class App {
    * @deprecated Please set the opacity of the desired view layer directly.
    */
   initWLDisplay() {
-    const viewLayer = this.#stage.getActiveLayerGroup().getActiveViewLayer();
+    const viewLayer = this._stage.getActiveLayerGroup().getActiveViewLayer();
     const controller = viewLayer.getViewController();
     controller.initialise();
   }
@@ -848,8 +848,8 @@ export class App {
    * @param {boolean} flag True to enable smoothing.
    */
   setImageSmoothing(flag) {
-    this.#stage.setImageSmoothing(flag);
-    this.#stage.draw();
+    this._stage.setImageSmoothing(flag);
+    this._stage.draw();
   }
 
   /**
@@ -862,16 +862,16 @@ export class App {
    */
   getViewConfigs(dataId, excludeStarConfig) {
     // check options
-    if (this.#options.dataViewConfigs === null ||
-      typeof this.#options.dataViewConfigs === 'undefined') {
+    if (this._options.dataViewConfigs === null ||
+      typeof this._options.dataViewConfigs === 'undefined') {
       throw new Error('No available data view configuration');
     }
     let configs = [];
-    if (typeof this.#options.dataViewConfigs[dataId] !== 'undefined') {
-      configs = this.#options.dataViewConfigs[dataId];
+    if (typeof this._options.dataViewConfigs[dataId] !== 'undefined') {
+      configs = this._options.dataViewConfigs[dataId];
     } else if (!excludeStarConfig &&
-      typeof this.#options.dataViewConfigs['*'] !== 'undefined') {
-      configs = this.#options.dataViewConfigs['*'];
+      typeof this._options.dataViewConfigs['*'] !== 'undefined') {
+      configs = this._options.dataViewConfigs['*'];
     }
     return configs;
   }
@@ -900,7 +900,7 @@ export class App {
    * @returns {Object<string, ViewConfig[]>} The configuration list.
    */
   getDataViewConfigs() {
-    return this.#options.dataViewConfigs;
+    return this._options.dataViewConfigs;
   }
 
   /**
@@ -911,11 +911,11 @@ export class App {
    */
   setDataViewConfigs(configs) {
     // clean up
-    this.#stage.empty();
+    this._stage.empty();
     // set new
-    this.#options.dataViewConfigs = configs;
+    this._options.dataViewConfigs = configs;
     // create layer groups
-    this.#createLayerGroups(configs);
+    this._createLayerGroups(configs);
   }
 
   /**
@@ -926,7 +926,7 @@ export class App {
    */
   addDataViewConfig(dataId, config) {
     // add to list
-    const configs = this.#options.dataViewConfigs;
+    const configs = this._options.dataViewConfigs;
     if (typeof configs[dataId] === 'undefined') {
       configs[dataId] = [];
     }
@@ -935,19 +935,19 @@ export class App {
     };
     const itemIndex = configs[dataId].findIndex(equalDivId);
     if (itemIndex === -1) {
-      this.#options.dataViewConfigs[dataId].push(config);
+      this._options.dataViewConfigs[dataId].push(config);
     } else {
       throw new Error('Duplicate view config for data ' + dataId +
         ' and div ' + config.divId);
     }
 
     // add layer group if not done
-    if (typeof this.#stage.getLayerGroupByDivId(config.divId) === 'undefined') {
-      this.#createLayerGroup(config);
+    if (typeof this._stage.getLayerGroupByDivId(config.divId) === 'undefined') {
+      this._createLayerGroup(config);
     }
 
     // render (will create layers)
-    if (typeof this.#dataController.get(dataId) !== 'undefined') {
+    if (typeof this._dataController.get(dataId) !== 'undefined') {
       this.render(dataId, [config]);
     }
   }
@@ -960,7 +960,7 @@ export class App {
    */
   removeDataViewConfig(dataId, divId) {
     // remove from list
-    const configs = this.#options.dataViewConfigs;
+    const configs = this._options.dataViewConfigs;
     if (typeof configs[dataId] === 'undefined') {
       // no config for dataId
       return;
@@ -979,8 +979,8 @@ export class App {
     }
 
     // data is loaded, remove view
-    if (typeof this.#dataController.get(dataId) !== 'undefined') {
-      const lg = this.#stage.getLayerGroupByDivId(divId);
+    if (typeof this._dataController.get(dataId) !== 'undefined') {
+      const lg = this._stage.getLayerGroupByDivId(divId);
       if (typeof lg !== 'undefined') {
         const vls = lg.getViewLayersByDataId(dataId);
         if (vls.length === 1) {
@@ -995,7 +995,7 @@ export class App {
           throw new Error('Expected one draw layer, got ' + dls.length);
         }
         if (lg.getNumberOfLayers() === 0) {
-          this.#stage.removeLayerGroup(lg);
+          this._stage.removeLayerGroup(lg);
         }
       }
     }
@@ -1010,7 +1010,7 @@ export class App {
    * @param {ViewConfig} config The view configuration.
    */
   updateDataViewConfig(dataId, divId, config) {
-    const configs = this.#options.dataViewConfigs;
+    const configs = this._options.dataViewConfigs;
     // check data id
     if (typeof configs[dataId] === 'undefined') {
       throw new Error('No config for dataId: ' + dataId);
@@ -1031,7 +1031,7 @@ export class App {
     }
 
     // remove previous layers
-    const lg = this.#stage.getLayerGroupByDivId(configToUpdate.divId);
+    const lg = this._stage.getLayerGroupByDivId(configToUpdate.divId);
     if (typeof lg !== 'undefined') {
       const vls = lg.getViewLayersByDataId(dataId);
       if (vls.length === 1) {
@@ -1048,7 +1048,7 @@ export class App {
     }
 
     // render (will create layer)
-    if (typeof this.#dataController.get(dataId) !== 'undefined') {
+    if (typeof this._dataController.get(dataId) !== 'undefined') {
       this.render(dataId, [configToUpdate]);
     }
   }
@@ -1059,7 +1059,7 @@ export class App {
    *
    * @param {DataViewConfigs} dataViewConfigs The data view config.
    */
-  #createLayerGroups(dataViewConfigs) {
+  _createLayerGroups(dataViewConfigs) {
     const dataKeys = Object.keys(dataViewConfigs);
     const divIds = [];
     for (let i = 0; i < dataKeys.length; ++i) {
@@ -1068,7 +1068,7 @@ export class App {
         const viewConfig = viewConfigs[j];
         // view configs can contain the same divIds, avoid duplicating
         if (!divIds.includes(viewConfig.divId)) {
-          this.#createLayerGroup(viewConfig);
+          this._createLayerGroup(viewConfig);
           divIds.push(viewConfig.divId);
         }
       }
@@ -1081,12 +1081,12 @@ export class App {
    *
    * @param {ViewConfig} viewConfig The view config.
    */
-  #createLayerGroup(viewConfig) {
+  _createLayerGroup(viewConfig) {
     // create new layer group
-    const element = this.#options.rootDocument.getElementById(viewConfig.divId);
-    const layerGroup = this.#stage.addLayerGroup(element);
+    const element = this._options.rootDocument.getElementById(viewConfig.divId);
+    const layerGroup = this._stage.addLayerGroup(element);
     // bind events
-    this.#bindLayerGroupToApp(layerGroup);
+    this._bindLayerGroupToApp(layerGroup);
   }
 
   /**
@@ -1103,7 +1103,7 @@ export class App {
       }
     }
     // pass to stage
-    this.#stage.setBinders(instances);
+    this._stage.setBinders(instances);
   }
 
   /**
@@ -1123,8 +1123,8 @@ export class App {
 
     // create layer groups if not done yet
     // (create all to allow for ratio sync)
-    if (this.#stage.getNumberOfLayerGroups() === 0) {
-      this.#createLayerGroups(this.#options.dataViewConfigs);
+    if (this._stage.getNumberOfLayerGroups() === 0) {
+      this._createLayerGroups(this._options.dataViewConfigs);
     }
 
     // use options list if non provided
@@ -1143,16 +1143,16 @@ export class App {
     for (let i = 0; i < viewConfigs.length; ++i) {
       const config = viewConfigs[i];
       const layerGroup =
-        this.#stage.getLayerGroupByDivId(config.divId);
+        this._stage.getLayerGroupByDivId(config.divId);
       // layer group must exist
       if (!layerGroup) {
         throw new Error('No layer group for ' + config.divId);
       }
       // add view
       // warn: needs a loaded DOM
-      if (typeof this.#dataController.get(dataId) !== 'undefined' &&
+      if (typeof this._dataController.get(dataId) !== 'undefined' &&
         layerGroup.getViewLayersByDataId(dataId).length === 0) {
-        this.#addViewLayer(dataId, config);
+        this._addViewLayer(dataId, config);
       }
       // draw
       layerGroup.draw();
@@ -1167,7 +1167,7 @@ export class App {
    * @param {number} cy The zoom center Y coordinate.
    */
   zoom(step, cx, cy) {
-    const layerGroup = this.#stage.getActiveLayerGroup();
+    const layerGroup = this._stage.getActiveLayerGroup();
     const viewController = layerGroup.getActiveViewLayer().getViewController();
     const k = viewController.getCurrentScrollPosition();
     const center = new Point3D(cx, cy, k);
@@ -1182,7 +1182,7 @@ export class App {
    * @param {number} ty The translation along Y.
    */
   translate(tx, ty) {
-    const layerGroup = this.#stage.getActiveLayerGroup();
+    const layerGroup = this._stage.getActiveLayerGroup();
     layerGroup.addTranslation({x: tx, y: ty, z: 0});
     layerGroup.draw();
   }
@@ -1194,7 +1194,7 @@ export class App {
    * @deprecated Please set the opacity of the desired view layer directly.
    */
   setOpacity(alpha) {
-    const viewLayer = this.#stage.getActiveLayerGroup().getActiveViewLayer();
+    const viewLayer = this._stage.getActiveLayerGroup().getActiveViewLayer();
     viewLayer.setOpacity(alpha);
     viewLayer.draw();
   }
@@ -1206,14 +1206,14 @@ export class App {
    * @param {Array} drawingsDetails An array of drawings details.
    */
   setDrawings(drawings, drawingsDetails) {
-    const layerGroup = this.#stage.getActiveLayerGroup();
+    const layerGroup = this._stage.getActiveLayerGroup();
     const viewController =
       layerGroup.getActiveViewLayer().getViewController();
     const drawController =
       layerGroup.getActiveDrawLayer().getDrawController();
 
     drawController.setDrawings(
-      drawings, drawingsDetails, this.#fireEvent, this.addToUndoStack);
+      drawings, drawingsDetails, this._fireEvent, this.addToUndoStack);
 
     drawController.activateDrawLayer(
       viewController.getCurrentOrientedIndex(),
@@ -1257,19 +1257,19 @@ export class App {
    * Key down callback. Meant to be used in tools.
    *
    * @param {KeyboardEvent} event The key down event.
-   * @fires App#keydown
+   * @fires App_keydown
    * @function
    */
   onKeydown = (event) => {
     /**
      * Key down event.
      *
-     * @event App#keydown
+     * @event App_keydown
      * @type {KeyboardEvent}
      * @property {string} type The event type: keydown.
      * @property {string} context The tool where the event originated.
      */
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1284,14 +1284,14 @@ export class App {
    * Applies to the active view of the active layer group.
    *
    * @param {KeyboardEvent} event The key down event.
-   * @fires UndoStack#undo
-   * @fires UndoStack#redo
+   * @fires UndoStack_undo
+   * @fires UndoStack_redo
    * @function
    */
   defaultOnKeydown = (event) => {
     if (event.ctrlKey) {
       if (event.shiftKey) {
-        const layerGroup = this.#stage.getActiveLayerGroup();
+        const layerGroup = this._stage.getActiveLayerGroup();
         const viewController =
           layerGroup.getActiveViewLayer().getViewController();
         if (event.key === 'ArrowLeft') { // crtl-shift-arrow-left
@@ -1312,13 +1312,13 @@ export class App {
           }
         }
       } else if (event.key === 'y') { // crtl-y
-        this.#undoStack.redo();
+        this._undoStack.redo();
       } else if (event.key === 'z') { // crtl-z
-        this.#undoStack.undo();
+        this._undoStack.undo();
       } else if (event.key === ' ') { // crtl-space
-        for (let i = 0; i < this.#stage.getNumberOfLayerGroups(); ++i) {
-          this.#stage.getLayerGroup(i).setShowCrosshair(
-            !this.#stage.getLayerGroup(i).getShowCrosshair()
+        for (let i = 0; i < this._stage.getNumberOfLayerGroups(); ++i) {
+          this._stage.getLayerGroup(i).setShowCrosshair(
+            !this._stage.getLayerGroup(i).getShowCrosshair()
           );
         }
       }
@@ -1350,7 +1350,7 @@ export class App {
    */
   setColourMap(name) {
     const viewController =
-      this.#stage.getActiveLayerGroup()
+      this._stage.getActiveLayerGroup()
         .getActiveViewLayer().getViewController();
     viewController.setColourMap(name);
   }
@@ -1363,7 +1363,7 @@ export class App {
    */
   setWindowLevelPreset(preset) {
     const viewController =
-      this.#stage.getActiveLayerGroup()
+      this._stage.getActiveLayerGroup()
         .getActiveViewLayer().getViewController();
     viewController.setWindowLevelPreset(preset);
   }
@@ -1375,8 +1375,8 @@ export class App {
    */
   setTool(tool) {
     // bind tool to active layer
-    for (let i = 0; i < this.#stage.getNumberOfLayerGroups(); ++i) {
-      const layerGroup = this.#stage.getLayerGroup(i);
+    for (let i = 0; i < this._stage.getNumberOfLayerGroups(); ++i) {
+      const layerGroup = this._stage.getLayerGroup(i);
       // draw or view layer
       let layer = null;
       if (tool === 'Draw' ||
@@ -1387,12 +1387,12 @@ export class App {
         layer = layerGroup.getActiveViewLayer();
       }
       if (layer) {
-        this.#toolboxController.bindLayerGroup(layerGroup, layer);
+        this._toolboxController.bindLayerGroup(layerGroup, layer);
       }
     }
 
     // set toolbox tool
-    this.#toolboxController.setSelectedTool(tool);
+    this._toolboxController.setSelectedTool(tool);
   }
 
   /**
@@ -1401,25 +1401,25 @@ export class App {
    * @param {object} list The list of features.
    */
   setToolFeatures(list) {
-    this.#toolboxController.setToolFeatures(list);
+    this._toolboxController.setToolFeatures(list);
   }
 
   /**
    * Undo the last action.
    *
-   * @fires UndoStack#undo
+   * @fires UndoStack_undo
    */
   undo() {
-    this.#undoStack.undo();
+    this._undoStack.undo();
   }
 
   /**
    * Redo the last action.
    *
-   * @fires UndoStack#redo
+   * @fires UndoStack_redo
    */
   redo() {
-    this.#undoStack.redo();
+    this._undoStack.redo();
   }
 
   /**
@@ -1428,7 +1428,7 @@ export class App {
    * @returns {number} The size of the stack.
    */
   getStackSize() {
-    return this.#undoStack.getStackSize();
+    return this._undoStack.getStackSize();
   }
 
   /**
@@ -1437,7 +1437,7 @@ export class App {
    * @returns {number} The stack index.
    */
   getCurrentStackIndex() {
-    return this.#undoStack.getCurrentStackIndex();
+    return this._undoStack.getCurrentStackIndex();
   }
 
   /**
@@ -1448,8 +1448,8 @@ export class App {
    */
   getOverlayData(dataId) {
     let data;
-    if (typeof this.#overlayDatas !== 'undefined') {
-      data = this.#overlayDatas[dataId];
+    if (typeof this._overlayDatas !== 'undefined') {
+      data = this._overlayDatas[dataId];
     }
     return data;
   }
@@ -1477,8 +1477,8 @@ export class App {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   /**
@@ -1486,16 +1486,16 @@ export class App {
    *
    * @param {object} event The load start event.
    */
-  #onloadstart = (event) => {
+  _onloadstart = (event) => {
     // create overlay data
-    if (typeof this.#options.overlayConfig !== 'undefined') {
-      this.#overlayDatas[event.dataid] = new OverlayData(
-        this, event.dataid, this.#options.overlayConfig);
+    if (typeof this._options.overlayConfig !== 'undefined') {
+      this._overlayDatas[event.dataid] = new OverlayData(
+        this, event.dataid, this._options.overlayConfig);
     }
     /**
      * Load start event.
      *
-     * @event App#loadstart
+     * @event App_loadstart
      * @type {object}
      * @property {string} type The event type: loadstart.
      * @property {string} loadType The load type: image or state.
@@ -1503,7 +1503,7 @@ export class App {
      *   File for a file.
      */
     event.type = 'loadstart';
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1511,11 +1511,11 @@ export class App {
    *
    * @param {object} event The progress event.
    */
-  #onloadprogress = (event) => {
+  _onloadprogress = (event) => {
     /**
      * Load progress event.
      *
-     * @event App#loadprogress
+     * @event App_loadprogress
      * @type {object}
      * @property {string} type The event type: loadprogress.
      * @property {string} loadType The load type: image or state.
@@ -1525,7 +1525,7 @@ export class App {
      * @property {number} total The total percentage.
      */
     event.type = 'loadprogress';
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1533,7 +1533,7 @@ export class App {
    *
    * @param {object} event The load event.
    */
-  #onloaditem = (event) => {
+  _onloaditem = (event) => {
     // check event
     if (typeof event.data === 'undefined') {
       logger.error('Missing loaditem event data.');
@@ -1547,10 +1547,10 @@ export class App {
     let eventMetaData = null;
     if (event.loadtype === 'image') {
       if (isFirstLoadItem) {
-        this.#dataController.addNew(
+        this._dataController.addNew(
           event.dataid, event.data.image, event.data.info);
       } else {
-        this.#dataController.update(
+        this._dataController.update(
           event.dataid, event.data.image, event.data.info);
       }
       eventMetaData = event.data.info;
@@ -1562,7 +1562,7 @@ export class App {
     /**
      * Load item event: fired when a load item is successfull.
      *
-     * @event App#loaditem
+     * @event App_loaditem
      * @type {object}
      * @property {string} type The event type: loaditem.
      * @property {string} loadType The load type: image or state.
@@ -1570,7 +1570,7 @@ export class App {
      *   File for a file.
      * @property {object} data The loaded meta data.
      */
-    this.#fireEvent({
+    this._fireEvent({
       type: 'loaditem',
       data: eventMetaData,
       source: event.source,
@@ -1581,15 +1581,15 @@ export class App {
     });
 
     // update overlay data if present
-    if (typeof this.#overlayDatas !== 'undefined' &&
-      typeof this.#overlayDatas[event.dataid] !== 'undefined') {
-      this.#overlayDatas[event.dataid].addItemMeta(eventMetaData);
+    if (typeof this._overlayDatas !== 'undefined' &&
+      typeof this._overlayDatas[event.dataid] !== 'undefined') {
+      this._overlayDatas[event.dataid].addItemMeta(eventMetaData);
     }
 
     // render if first and flag allows
     if (event.loadtype === 'image' &&
       this.getViewConfigs(event.dataid).length !== 0 &&
-      isFirstLoadItem && this.#options.viewOnFirstLoadItem) {
+      isFirstLoadItem && this._options.viewOnFirstLoadItem) {
       this.render(event.dataid);
     }
   };
@@ -1599,17 +1599,17 @@ export class App {
    *
    * @param {object} event The load event.
    */
-  #onload = (event) => {
+  _onload = (event) => {
     /**
      * Load event: fired when a load finishes successfully.
      *
-     * @event App#load
+     * @event App_load
      * @type {object}
      * @property {string} type The event type: load.
      * @property {string} loadType The load type: image or state.
      */
     event.type = 'load';
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1617,12 +1617,12 @@ export class App {
    *
    * @param {object} event The load end event.
    */
-  #onloadend = (event) => {
+  _onloadend = (event) => {
     /**
      * Main load end event: fired when the load finishes,
      *   successfully or not.
      *
-     * @event App#loadend
+     * @event App_loadend
      * @type {object}
      * @property {string} type The event type: loadend.
      * @property {string} loadType The load type: image or state.
@@ -1630,7 +1630,7 @@ export class App {
      *   File for a file.
      */
     event.type = 'loadend';
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1638,11 +1638,11 @@ export class App {
    *
    * @param {object} event The error event.
    */
-  #onloaderror = (event) => {
+  _onloaderror = (event) => {
     /**
      * Load error event.
      *
-     * @event App#error
+     * @event App_error
      * @type {object}
      * @property {string} type The event type: error.
      * @property {string} loadType The load type: image or state.
@@ -1654,7 +1654,7 @@ export class App {
     if (typeof event.type === 'undefined') {
       event.type = 'error';
     }
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1662,11 +1662,11 @@ export class App {
    *
    * @param {object} event The abort event.
    */
-  #onloadabort = (event) => {
+  _onloadabort = (event) => {
     /**
      * Load abort event.
      *
-     * @event App#abort
+     * @event App_abort
      * @type {object}
      * @property {string} type The event type: abort.
      * @property {string} loadType The load type: image or state.
@@ -1676,7 +1676,7 @@ export class App {
     if (typeof event.type === 'undefined') {
       event.type = 'abort';
     }
-    this.#fireEvent(event);
+    this._fireEvent(event);
   };
 
   /**
@@ -1684,21 +1684,21 @@ export class App {
    *
    * @param {object} group The layer group.
    */
-  #bindLayerGroupToApp(group) {
+  _bindLayerGroupToApp(group) {
     // propagate layer group events
-    group.addEventListener('zoomchange', this.#fireEvent);
-    group.addEventListener('offsetchange', this.#fireEvent);
+    group.addEventListener('zoomchange', this._fireEvent);
+    group.addEventListener('offsetchange', this._fireEvent);
     // propagate viewLayer events
-    group.addEventListener('renderstart', this.#fireEvent);
-    group.addEventListener('renderend', this.#fireEvent);
+    group.addEventListener('renderstart', this._fireEvent);
+    group.addEventListener('renderend', this._fireEvent);
     // propagate view events
     for (let j = 0; j < viewEventNames.length; ++j) {
-      group.addEventListener(viewEventNames[j], this.#fireEvent);
+      group.addEventListener(viewEventNames[j], this._fireEvent);
     }
     // propagate drawLayer events
-    if (this.#toolboxController && this.#toolboxController.hasTool('Draw')) {
-      group.addEventListener('drawcreate', this.#fireEvent);
-      group.addEventListener('drawdelete', this.#fireEvent);
+    if (this._toolboxController && this._toolboxController.hasTool('Draw')) {
+      group.addEventListener('drawcreate', this._fireEvent);
+      group.addEventListener('drawdelete', this._fireEvent);
     }
     // updata data view config
     group.addEventListener('wlchange', (event) => {
@@ -1745,13 +1745,13 @@ export class App {
    * @param {string} dataId The data id.
    * @param {ViewConfig} viewConfig The data view config.
    */
-  #addViewLayer(dataId, viewConfig) {
-    const data = this.#dataController.get(dataId);
+  _addViewLayer(dataId, viewConfig) {
+    const data = this._dataController.get(dataId);
     if (!data) {
       throw new Error('Cannot initialise layer with missing data, id: ' +
         dataId);
     }
-    const layerGroup = this.#stage.getLayerGroupByDivId(viewConfig.divId);
+    const layerGroup = this._stage.getLayerGroupByDivId(viewConfig.divId);
     if (!layerGroup) {
       throw new Error('Cannot initialise layer with missing group, id: ' +
         viewConfig.divId);
@@ -1759,7 +1759,7 @@ export class App {
     const imageGeometry = data.image.getGeometry();
 
     // un-bind
-    this.#stage.unbindLayerGroups();
+    this._stage.unbindLayerGroups();
 
     // create and setup view
     const viewFactory = new ViewFactory();
@@ -1830,11 +1830,11 @@ export class App {
     }
 
     // listen to image set
-    this.#dataController.addEventListener('imageset', viewLayer.onimageset);
+    this._dataController.addEventListener('imageset', viewLayer.onimageset);
 
     // optional draw layer
     let drawLayer;
-    if (this.#toolboxController && this.#toolboxController.hasTool('Draw')) {
+    if (this._toolboxController && this._toolboxController.hasTool('Draw')) {
       drawLayer = layerGroup.addDrawLayer();
       drawLayer.initialise(size2D, spacing2D, dataId);
       drawLayer.setPlaneHelper(viewLayer.getViewController().getPlaneHelper());
@@ -1851,13 +1851,13 @@ export class App {
     });
 
     // sync layer groups
-    this.#stage.fitToContainer();
+    this._stage.fitToContainer();
 
     // view layer offset (done before scale)
     viewLayer.setOffset(layerGroup.getOffset());
 
     // get and apply flip flags
-    const flipFlags = this.#getViewFlipFlags(
+    const flipFlags = this._getViewFlipFlags(
       imageGeometry.getOrientation(),
       viewConfig.orientation);
     if (flipFlags.offset.x) {
@@ -1907,15 +1907,15 @@ export class App {
     }
 
     // bind
-    this.#stage.bindLayerGroups();
-    if (this.#toolboxController) {
-      this.#toolboxController.bindLayerGroup(layerGroup, viewLayer);
+    this._stage.bindLayerGroups();
+    if (this._toolboxController) {
+      this._toolboxController.bindLayerGroup(layerGroup, viewLayer);
     }
 
     // initialise the toolbox for base
     if (isBaseLayer) {
-      if (this.#toolboxController) {
-        this.#toolboxController.init();
+      if (this._toolboxController) {
+        this._toolboxController.init();
       }
     }
   }
@@ -1927,7 +1927,7 @@ export class App {
    * @param {string} viewConfigOrientation The view config orientation.
    * @returns {object} Offset and scale flip flags.
    */
-  #getViewFlipFlags(imageOrientation, viewConfigOrientation) {
+  _getViewFlipFlags(imageOrientation, viewConfigOrientation) {
     // 'simple' orientation code (does not take into account angles)
     const orientationCode =
       getOrientationStringLPS(imageOrientation.asOneAndZeros());

@@ -8,14 +8,14 @@ export class RescaleSlopeAndIntercept {
    *
    * @type {number}
    */
-  #slope;
+  _slope;
 
   /**
    * The intercept.
    *
    * @type {number}
    */
-  #intercept;
+  _intercept;
 
   /**
    * @param {number} slope The slope of the RSI.
@@ -30,8 +30,8 @@ export class RescaleSlopeAndIntercept {
       if(typeof(intercept) === 'undefined') {
           intercept = 0;
       }*/
-    this.#slope = slope;
-    this.#intercept = intercept;
+    this._slope = slope;
+    this._intercept = intercept;
   }
 
   /**
@@ -40,7 +40,7 @@ export class RescaleSlopeAndIntercept {
    * @returns {number} The slope of the RSI.
    */
   getSlope() {
-    return this.#slope;
+    return this._slope;
   }
 
   /**
@@ -49,7 +49,7 @@ export class RescaleSlopeAndIntercept {
    * @returns {number} The intercept of the RSI.
    */
   getIntercept() {
-    return this.#intercept;
+    return this._intercept;
   }
 
   /**
@@ -59,7 +59,7 @@ export class RescaleSlopeAndIntercept {
    * @returns {number} The value to rescale.
    */
   apply(value) {
-    return value * this.#slope + this.#intercept;
+    return value * this._slope + this._intercept;
   }
 
   /**

@@ -82,56 +82,56 @@ export class Scroll {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * Interaction start flag.
    *
    * @type {boolean}
    */
-  #started = false;
+  _started = false;
 
   /**
    * Start point.
    *
    * @type {Point2D}
    */
-  #startPoint;
+  _startPoint;
 
   /**
    * Scroll wheel handler.
    *
    * @type {ScrollWheel}
    */
-  #scrollWhell;
+  _scrollWhell;
 
   /**
    * Touch timer ID (created by setTimeout).
    *
    * @type {number}
    */
-  #touchTimerID;
+  _touchTimerID;
 
   /**
    * Option to show or not a value tooltip on mousemove.
    *
    * @type {boolean}
    */
-  #displayTooltip = false;
+  _displayTooltip = false;
 
   /**
    * Current layer group div id.
    *
    * @type {string}
    */
-  #currentDivId;
+  _currentDivId;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
-    this.#scrollWhell = new ScrollWheel(app);
+    this._app = app;
+    this._scrollWhell = new ScrollWheel(app);
   }
 
   /**
@@ -140,12 +140,12 @@ export class Scroll {
    * @param {Point2D} point The start point.
    * @param {string} divId The layer group divId.
    */
-  #start(point, divId) {
+  _start(point, divId) {
     // optional tooltip
-    this.#removeTooltipDiv();
+    this._removeTooltipDiv();
 
     // stop viewer if playing
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
     const viewLayer = layerGroup.getActiveViewLayer();
     const viewController = viewLayer.getViewController();
     if (viewController.isPlaying()) {
@@ -153,8 +153,8 @@ export class Scroll {
     }
 
     // start flag
-    this.#started = true;
-    this.#startPoint = point;
+    this._started = true;
+    this._startPoint = point;
 
     // update controller position
     const planePos = viewLayer.displayToPlanePos(point);
@@ -168,23 +168,23 @@ export class Scroll {
    * @param {Point2D} point The update point.
    * @param {string} divId The layer group divId.
    */
-  #update(point, divId) {
-    if (!this.#started) {
+  _update(point, divId) {
+    if (!this._started) {
       // optional tooltip
-      if (this.#displayTooltip) {
-        this.#showTooltip(point, divId);
+      if (this._displayTooltip) {
+        this._showTooltip(point, divId);
       }
       return;
     }
 
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
     const viewLayer = layerGroup.getActiveViewLayer();
     const viewController = viewLayer.getViewController();
 
     let newPosition;
 
     // difference to last Y position
-    const diffY = point.getY() - this.#startPoint.getY();
+    const diffY = point.getY() - this._startPoint.getY();
     const yMove = (Math.abs(diffY) > 15);
     // do not trigger for small moves
     if (yMove && layerGroup.canScroll()) {
@@ -197,7 +197,7 @@ export class Scroll {
     }
 
     // difference to last X position
-    const diffX = point.getX() - this.#startPoint.getX();
+    const diffX = point.getX() - this._startPoint.getX();
     const xMove = (Math.abs(diffX) > 15);
     // do not trigger for small moves
     if (xMove && layerGroup.moreThanOne(3)) {
@@ -217,16 +217,16 @@ export class Scroll {
 
     // reset origin point
     if (xMove || yMove) {
-      this.#startPoint = point;
+      this._startPoint = point;
     }
   }
 
   /**
    * Finish tool interaction.
    */
-  #finish() {
-    if (this.#started) {
-      this.#started = false;
+  _finish() {
+    if (this._started) {
+      this._started = false;
     }
   }
 
@@ -238,7 +238,7 @@ export class Scroll {
   mousedown = (event) => {
     const mousePoint = getMousePoint(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#start(mousePoint, layerDetails.groupDivId);
+    this._start(mousePoint, layerDetails.groupDivId);
   };
 
   /**
@@ -249,7 +249,7 @@ export class Scroll {
   mousemove = (event) => {
     const mousePoint = getMousePoint(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#update(mousePoint, layerDetails.groupDivId);
+    this._update(mousePoint, layerDetails.groupDivId);
   };
 
   /**
@@ -258,7 +258,7 @@ export class Scroll {
    * @param {object} _event The mouse up event.
    */
   mouseup = (_event) => {
-    this.#finish();
+    this._finish();
   };
 
   /**
@@ -267,9 +267,9 @@ export class Scroll {
    * @param {object} _event The mouse out event.
    */
   mouseout = (_event) => {
-    this.#finish();
+    this._finish();
     // remove possible tooltip div
-    this.#removeTooltipDiv();
+    this._removeTooltipDiv();
   };
 
   /**
@@ -280,13 +280,13 @@ export class Scroll {
   touchstart = (event) => {
     // long touch triggers the dblclick
     // @ts-ignore
-    this.#touchTimerID = setTimeout(() => {
+    this._touchTimerID = setTimeout(() => {
       this.dblclick(event);
     }, 500);
     // call start
     const touchPoints = getTouchPoints(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#start(touchPoints[0], layerDetails.groupDivId);
+    this._start(touchPoints[0], layerDetails.groupDivId);
   };
 
   /**
@@ -296,14 +296,14 @@ export class Scroll {
    */
   touchmove = (event) => {
     // abort timer if move
-    if (this.#touchTimerID !== null) {
-      clearTimeout(this.#touchTimerID);
-      this.#touchTimerID = null;
+    if (this._touchTimerID !== null) {
+      clearTimeout(this._touchTimerID);
+      this._touchTimerID = null;
     }
     // call update
     const touchPoints = getTouchPoints(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#update(touchPoints[0], layerDetails.groupDivId);
+    this._update(touchPoints[0], layerDetails.groupDivId);
   };
 
   /**
@@ -313,12 +313,12 @@ export class Scroll {
    */
   touchend = (_event) => {
     // abort timer
-    if (this.#touchTimerID !== null) {
-      clearTimeout(this.#touchTimerID);
-      this.#touchTimerID = null;
+    if (this._touchTimerID !== null) {
+      clearTimeout(this._touchTimerID);
+      this._touchTimerID = null;
     }
     // call mouse equivalent
-    this.#finish();
+    this._finish();
   };
 
   /**
@@ -327,7 +327,7 @@ export class Scroll {
    * @param {WheelEvent} event The mouse wheel event.
    */
   wheel = (event) => {
-    this.#scrollWhell.wheel(event);
+    this._scrollWhell.wheel(event);
   };
 
   /**
@@ -337,7 +337,7 @@ export class Scroll {
    */
   keydown = (event) => {
     event.context = 'Scroll';
-    this.#app.onKeydown(event);
+    this._app.onKeydown(event);
   };
 
   /**
@@ -348,7 +348,7 @@ export class Scroll {
   dblclick = (event) => {
     const layerDetails = getLayerDetailsFromEvent(event);
 
-    const layerGroup = this.#app.getLayerGroupByDivId(layerDetails.groupDivId);
+    const layerGroup = this._app.getLayerGroupByDivId(layerDetails.groupDivId);
     const viewController =
       layerGroup.getActiveViewLayer().getViewController();
     viewController.play();
@@ -360,10 +360,10 @@ export class Scroll {
    * @param {Point2D} point The update point.
    * @param {string} divId The layer group divId.
    */
-  #showTooltip(point, divId) {
+  _showTooltip(point, divId) {
     // get layer group
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
-    this.#currentDivId = divId;
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
+    this._currentDivId = divId;
     // show new tooltip
     layerGroup.showTooltip(point);
   }
@@ -371,11 +371,11 @@ export class Scroll {
   /**
    * Remove the last tooltip html div.
    */
-  #removeTooltipDiv() {
-    if (typeof this.#currentDivId !== 'undefined') {
-      const layerGroup = this.#app.getLayerGroupByDivId(this.#currentDivId);
+  _removeTooltipDiv() {
+    if (typeof this._currentDivId !== 'undefined') {
+      const layerGroup = this._app.getLayerGroupByDivId(this._currentDivId);
       layerGroup.removeTooltipDiv();
-      this.#currentDivId = undefined;
+      this._currentDivId = undefined;
     }
   }
 
@@ -387,7 +387,7 @@ export class Scroll {
   activate(_bool) {
     // remove tooltip html when deactivating
     if (!_bool) {
-      this.#removeTooltipDiv();
+      this._removeTooltipDiv();
     }
   }
 
@@ -398,7 +398,7 @@ export class Scroll {
    */
   setFeatures(features) {
     if (typeof features.displayTooltip !== 'undefined') {
-      this.#displayTooltip = features.displayTooltip;
+      this._displayTooltip = features.displayTooltip;
     }
   }
 

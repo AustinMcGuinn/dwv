@@ -19,49 +19,49 @@ export class UrlsLoader {
    *
    * @type {string[]}
    */
-  #inputData = null;
+  _inputData = null;
 
   /**
    * Array of launched requests.
    *
    * @type {XMLHttpRequest[]}
    */
-  #requests = [];
+  _requests = [];
 
   /**
    * Data loader.
    *
    * @type {object}
    */
-  #runningLoader = null;
+  _runningLoader = null;
 
   /**
    * Number of loaded data.
    *
    * @type {number}
    */
-  #nLoad = 0;
+  _nLoad = 0;
 
   /**
    * Number of load end events.
    *
    * @type {number}
    */
-  #nLoadend = 0;
+  _nLoadend = 0;
 
   /**
    * Flag to know if the load is aborting.
    *
    * @type {boolean}
    */
-  #aborting;
+  _aborting;
 
   /**
    * The default character set (optional).
    *
    * @type {string}
    */
-  #defaultCharacterSet;
+  _defaultCharacterSet;
 
   /**
    * Get the default character set.
@@ -69,7 +69,7 @@ export class UrlsLoader {
    * @returns {string} The default character set.
    */
   getDefaultCharacterSet() {
-    return this.#defaultCharacterSet;
+    return this._defaultCharacterSet;
   }
 
   /**
@@ -78,7 +78,7 @@ export class UrlsLoader {
    * @param {string} characterSet The character set.
    */
   setDefaultCharacterSet(characterSet) {
-    this.#defaultCharacterSet = characterSet;
+    this._defaultCharacterSet = characterSet;
   }
 
   /**
@@ -86,16 +86,16 @@ export class UrlsLoader {
    *
    * @param {string[]} data The input data.
    */
-  #storeInputData(data) {
-    this.#inputData = data;
+  _storeInputData(data) {
+    this._inputData = data;
     // reset counters
-    this.#nLoad = 0;
-    this.#nLoadend = 0;
+    this._nLoad = 0;
+    this._nLoadend = 0;
     // reset flag
-    this.#aborting = false;
+    this._aborting = false;
     // clear storage
-    this.#clearStoredRequests();
-    this.#clearStoredLoader();
+    this._clearStoredRequests();
+    this._clearStoredLoader();
   }
 
   /**
@@ -103,16 +103,16 @@ export class UrlsLoader {
    *
    * @param {XMLHttpRequest} request The launched request.
    */
-  #storeRequest(request) {
-    this.#requests.push(request);
+  _storeRequest(request) {
+    this._requests.push(request);
   }
 
   /**
    * Clear the stored requests.
    *
    */
-  #clearStoredRequests() {
-    this.#requests = [];
+  _clearStoredRequests() {
+    this._requests = [];
   }
 
   /**
@@ -120,16 +120,16 @@ export class UrlsLoader {
    *
    * @param {object} loader The launched loader.
    */
-  #storeLoader(loader) {
-    this.#runningLoader = loader;
+  _storeLoader(loader) {
+    this._runningLoader = loader;
   }
 
   /**
    * Clear the stored loader.
    *
    */
-  #clearStoredLoader() {
-    this.#runningLoader = null;
+  _clearStoredLoader() {
+    this._runningLoader = null;
   }
 
   /**
@@ -138,14 +138,14 @@ export class UrlsLoader {
    *
    * @param {object} _event The load data event.
    */
-  #addLoad = (_event) => {
-    this.#nLoad++;
+  _addLoad = (_event) => {
+    this._nLoad++;
     // call onload when all is loaded
     // (not using the input event since it is
     //   an individual load)
-    if (this.#nLoad === this.#inputData.length) {
+    if (this._nLoad === this._inputData.length) {
       this.onload({
-        source: this.#inputData
+        source: this._inputData
       });
     }
   };
@@ -156,14 +156,14 @@ export class UrlsLoader {
    *
    * @param {object} _event The load end event.
    */
-  #addLoadend = (_event) => {
-    this.#nLoadend++;
+  _addLoadend = (_event) => {
+    this._nLoadend++;
     // call onloadend when all is run
     // (not using the input event since it is
     //   an individual load end)
-    if (this.#nLoadend === this.#inputData.length) {
+    if (this._nLoadend === this._inputData.length) {
       this.onloadend({
-        source: this.#inputData
+        source: this._inputData
       });
     }
   };
@@ -180,7 +180,7 @@ export class UrlsLoader {
    * @param {object} source The source to add to the event.
    * @returns {eventFn} The augmented callback.
    */
-  #augmentCallbackEvent(callback, source) {
+  _augmentCallbackEvent(callback, source) {
     return (event) => {
       event.source = source;
       callback(event);
@@ -203,9 +203,9 @@ export class UrlsLoader {
     if (data.length === 1 &&
       (endsWith(data[0], 'DICOMDIR') ||
       endsWith(data[0], '.dcmdir'))) {
-      this.#loadDicomDir(data[0], options);
+      this._loadDicomDir(data[0], options);
     } else {
-      this.#loadUrls(data, options);
+      this._loadUrls(data, options);
     }
   }
 
@@ -217,7 +217,7 @@ export class UrlsLoader {
    * @param {number} i The index of the element.
    * @returns {eventFn} A load handler.
    */
-  #getLoadHandler(loader, dataElement, i) {
+  _getLoadHandler(loader, dataElement, i) {
     return (event) => {
       // check response status
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Response_codes
@@ -231,7 +231,7 @@ export class UrlsLoader {
             ' (' + event.target.statusText + ')',
           target: event.target
         });
-        this.#addLoadend();
+        this._addLoadend();
       } else {
         loader.load(event.target.response, dataElement, i);
       }
@@ -248,12 +248,12 @@ export class UrlsLoader {
    *   to the request,
    * - batchSize: the size of the request url batch.
    */
-  #loadUrls(data, options) {
+  _loadUrls(data, options) {
     // check input
     if (typeof data === 'undefined' || data.length === 0) {
       return;
     }
-    this.#storeInputData(data);
+    this._storeInputData(data);
 
     // create prgress handler
     const mproghandler = new MultiProgressHandler(this.onprogress);
@@ -282,13 +282,13 @@ export class UrlsLoader {
         // loader.onloadstart: nothing to do
         loader.onprogress = mproghandler.getUndefinedMonoProgressHandler(1);
         loader.onloaditem = this.onloaditem;
-        loader.onload = this.#addLoad;
-        loader.onloadend = this.#addLoadend;
+        loader.onload = this._addLoad;
+        loader.onloadend = this._addLoadend;
         loader.onerror = this.onerror;
         loader.onabort = this.onabort;
 
         // store loader
-        this.#storeLoader(loader);
+        this._storeLoader(loader);
         // exit
         break;
       }
@@ -301,9 +301,9 @@ export class UrlsLoader {
     let lastRunRequestIndex = 0;
     const requestOnLoadEnd = () => {
       // launch next in queue
-      if (lastRunRequestIndex < this.#requests.length - 1 && !this.#aborting) {
+      if (lastRunRequestIndex < this._requests.length - 1 && !this._aborting) {
         ++lastRunRequestIndex;
-        this.#requests[lastRunRequestIndex].send(null);
+        this._requests[lastRunRequestIndex].send(null);
       }
     };
 
@@ -347,20 +347,20 @@ export class UrlsLoader {
 
       // set request callbacks
       // request.onloadstart: nothing to do
-      request.onprogress = this.#augmentCallbackEvent(
+      request.onprogress = this._augmentCallbackEvent(
         mproghandler.getMonoProgressHandler(i, 0), dataElement);
-      request.onload = this.#getLoadHandler(loader, dataElement, i);
+      request.onload = this._getLoadHandler(loader, dataElement, i);
       request.onloadend = requestOnLoadEnd;
       const errorCallback =
-        this.#augmentCallbackEvent(this.onerror, dataElement);
+        this._augmentCallbackEvent(this.onerror, dataElement);
       request.onerror = (event) => {
-        this.#addLoadend();
+        this._addLoadend();
         errorCallback(event);
       };
       const abortCallback =
-        this.#augmentCallbackEvent(this.onabort, dataElement);
+        this._augmentCallbackEvent(this.onabort, dataElement);
       request.onabort = (event) => {
-        this.#addLoadend();
+        this._addLoadend();
         abortCallback(event);
       };
       // response type (default is 'text')
@@ -369,21 +369,21 @@ export class UrlsLoader {
       }
 
       // store request
-      this.#storeRequest(request);
+      this._storeRequest(request);
     }
 
     // launch requests in batch
-    let batchSize = this.#requests.length;
+    let batchSize = this._requests.length;
     if (typeof options !== 'undefined') {
       // optional request batch size
       if (typeof options.batchSize !== 'undefined' && batchSize !== 0) {
-        batchSize = Math.min(options.batchSize, this.#requests.length);
+        batchSize = Math.min(options.batchSize, this._requests.length);
       }
     }
     for (let r = 0; r < batchSize; ++r) {
-      if (!this.#aborting) {
+      if (!this._aborting) {
         lastRunRequestIndex = r;
-        this.#requests[lastRunRequestIndex].send(null);
+        this._requests[lastRunRequestIndex].send(null);
       }
     }
   }
@@ -394,7 +394,7 @@ export class UrlsLoader {
    * @param {string} dicomDirUrl The DICOMDIR url.
    * @param {object} [options] Load options.
    */
-  #loadDicomDir(dicomDirUrl, options) {
+  _loadDicomDir(dicomDirUrl, options) {
     // read DICOMDIR
     const request = new XMLHttpRequest();
     request.open('GET', dicomDirUrl, true);
@@ -427,15 +427,15 @@ export class UrlsLoader {
           fullUrls.push(rootUrl + '/' + urls[i]);
         }
         // load urls
-        this.#loadUrls(fullUrls, options);
+        this._loadUrls(fullUrls, options);
       }
     };
     request.onerror = (event) => {
-      this.#augmentCallbackEvent(this.onerror, dicomDirUrl)(event);
+      this._augmentCallbackEvent(this.onerror, dicomDirUrl)(event);
       this.onloadend({});
     };
     request.onabort = (event) => {
-      this.#augmentCallbackEvent(this.onabort, dicomDirUrl)(event);
+      this._augmentCallbackEvent(this.onabort, dicomDirUrl)(event);
       this.onloadend({});
     };
     // request.onloadend: nothing to do
@@ -447,17 +447,17 @@ export class UrlsLoader {
    * Abort a load.
    */
   abort() {
-    this.#aborting = true;
+    this._aborting = true;
     // abort non finished requests
-    for (let i = 0; i < this.#requests.length; ++i) {
+    for (let i = 0; i < this._requests.length; ++i) {
       // 0: UNSENT, 1: OPENED, 2: HEADERS_RECEIVED (send()), 3: LOADING, 4: DONE
-      if (this.#requests[i].readyState !== 4) {
-        this.#requests[i].abort();
+      if (this._requests[i].readyState !== 4) {
+        this._requests[i].abort();
       }
     }
     // abort loader
-    if (this.#runningLoader && this.#runningLoader.isLoading()) {
-      this.#runningLoader.abort();
+    if (this._runningLoader && this._runningLoader.isLoading()) {
+      this._runningLoader.abort();
     }
   }
 

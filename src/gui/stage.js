@@ -173,26 +173,26 @@ export class Stage {
    *
    * @type {LayerGroup[]}
    */
-  #layerGroups = [];
+  _layerGroups = [];
 
   /**
    * Active layer group index.
    *
    * @type {number|undefined}
    */
-  #activeLayerGroupIndex;
+  _activeLayerGroupIndex;
 
   /**
    * Image smoothing flag.
    *
    * @type {boolean}
    */
-  #imageSmoothing = false;
+  _imageSmoothing = false;
 
   // layer group binders
-  #binders = [];
+  _binders = [];
   // binder callbacks
-  #callbackStore = null;
+  _callbackStore = null;
 
   /**
    * Get the layer group at the given index.
@@ -201,7 +201,7 @@ export class Stage {
    * @returns {LayerGroup|undefined} The layer group.
    */
   getLayerGroup(index) {
-    return this.#layerGroups[index];
+    return this._layerGroups[index];
   }
 
   /**
@@ -210,7 +210,7 @@ export class Stage {
    * @returns {number} The number of layer groups.
    */
   getNumberOfLayerGroups() {
-    return this.#layerGroups.length;
+    return this._layerGroups.length;
   }
 
   /**
@@ -219,7 +219,7 @@ export class Stage {
    * @returns {LayerGroup|undefined} The layer group.
    */
   getActiveLayerGroup() {
-    return this.getLayerGroup(this.#activeLayerGroupIndex);
+    return this.getLayerGroup(this._activeLayerGroupIndex);
   }
 
   /**
@@ -229,7 +229,7 @@ export class Stage {
    */
   setActiveLayerGroup(index) {
     if (typeof this.getLayerGroup(index) !== 'undefined') {
-      this.#activeLayerGroupIndex = index;
+      this._activeLayerGroupIndex = index;
     } else {
       logger.warn('No layer group to set as active with index: ' +
         index);
@@ -244,8 +244,8 @@ export class Stage {
    */
   getViewLayersByDataId(dataId) {
     let res = [];
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      res = res.concat(this.#layerGroups[i].getViewLayersByDataId(dataId));
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      res = res.concat(this._layerGroups[i].getViewLayersByDataId(dataId));
     }
     return res;
   }
@@ -258,8 +258,8 @@ export class Stage {
    */
   getDrawLayersByDataId(dataId) {
     let res = [];
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      res = res.concat(this.#layerGroups[i].getDrawLayersByDataId(dataId));
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      res = res.concat(this._layerGroups[i].getDrawLayersByDataId(dataId));
     }
     return res;
   }
@@ -273,15 +273,15 @@ export class Stage {
    * @returns {LayerGroup} The newly created layer group.
    */
   addLayerGroup(htmlElement) {
-    this.#activeLayerGroupIndex = this.#layerGroups.length;
+    this._activeLayerGroupIndex = this._layerGroups.length;
     const layerGroup = new LayerGroup(htmlElement);
-    layerGroup.setImageSmoothing(this.#imageSmoothing);
+    layerGroup.setImageSmoothing(this._imageSmoothing);
     // add to storage
-    const isBound = this.#callbackStore && this.#callbackStore.length !== 0;
+    const isBound = this._callbackStore && this._callbackStore.length !== 0;
     if (isBound) {
       this.unbindLayerGroups();
     }
-    this.#layerGroups.push(layerGroup);
+    this._layerGroups.push(layerGroup);
     if (isBound) {
       this.bindLayerGroups();
     }
@@ -296,7 +296,7 @@ export class Stage {
    * @returns {LayerGroup} The layer group.
    */
   getLayerGroupByDivId(id) {
-    return this.#layerGroups.find(function (item) {
+    return this._layerGroups.find(function (item) {
       return item.getDivId() === id;
     });
   }
@@ -310,10 +310,10 @@ export class Stage {
     if (typeof list === 'undefined' || list === null) {
       throw new Error('Cannot set null or undefined binders');
     }
-    if (this.#binders.length !== 0) {
+    if (this._binders.length !== 0) {
       this.unbindLayerGroups();
     }
-    this.#binders = list.slice();
+    this._binders = list.slice();
     this.bindLayerGroups();
   }
 
@@ -322,11 +322,11 @@ export class Stage {
    */
   empty() {
     this.unbindLayerGroups();
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      this.#layerGroups[i].empty();
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      this._layerGroups[i].empty();
     }
-    this.#layerGroups = [];
-    this.#activeLayerGroupIndex = undefined;
+    this._layerGroups = [];
+    this._activeLayerGroupIndex = undefined;
   }
 
   /**
@@ -335,7 +335,7 @@ export class Stage {
    * @param {string} dataId The data to remove its layers.
    */
   removeLayersByDataId(dataId) {
-    for (const layerGroup of this.#layerGroups) {
+    for (const layerGroup of this._layerGroups) {
       layerGroup.removeLayersByDataId(dataId);
     }
   }
@@ -347,7 +347,7 @@ export class Stage {
    */
   removeLayerGroup(layerGroup) {
     // find layer
-    const index = this.#layerGroups.findIndex((item) => item === layerGroup);
+    const index = this._layerGroups.findIndex((item) => item === layerGroup);
     if (index === -1) {
       throw new Error('Cannot find layerGroup to remove');
     }
@@ -356,10 +356,10 @@ export class Stage {
     // empty layer group
     layerGroup.empty();
     // remove from storage
-    this.#layerGroups.splice(index, 1);
+    this._layerGroups.splice(index, 1);
     // update active index
-    if (this.#activeLayerGroupIndex === index) {
-      this.#activeLayerGroupIndex = undefined;
+    if (this._activeLayerGroupIndex === index) {
+      this._activeLayerGroupIndex = undefined;
     }
     // bind
     this.bindLayerGroups();
@@ -369,8 +369,8 @@ export class Stage {
    * Reset the stage: calls reset on all layer groups.
    */
   reset() {
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      this.#layerGroups[i].reset();
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      this._layerGroups[i].reset();
     }
   }
 
@@ -378,8 +378,8 @@ export class Stage {
    * Draw the stage: calls draw on all layer groups.
    */
   draw() {
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      this.#layerGroups[i].draw();
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      this._layerGroups[i].draw();
     }
   }
 
@@ -391,8 +391,8 @@ export class Stage {
     // find the minimum ratio
     let minRatio;
     const hasRatio = [];
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      const ratio = this.#layerGroups[i].getDivToWorldSizeRatio();
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      const ratio = this._layerGroups[i].getDivToWorldSizeRatio();
       if (typeof ratio !== 'undefined') {
         hasRatio.push(i);
         if (typeof minRatio === 'undefined' || ratio < minRatio) {
@@ -405,9 +405,9 @@ export class Stage {
       return;
     }
     // apply min ratio to layers
-    for (let j = 0; j < this.#layerGroups.length; ++j) {
+    for (let j = 0; j < this._layerGroups.length; ++j) {
       if (hasRatio.includes(j)) {
-        this.#layerGroups[j].fitToContainer(minRatio);
+        this._layerGroups[j].fitToContainer(minRatio);
       }
     }
   }
@@ -416,17 +416,17 @@ export class Stage {
    * Bind the layer groups of the stage.
    */
   bindLayerGroups() {
-    if (this.#layerGroups.length === 0 ||
-      this.#layerGroups.length === 1 ||
-      this.#binders.length === 0) {
+    if (this._layerGroups.length === 0 ||
+      this._layerGroups.length === 1 ||
+      this._binders.length === 0) {
       return;
     }
     // create callback store
-    this.#callbackStore = new Array(this.#layerGroups.length);
+    this._callbackStore = new Array(this._layerGroups.length);
     // add listeners
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      for (let j = 0; j < this.#binders.length; ++j) {
-        this.#addEventListeners(i, this.#binders[j]);
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      for (let j = 0; j < this._binders.length; ++j) {
+        this._addEventListeners(i, this._binders[j]);
       }
     }
   }
@@ -435,20 +435,20 @@ export class Stage {
    * Unbind the layer groups of the stage.
    */
   unbindLayerGroups() {
-    if (this.#layerGroups.length === 0 ||
-      this.#layerGroups.length === 1 ||
-      this.#binders.length === 0 ||
-      !this.#callbackStore) {
+    if (this._layerGroups.length === 0 ||
+      this._layerGroups.length === 1 ||
+      this._binders.length === 0 ||
+      !this._callbackStore) {
       return;
     }
     // remove listeners
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      for (let j = 0; j < this.#binders.length; ++j) {
-        this.#removeEventListeners(i, this.#binders[j]);
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      for (let j = 0; j < this._binders.length; ++j) {
+        this._removeEventListeners(i, this._binders[j]);
       }
     }
     // clear callback store
-    this.#callbackStore = null;
+    this._callbackStore = null;
   }
 
   /**
@@ -457,10 +457,10 @@ export class Stage {
    * @param {boolean} flag True to enable smoothing.
    */
   setImageSmoothing(flag) {
-    this.#imageSmoothing = flag;
+    this._imageSmoothing = flag;
     // set for existing layer groups
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
-      this.#layerGroups[i].setImageSmoothing(flag);
+    for (let i = 0; i < this._layerGroups.length; ++i) {
+      this._layerGroups[i].setImageSmoothing(flag);
     }
   }
 
@@ -472,11 +472,11 @@ export class Stage {
    * @param {number} index The index of the associated layer group.
    * @returns {Function} The binder function.
    */
-  #getBinderCallback(binder, index) {
-    if (typeof this.#callbackStore[index] === 'undefined') {
-      this.#callbackStore[index] = [];
+  _getBinderCallback(binder, index) {
+    if (typeof this._callbackStore[index] === 'undefined') {
+      this._callbackStore[index] = [];
     }
-    const store = this.#callbackStore[index];
+    const store = this._callbackStore[index];
     let binderObj = store.find(function (elem) {
       return elem.binder === binder;
     });
@@ -486,14 +486,14 @@ export class Stage {
         binder: binder,
         callback: (event) => {
           // stop listeners
-          this.#removeEventListeners(index, binder);
+          this._removeEventListeners(index, binder);
           // apply binder
-          binder.getCallback(this.#layerGroups[index])(event);
+          binder.getCallback(this._layerGroups[index])(event);
           // re-start listeners
-          this.#addEventListeners(index, binder);
+          this._addEventListeners(index, binder);
         }
       };
-      this.#callbackStore[index].push(binderObj);
+      this._callbackStore[index].push(binderObj);
     }
     return binderObj.callback;
   }
@@ -504,12 +504,12 @@ export class Stage {
    * @param {number} index The index of the associated layer group.
    * @param {object} binder The layer binder.
    */
-  #addEventListeners(index, binder) {
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
+  _addEventListeners(index, binder) {
+    for (let i = 0; i < this._layerGroups.length; ++i) {
       if (i !== index) {
-        this.#layerGroups[index].addEventListener(
+        this._layerGroups[index].addEventListener(
           binder.getEventType(),
-          this.#getBinderCallback(binder, i)
+          this._getBinderCallback(binder, i)
         );
       }
     }
@@ -521,12 +521,12 @@ export class Stage {
    * @param {number} index The index of the associated layer group.
    * @param {object} binder The layer binder.
    */
-  #removeEventListeners(index, binder) {
-    for (let i = 0; i < this.#layerGroups.length; ++i) {
+  _removeEventListeners(index, binder) {
+    for (let i = 0; i < this._layerGroups.length; ++i) {
       if (i !== index) {
-        this.#layerGroups[index].removeEventListener(
+        this._layerGroups[index].removeEventListener(
           binder.getEventType(),
-          this.#getBinderCallback(binder, i)
+          this._getBinderCallback(binder, i)
         );
       }
     }

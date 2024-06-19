@@ -356,7 +356,7 @@ export class DicomWriter {
    *
    * @type {boolean}
    */
-  #useUnVrForPrivateSq = false;
+  _useUnVrForPrivateSq = false;
 
   /**
    * Flag to activate or not the vr=UN tag check and fix
@@ -364,14 +364,14 @@ export class DicomWriter {
    *
    * @type {boolean}
    */
-  #fixUnknownVR = true;
+  _fixUnknownVR = true;
 
   /**
    * Default rules: just copy.
    *
    * @type {Object<string, WriterRule>}
    */
-  #defaultRules = {
+  _defaultRules = {
     default: {action: 'copy', value: null}
   };
 
@@ -380,28 +380,28 @@ export class DicomWriter {
    *
    * @type {Object<string, WriterRule>}
    */
-  #rules = this.#defaultRules;
+  _rules = this._defaultRules;
 
   /**
    * List of compulsory tags keys.
    *
    * @type {string[]}
    */
-  #compulsoryTags = [];
+  _compulsoryTags = [];
 
   /**
    * Default text encoder.
    *
    * @type {DefaultTextEncoder}
    */
-  #defaultTextEncoder = new DefaultTextEncoder();
+  _defaultTextEncoder = new DefaultTextEncoder();
 
   /**
    * Special text encoder.
    *
    * @type {DefaultTextEncoder|TextEncoder}
    */
-  #textEncoder = this.#defaultTextEncoder;
+  _textEncoder = this._defaultTextEncoder;
 
   /**
    * Set the use UN VR for private sequence flag.
@@ -409,7 +409,7 @@ export class DicomWriter {
    * @param {boolean} flag True to use UN VR.
    */
   setUseUnVrForPrivateSq(flag) {
-    this.#useUnVrForPrivateSq = flag;
+    this._useUnVrForPrivateSq = flag;
   }
 
   /**
@@ -418,7 +418,7 @@ export class DicomWriter {
    * @param {boolean} flag True to activate the check and fix.
    */
   setFixUnknownVR(flag) {
-    this.#fixUnknownVR = flag;
+    this._fixUnknownVR = flag;
   }
 
   /**
@@ -435,10 +435,10 @@ export class DicomWriter {
    *   added if missing. Defaults to false.
    */
   setRules(rules, addMissingTags) {
-    this.#rules = rules;
+    this._rules = rules;
 
     // default compulsory list is empty
-    this.#compulsoryTags = [];
+    this._compulsoryTags = [];
 
     // use replace rule tags as compulsory tags
     if (addMissingTags) {
@@ -467,7 +467,7 @@ export class DicomWriter {
           }
           // add to list
           if (typeof tagKey !== 'undefined') {
-            this.#compulsoryTags.push(tagKey);
+            this._compulsoryTags.push(tagKey);
           }
         }
       }
@@ -480,8 +480,8 @@ export class DicomWriter {
    * @param {string} str The string to encode.
    * @returns {Uint8Array} The encoded string.
    */
-  #encodeString(str) {
-    return this.#defaultTextEncoder.encode(str);
+  _encodeString(str) {
+    return this._defaultTextEncoder.encode(str);
   }
 
   /**
@@ -490,8 +490,8 @@ export class DicomWriter {
    * @param {string} str The string to write.
    * @returns {Uint8Array} The encoded string.
    */
-  #encodeSpecialString(str) {
-    return this.#textEncoder.encode(str);
+  _encodeSpecialString(str) {
+    return this._textEncoder.encode(str);
   }
 
   /**
@@ -505,7 +505,7 @@ export class DicomWriter {
      *
      * @external TextEncoder
      */
-    this.#textEncoder = new TextEncoder();
+    this._textEncoder = new TextEncoder();
   }
 
   /**
@@ -522,19 +522,19 @@ export class DicomWriter {
 
     // apply rules:
     let rule;
-    if (typeof this.#rules[element.tag.getKey()] !== 'undefined') {
+    if (typeof this._rules[element.tag.getKey()] !== 'undefined') {
       // 1. tag itself
-      rule = this.#rules[element.tag.getKey()];
+      rule = this._rules[element.tag.getKey()];
     } else if (typeof tagName !== 'undefined' &&
-      typeof this.#rules[tagName] !== 'undefined') {
+      typeof this._rules[tagName] !== 'undefined') {
       // 2. tag name
-      rule = this.#rules[tagName];
-    } else if (typeof this.#rules[groupName] !== 'undefined') {
+      rule = this._rules[tagName];
+    } else if (typeof this._rules[groupName] !== 'undefined') {
       // 3. group name
-      rule = this.#rules[groupName];
+      rule = this._rules[groupName];
     } else {
       // 4. default
-      rule = this.#rules['default'];
+      rule = this._rules['default'];
     }
     // apply action on element and return
     return writerActions[rule.action](element, rule.value);
@@ -549,7 +549,7 @@ export class DicomWriter {
    * @param {boolean} isImplicit Is the DICOM VR implicit?
    * @returns {number} The new offset position.
    */
-  #writeDataElementItems(
+  _writeDataElementItems(
     writer, byteOffset, items, isImplicit) {
     let item = null;
     for (let i = 0; i < items.length; ++i) {
@@ -567,12 +567,12 @@ export class DicomWriter {
       itemElement.vl = undefinedLength ? 0xffffffff : item['FFFEE000'].vl,
       itemElement.tag = getItemTag();
       itemElement.value = [];
-      byteOffset = this.#writeDataElement(
+      byteOffset = this._writeDataElement(
         writer, itemElement, byteOffset, isImplicit);
       // write rest
       for (let m = 0; m < itemKeys.length; ++m) {
         if (itemKeys[m] !== 'FFFEE000' && itemKeys[m] !== 'FFFEE00D') {
-          byteOffset = this.#writeDataElement(
+          byteOffset = this._writeDataElement(
             writer, item[itemKeys[m]], byteOffset, isImplicit);
         }
       }
@@ -582,7 +582,7 @@ export class DicomWriter {
         itemDelimElement.vl = 0;
         itemDelimElement.tag = getItemDelimitationItemTag();
         itemDelimElement.value = [];
-        byteOffset = this.#writeDataElement(
+        byteOffset = this._writeDataElement(
           writer, itemDelimElement, byteOffset, isImplicit);
       }
     }
@@ -601,7 +601,7 @@ export class DicomWriter {
    * @param {boolean} isImplicit Is the DICOM VR implicit?
    * @returns {number} The new offset position.
    */
-  #writeDataElementValue(
+  _writeDataElementValue(
     writer, element, byteOffset, value, isImplicit) {
 
     const startOffset = byteOffset;
@@ -657,7 +657,7 @@ export class DicomWriter {
           throw new Error('Unknown VR type: ' + vrType);
         }
       } else if (element.vr === 'SQ') {
-        byteOffset = this.#writeDataElementItems(
+        byteOffset = this._writeDataElementItems(
           writer, byteOffset, value, isImplicit);
       } else if (element.vr === 'AT') {
         for (let i = 0; i < value.length; ++i) {
@@ -709,7 +709,7 @@ export class DicomWriter {
    * @param {boolean} isImplicit Is the DICOM VR implicit?
    * @returns {number} The new offset position.
    */
-  #writePixelDataElementValue(
+  _writePixelDataElementValue(
     writer, element, byteOffset, value, isImplicit) {
     // undefined length flag
     let undefinedLength = false;
@@ -724,7 +724,7 @@ export class DicomWriter {
         finalValue = flattenArrayOfTypedArrays(value);
       }
       // write
-      byteOffset = this.#writeDataElementValue(
+      byteOffset = this._writeDataElementValue(
         writer, element, byteOffset, finalValue, isImplicit);
     } else {
       // pixel data as sequence
@@ -746,7 +746,7 @@ export class DicomWriter {
         };
       }
       // write
-      byteOffset = this.#writeDataElementItems(
+      byteOffset = this._writeDataElementItems(
         writer, byteOffset, [item], isImplicit);
     }
 
@@ -763,7 +763,7 @@ export class DicomWriter {
    * @param {boolean} isImplicit Is the DICOM VR implicit?
    * @returns {number} The new offset position.
    */
-  #writeDataElement(
+  _writeDataElement(
     writer, element, byteOffset, isImplicit) {
     const isTagWithVR = element.tag.isWithVR();
     const is32bitVL = (isImplicit || !isTagWithVR)
@@ -775,14 +775,14 @@ export class DicomWriter {
     // VR
     let vr = element.vr;
     // use VR=UN for private sequence
-    if (this.#useUnVrForPrivateSq &&
+    if (this._useUnVrForPrivateSq &&
       element.tag.isPrivate() &&
       vr === 'SQ') {
       logger.warn('Write element using VR=UN for private sequence.');
       vr = 'UN';
     }
     if (isTagWithVR && !isImplicit) {
-      byteOffset = writer.writeUint8Array(byteOffset, this.#encodeString(vr));
+      byteOffset = writer.writeUint8Array(byteOffset, this._encodeString(vr));
       // reserved 2 bytes for 32bit VL
       if (is32bitVL) {
         byteOffset += 2;
@@ -823,10 +823,10 @@ export class DicomWriter {
     }
     // write
     if (isPixelDataTag(element.tag)) {
-      byteOffset = this.#writePixelDataElementValue(
+      byteOffset = this._writePixelDataElementValue(
         writer, element, byteOffset, value, isImplicit);
     } else {
-      byteOffset = this.#writeDataElementValue(
+      byteOffset = this._writeDataElementValue(
         writer, element, byteOffset, value, isImplicit);
     }
 
@@ -836,7 +836,7 @@ export class DicomWriter {
       seqDelimElement.vl = 0;
       seqDelimElement.tag = getSequenceDelimitationItemTag();
       seqDelimElement.value = [];
-      byteOffset = this.#writeDataElement(
+      byteOffset = this._writeDataElement(
         writer, seqDelimElement, byteOffset, isImplicit);
     }
 
@@ -889,7 +889,7 @@ export class DicomWriter {
     const ivnTag = new Tag('0002', '0013');
 
     // missing tag list: start as a copy of compulsory
-    const missingTags = this.#compulsoryTags.slice();
+    const missingTags = this._compulsoryTags.slice();
 
     // loop through elements to get the buffer size
     const keys = Object.keys(dataElements);
@@ -915,12 +915,12 @@ export class DicomWriter {
         // This check must be done BEFORE calculating totalSize,
         // otherwise there may be extra null bytes at the end of the file
         // (dcmdump may crash because of these bytes)
-        if (this.#fixUnknownVR) {
+        if (this._fixUnknownVR) {
           checkAndFixUnknownVR(element, !isBigEndian);
         }
 
         // update value and vl
-        this.#setElementValue(
+        this._setElementValue(
           element, element.value, isImplicit, bitsAllocated);
 
         // tag group name
@@ -957,15 +957,15 @@ export class DicomWriter {
       dataElement.tag = tag;
       // rules are indexed by key or tag name
       let value;
-      if (typeof this.#rules[key] !== 'undefined') {
-        value = this.#rules[key].value;
+      if (typeof this._rules[key] !== 'undefined') {
+        value = this._rules[key].value;
       } else {
         const name = tag.getNameFromDictionary();
-        value = this.#rules[name].value;
+        value = this._rules[name].value;
       }
       // add element
       let size = getDataElementPrefixByteSize(dataElement.vr, isImplicit);
-      size += this.#setElementValue(dataElement, [value], isImplicit);
+      size += this._setElementValue(dataElement, [value], isImplicit);
       rawElements.push(dataElement);
       totalSize += size;
     }
@@ -973,14 +973,14 @@ export class DicomWriter {
     // FileMetaInformationVersion
     const fmiv = getDataElement('FileMetaInformationVersion');
     let fmivSize = getDataElementPrefixByteSize(fmiv.vr, false);
-    fmivSize += this.#setElementValue(fmiv, [0, 1], false);
+    fmivSize += this._setElementValue(fmiv, [0, 1], false);
     metaElements.push(fmiv);
     metaLength += fmivSize;
     totalSize += fmivSize;
     // ImplementationClassUID
     const icUID = getDataElement('ImplementationClassUID');
     let icUIDSize = getDataElementPrefixByteSize(icUID.vr, false);
-    icUIDSize += this.#setElementValue(
+    icUIDSize += this._setElementValue(
       icUID, [getUID('ImplementationClassUID')], false);
     metaElements.push(icUID);
     metaLength += icUIDSize;
@@ -989,7 +989,7 @@ export class DicomWriter {
     const ivn = getDataElement('ImplementationVersionName');
     let ivnSize = getDataElementPrefixByteSize(ivn.vr, false);
     const ivnValue = 'DWV_' + getDwvVersion();
-    ivnSize += this.#setElementValue(ivn, [ivnValue], false);
+    ivnSize += this._setElementValue(ivn, [ivnValue], false);
     metaElements.push(ivn);
     metaLength += ivnSize;
     totalSize += ivnSize;
@@ -1004,7 +1004,7 @@ export class DicomWriter {
     // create the FileMetaInformationGroupLength element
     const fmigl = getDataElement('FileMetaInformationGroupLength');
     let fmiglSize = getDataElementPrefixByteSize(fmigl.vr, false);
-    fmiglSize += this.#setElementValue(
+    fmiglSize += this._setElementValue(
       fmigl, new Uint32Array([metaLength]), false);
     totalSize += fmiglSize;
 
@@ -1015,12 +1015,12 @@ export class DicomWriter {
 
     let offset = 128;
     // DICM
-    offset = metaWriter.writeUint8Array(offset, this.#encodeString('DICM'));
+    offset = metaWriter.writeUint8Array(offset, this._encodeString('DICM'));
     // FileMetaInformationGroupLength
-    offset = this.#writeDataElement(metaWriter, fmigl, offset, false);
+    offset = this._writeDataElement(metaWriter, fmigl, offset, false);
     // write meta
     for (let j = 0, lenj = metaElements.length; j < lenj; ++j) {
-      offset = this.#writeDataElement(
+      offset = this._writeDataElement(
         metaWriter, metaElements[j], offset, false);
     }
 
@@ -1035,7 +1035,7 @@ export class DicomWriter {
 
     // write non meta
     for (let k = 0, lenk = rawElements.length; k < lenk; ++k) {
-      offset = this.#writeDataElement(
+      offset = this._writeDataElement(
         dataWriter, rawElements[k], offset, isImplicit);
     }
 
@@ -1058,7 +1058,7 @@ export class DicomWriter {
    * @param {number} [bitsAllocated] Bits allocated used for pixel data.
    * @returns {number} The total element size.
    */
-  #setElementValue(
+  _setElementValue(
     element, value, isImplicit, bitsAllocated) {
     // byte size of the element
     let size = 0;
@@ -1106,7 +1106,7 @@ export class DicomWriter {
               continue;
             }
             // set item value
-            subSize += this.#setElementValue(
+            subSize += this._setElementValue(
               subElement, subElement.value, isImplicit, sqBitsAllocated);
             newItemElements[itemKey] = subElement;
             // add prefix size
@@ -1160,11 +1160,11 @@ export class DicomWriter {
         if (isStringVr(element.vr)) {
           let pad;
           if (isCharSetStringVR(element.vr)) {
-            value = this.#encodeSpecialString(value.join('\\'));
-            pad = this.#encodeSpecialString(padStr);
+            value = this._encodeSpecialString(value.join('\\'));
+            pad = this._encodeSpecialString(padStr);
           } else {
-            value = this.#encodeString(value.join('\\'));
-            pad = this.#encodeString(padStr);
+            value = this._encodeString(value.join('\\'));
+            pad = this._encodeString(padStr);
           }
           if (!isEven(value.length)) {
             value = uint8ArrayPush(value, pad);

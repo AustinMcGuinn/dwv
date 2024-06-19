@@ -127,7 +127,7 @@ export class EllipseFactory {
     // debug shadow
     let kshadow;
     if (DRAW_DEBUG) {
-      kshadow = this.#getShadowEllipse(ellipse);
+      kshadow = this._getShadowEllipse(ellipse);
     }
 
     // return group
@@ -287,7 +287,7 @@ export class EllipseFactory {
       // remove previous
       kshadow.destroy();
       // add new
-      group.add(this.#getShadowEllipse(ellipse, group));
+      group.add(this._getShadowEllipse(ellipse, group));
     }
 
     // update label position
@@ -298,7 +298,7 @@ export class EllipseFactory {
     klabel.position(textPos);
 
     // update quantification
-    this.#updateEllipseQuantification(group, viewController);
+    this._updateEllipseQuantification(group, viewController);
   }
 
   /**
@@ -308,7 +308,7 @@ export class EllipseFactory {
    * @param {ViewController} viewController The associated view controller.
    */
   updateQuantification(group, viewController) {
-    this.#updateEllipseQuantification(group, viewController);
+    this._updateEllipseQuantification(group, viewController);
   }
 
   /**
@@ -318,7 +318,7 @@ export class EllipseFactory {
    * @param {Konva.Group} group The group with the shape.
    * @param {ViewController} viewController The associated view controller.
    */
-  #updateEllipseQuantification(group, viewController) {
+  _updateEllipseQuantification(group, viewController) {
     // associated shape
     const kellipse = group.getChildren(function (node) {
       return node.name() === 'shape';
@@ -362,7 +362,7 @@ export class EllipseFactory {
    * @param {Konva.Group} [group] The associated group.
    * @returns {Konva.Group} The shadow konva group.
    */
-  #getShadowEllipse(ellipse, group) {
+  _getShadowEllipse(ellipse, group) {
     // possible group offset
     let offsetX = 0;
     let offsetY = 0;

@@ -36,21 +36,21 @@ export class Ellipse {
    *
    * @type {Point2D}
    */
-  #centre;
+  _centre;
 
   /**
    * Ellipse horizontal radius.
    *
    * @type {number}
    */
-  #a;
+  _a;
 
   /**
    * Ellipse vertical radius.
    *
    * @type {number}
    */
-  #b;
+  _b;
 
   /**
    * @param {Point2D} centre A Point2D representing the centre
@@ -59,9 +59,9 @@ export class Ellipse {
    * @param {number} b The radius of the ellipse on the vertical axe.
    */
   constructor(centre, a, b) {
-    this.#centre = centre;
-    this.#a = a;
-    this.#b = b;
+    this._centre = centre;
+    this._a = a;
+    this._b = b;
   }
 
   /**
@@ -70,7 +70,7 @@ export class Ellipse {
    * @returns {Point2D} The center (point) of the ellipse.
    */
   getCenter() {
-    return this.#centre;
+    return this._centre;
   }
 
   /**
@@ -79,7 +79,7 @@ export class Ellipse {
    * @returns {number} The radius of the ellipse on the horizontal axe.
    */
   getA() {
-    return this.#a;
+    return this._a;
   }
 
   /**
@@ -88,7 +88,7 @@ export class Ellipse {
    * @returns {number} The radius of the ellipse on the vertical axe.
    */
   getB() {
-    return this.#b;
+    return this._b;
   }
 
   /**
@@ -127,7 +127,7 @@ export class Ellipse {
   /**
    * Get the rounded limits of the ellipse.
    *
-   * See: {@link https://en.wikipedia.org/wiki/Ellipse#Standard_equation}.
+   * See: {@link https://en.wikipedia.org/wiki/Ellipse_Standard_equation}.
    *
    * Ellipse formula: `x*x / a*a + y*y / b*b = 1`.
    *

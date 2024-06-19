@@ -34,14 +34,14 @@ import {
  * @returns {string} The version of the library.
  */
 export function getDwvVersion() {
-  return '0.34.0-beta.0';
+  return '0.34.1';
 }
 
 /**
  * Check that an input buffer includes the DICOM prefix 'DICM'
  *   after the 128 bytes preamble.
  *
- * Ref: [DICOM File Meta]{@link https://dicom.nema.org/medical/dicom/2022a/output/chtml/part10/chapter_7.html#sect_7.1}.
+ * Ref: [DICOM File Meta]{@link https://dicom.nema.org/medical/dicom/2022a/output/chtml/part10/chapter_7.html_sect_7.1}.
  *
  * @param {ArrayBuffer} buffer The buffer to check.
  * @returns {boolean} True if the buffer includes the prefix.
@@ -90,8 +90,8 @@ export function cleanString(inputStr) {
  *
  * References:
  * - DICOM [Value Encoding]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/chapter_6.html},
- * - DICOM [Specific Character Set]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part03/sect_C.12.html#sect_C.12.1.1.2},
- * - [TextDecoder#Parameters]{@link https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder/TextDecoder#Parameters}.
+ * - DICOM [Specific Character Set]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part03/sect_C.12.html_sect_C.12.1.1.2},
+ * - [TextDecoder_Parameters]{@link https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder/TextDecoder_Parameters}.
  *
  * @param {string} charSetTerm The DICOM character set.
  * @returns {string} The corresponding UTF label.
@@ -429,8 +429,8 @@ export function getTypedArray(bitsAllocated, pixelRepresentation, size) {
  *   the 'isTagWithVR' function first.
  *
  * Reference:
- * - [Data Element explicit]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/chapter_7.html#table_7.1-1},
- * - [Data Element implicit]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_7.5.2.html#table_7.5-1}.
+ * - [Data Element explicit]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/chapter_7.html_table_7.1-1},
+ * - [Data Element implicit]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_7.5.2.html_table_7.5-1}.
  *
  * ```
  * | Tag | VR  | VL | Value |
@@ -509,28 +509,28 @@ export class DicomParser {
    *
    * @type {DataElements}
    */
-  #dataElements = {};
+  _dataElements = {};
 
   /**
    * Default character set (optional).
    *
    * @type {string}
    */
-  #defaultCharacterSet;
+  _defaultCharacterSet;
 
   /**
    * Default text decoder.
    *
    * @type {DefaultTextDecoder}
    */
-  #defaultTextDecoder = new DefaultTextDecoder();
+  _defaultTextDecoder = new DefaultTextDecoder();
 
   /**
    * Special text decoder.
    *
    * @type {DefaultTextDecoder|TextDecoder}
    */
-  #textDecoder = this.#defaultTextDecoder;
+  _textDecoder = this._defaultTextDecoder;
 
   /**
    * Decode an input string buffer using the default text decoder.
@@ -538,8 +538,8 @@ export class DicomParser {
    * @param {Uint8Array} buffer The buffer to decode.
    * @returns {string} The decoded string.
    */
-  #decodeString(buffer) {
-    return this.#defaultTextDecoder.decode(buffer);
+  _decodeString(buffer) {
+    return this._defaultTextDecoder.decode(buffer);
   }
 
   /**
@@ -548,8 +548,8 @@ export class DicomParser {
    * @param {Uint8Array} buffer The buffer to decode.
    * @returns {string} The decoded string.
    */
-  #decodeSpecialString(buffer) {
-    return this.#textDecoder.decode(buffer);
+  _decodeSpecialString(buffer) {
+    return this._textDecoder.decode(buffer);
   }
 
   /**
@@ -558,7 +558,7 @@ export class DicomParser {
    * @returns {string} The default character set.
    */
   getDefaultCharacterSet() {
-    return this.#defaultCharacterSet;
+    return this._defaultCharacterSet;
   }
 
   /**
@@ -567,7 +567,7 @@ export class DicomParser {
    * @param {string} characterSet The input character set.
    */
   setDefaultCharacterSet(characterSet) {
-    this.#defaultCharacterSet = characterSet;
+    this._defaultCharacterSet = characterSet;
   }
 
   /**
@@ -583,7 +583,7 @@ export class DicomParser {
      *
      * @external TextDecoder
      */
-    this.#textDecoder = new TextDecoder(characterSet);
+    this._textDecoder = new TextDecoder(characterSet);
   }
 
   // not using type DataElements since the typedef is not exported with the API
@@ -594,7 +594,7 @@ export class DicomParser {
    * @returns {Object<string, DataElement>} The data elements.
    */
   getDicomElements() {
-    return this.#dataElements;
+    return this._dataElements;
   }
 
   /**
@@ -604,7 +604,7 @@ export class DicomParser {
    * @param {number} offset The offset where to start to read.
    * @returns {object} An object containing the tag and the end offset.
    */
-  #readTag(reader, offset) {
+  _readTag(reader, offset) {
     // group
     const group = reader.readHex(offset);
     offset += Uint16Array.BYTES_PER_ELEMENT;
@@ -626,11 +626,11 @@ export class DicomParser {
    * @param {boolean} implicit Is the DICOM VR implicit?
    * @returns {object} The item data as a list of data elements.
    */
-  #readItemDataElement(reader, offset, implicit) {
+  _readItemDataElement(reader, offset, implicit) {
     const itemData = {};
 
     // read the first item
-    let item = this.#readDataElement(reader, offset, implicit);
+    let item = this._readDataElement(reader, offset, implicit);
     offset = item.endOffset;
 
     // exit if it is a sequence delimitation item
@@ -655,7 +655,7 @@ export class DicomParser {
       const endOffset = offset;
       offset -= item.vl;
       while (offset < endOffset) {
-        item = this.#readDataElement(reader, offset, implicit);
+        item = this._readDataElement(reader, offset, implicit);
         offset = item.endOffset;
         itemData[item.tag.getKey()] = item;
       }
@@ -663,7 +663,7 @@ export class DicomParser {
       // implicit VR item: read until the item delimitation item
       let isItemDelim = false;
       while (!isItemDelim) {
-        item = this.#readDataElement(reader, offset, implicit);
+        item = this._readDataElement(reader, offset, implicit);
         offset = item.endOffset;
         isItemDelim = isItemDelimitationItemTag(item.tag);
         if (!isItemDelim) {
@@ -681,26 +681,26 @@ export class DicomParser {
 
   /**
    * Read the pixel item data element.
-   * Ref: [Single frame fragments]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_A.4.html#table_A.4-1}.
+   * Ref: [Single frame fragments]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_A.4.html_table_A.4-1}.
    *
    * @param {DataReader} reader The raw data reader.
    * @param {number} offset The offset where to start to read.
    * @param {boolean} implicit Is the DICOM VR implicit?
    * @returns {object} The item data as an array of data elements.
    */
-  #readPixelItemDataElement(
+  _readPixelItemDataElement(
     reader, offset, implicit) {
     const itemData = [];
 
     // first item: basic offset table
-    let item = this.#readDataElement(reader, offset, implicit);
+    let item = this._readDataElement(reader, offset, implicit);
     const offsetTableVl = item.vl;
     offset = item.endOffset;
 
     // read until the sequence delimitation item
     let isSeqDelim = false;
     while (!isSeqDelim) {
-      item = this.#readDataElement(reader, offset, implicit);
+      item = this._readDataElement(reader, offset, implicit);
       offset = item.endOffset;
       isSeqDelim = isSequenceDelimitationItemTag(item.tag);
       if (!isSeqDelim) {
@@ -720,16 +720,16 @@ export class DicomParser {
   /**
    * Read a DICOM data element.
    *
-   * Reference: [DICOM VRs]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_6.2.html#table_6.2-1}.
+   * Reference: [DICOM VRs]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_6.2.html_table_6.2-1}.
    *
    * @param {DataReader} reader The raw data reader.
    * @param {number} offset The offset where to start to read.
    * @param {boolean} implicit Is the DICOM VR implicit?
    * @returns {DataElement} The data element.
    */
-  #readDataElement(reader, offset, implicit) {
+  _readDataElement(reader, offset, implicit) {
     // Tag: group, element
-    const readTagRes = this.#readTag(reader, offset);
+    const readTagRes = this._readTag(reader, offset);
     const tag = readTagRes.tag;
     offset = readTagRes.endOffset;
 
@@ -745,7 +745,7 @@ export class DicomParser {
         }
         is32bitVL = true;
       } else {
-        vr = this.#decodeString(reader.readUint8Array(offset, 2));
+        vr = this._decodeString(reader.readUint8Array(offset, 2));
         offset += 2 * Uint8Array.BYTES_PER_ELEMENT;
         is32bitVL = is32bitVLVR(vr);
         // reserved 2 bytes
@@ -782,7 +782,7 @@ export class DicomParser {
       vl = 0;
     }
 
-    // treat private tag with unknown VR and zero VL as a sequence (see #799)
+    // treat private tag with unknown VR and zero VL as a sequence (see _799)
     if (tag.isPrivate() && vr === 'UN' && vl === 0) {
       vr = 'SQ';
     }
@@ -795,7 +795,7 @@ export class DicomParser {
     if (isPixelDataTag(tag) && undefinedLength) {
       // pixel data sequence (implicit)
       const pixItemData =
-        this.#readPixelItemDataElement(reader, offset, implicit);
+        this._readPixelItemDataElement(reader, offset, implicit);
       offset = pixItemData.endOffset;
       startOffset += pixItemData.offsetTableVl;
       data = pixItemData.data;
@@ -810,7 +810,7 @@ export class DicomParser {
           // explicit VR sequence: read until the end offset
           const sqEndOffset = offset + vl;
           while (offset < sqEndOffset) {
-            itemData = this.#readItemDataElement(reader, offset, implicit);
+            itemData = this._readItemDataElement(reader, offset, implicit);
             data.push(itemData.data);
             offset = itemData.endOffset;
           }
@@ -821,7 +821,7 @@ export class DicomParser {
         // implicit VR sequence: read until the sequence delimitation item
         let isSeqDelim = false;
         while (!isSeqDelim) {
-          itemData = this.#readItemDataElement(reader, offset, implicit);
+          itemData = this._readItemDataElement(reader, offset, implicit);
           isSeqDelim = itemData.isSeqDelim;
           offset = itemData.endOffset;
           // do not store the delimitation item
@@ -860,7 +860,7 @@ export class DicomParser {
    * @param {number} [bitsAllocated] Bits allocated (needed for pixel data).
    * @returns {object} The interpreted data.
    */
-  #interpretElement(
+  _interpretElement(
     element, reader, pixelRepresentation, bitsAllocated) {
 
     const tag = element.tag;
@@ -876,7 +876,7 @@ export class DicomParser {
         // implicit pixel data sequence
         data = [];
         for (let j = 0; j < element.items.length; ++j) {
-          data.push(this.#interpretElement(
+          data.push(this._interpretElement(
             element.items[j], reader,
             pixelRepresentation, bitsAllocated));
         }
@@ -942,9 +942,9 @@ export class DicomParser {
       } else if (vrType === 'string') {
         const stream = reader.readUint8Array(offset, vl);
         if (isCharSetStringVR(vr)) {
-          data = this.#decodeSpecialString(stream);
+          data = this._decodeSpecialString(stream);
         } else {
-          data = this.#decodeString(stream);
+          data = this._decodeString(stream);
         }
         data = cleanString(data).split('\\');
       } else {
@@ -1014,7 +1014,7 @@ export class DicomParser {
             sqPixelRepresentation = dataElement.value[0];
           }
           const subElement = item[keys[l]];
-          subElement.value = this.#interpretElement(
+          subElement.value = this._interpretElement(
             subElement, reader,
             sqPixelRepresentation, sqBitsAllocated);
           delete subElement.tag;
@@ -1049,7 +1049,7 @@ export class DicomParser {
    *   1->signed.
    * @param {number} bitsAllocated Bits allocated.
    */
-  #interpret(
+  _interpret(
     elements, reader,
     pixelRepresentation, bitsAllocated) {
 
@@ -1057,7 +1057,7 @@ export class DicomParser {
     for (let i = 0; i < keys.length; ++i) {
       const element = elements[keys[i]];
       if (typeof element.value === 'undefined') {
-        element.value = this.#interpretElement(
+        element.value = this._interpretElement(
           element, reader, pixelRepresentation, bitsAllocated);
       }
       // delete interpretation specific properties
@@ -1084,16 +1084,16 @@ export class DicomParser {
 
     // 128 -> 132: magic word
     offset = 128;
-    const magicword = this.#decodeString(metaReader.readUint8Array(offset, 4));
+    const magicword = this._decodeString(metaReader.readUint8Array(offset, 4));
     offset += 4 * Uint8Array.BYTES_PER_ELEMENT;
     if (magicword === 'DICM') {
       // 0002, 0000: FileMetaInformationGroupLength (vr='UL')
-      dataElement = this.#readDataElement(metaReader, offset, false);
-      dataElement.value = this.#interpretElement(dataElement, metaReader);
+      dataElement = this._readDataElement(metaReader, offset, false);
+      dataElement.value = this._interpretElement(dataElement, metaReader);
       // increment offset
       offset = dataElement.endOffset;
       // store the data element
-      this.#dataElements[dataElement.tag.getKey()] = dataElement;
+      this._dataElements[dataElement.tag.getKey()] = dataElement;
       // get meta length
       const metaLength = dataElement.value[0];
 
@@ -1101,28 +1101,28 @@ export class DicomParser {
       const metaEnd = offset + metaLength;
       while (offset < metaEnd) {
         // get the data element
-        dataElement = this.#readDataElement(metaReader, offset, false);
+        dataElement = this._readDataElement(metaReader, offset, false);
         offset = dataElement.endOffset;
         // store the data element
-        this.#dataElements[dataElement.tag.getKey()] = dataElement;
+        this._dataElements[dataElement.tag.getKey()] = dataElement;
       }
 
       // check the TransferSyntaxUID (has to be there!)
-      dataElement = this.#dataElements[TagKeys.TransferSyntax];
+      dataElement = this._dataElements[TagKeys.TransferSyntax];
       if (typeof dataElement === 'undefined') {
         throw new Error('Not a valid DICOM file (no TransferSyntaxUID found)');
       }
-      dataElement.value = this.#interpretElement(dataElement, metaReader);
+      dataElement.value = this._interpretElement(dataElement, metaReader);
       syntax = dataElement.value[0];
 
     } else {
       logger.warn('No DICM prefix, trying to guess tansfer syntax.');
       // read first element
-      dataElement = this.#readDataElement(dataReader, 0, false);
+      dataElement = this._readDataElement(dataReader, 0, false);
       // guess transfer syntax
       const tsElement = guessTransferSyntax(dataElement);
       // store
-      this.#dataElements[tsElement.tag.getKey()] = tsElement;
+      this._dataElements[tsElement.tag.getKey()] = tsElement;
       syntax = tsElement.value[0];
       // reset offset
       offset = 0;
@@ -1148,13 +1148,13 @@ export class DicomParser {
     // DICOM data elements
     while (offset < buffer.byteLength) {
       // get the data element
-      dataElement = this.#readDataElement(dataReader, offset, implicit);
+      dataElement = this._readDataElement(dataReader, offset, implicit);
       // increment offset
       offset = dataElement.endOffset;
       // store the data element
       const key = dataElement.tag.getKey();
-      if (typeof this.#dataElements[key] === 'undefined') {
-        this.#dataElements[key] = dataElement;
+      if (typeof this._dataElements[key] === 'undefined') {
+        this._dataElements[key] = dataElement;
       } else {
         logger.warn('Not saving duplicate tag: ' + key);
       }
@@ -1175,11 +1175,11 @@ export class DicomParser {
     // pixel specific
     let pixelRepresentation = 0;
     let bitsAllocated = 16;
-    if (typeof this.#dataElements[TagKeys.PixelData] !== 'undefined') {
+    if (typeof this._dataElements[TagKeys.PixelData] !== 'undefined') {
       // PixelRepresentation 0->unsigned, 1->signed
-      dataElement = this.#dataElements[TagKeys.PixelRepresentation];
+      dataElement = this._dataElements[TagKeys.PixelRepresentation];
       if (typeof dataElement !== 'undefined') {
-        dataElement.value = this.#interpretElement(dataElement, dataReader);
+        dataElement.value = this._interpretElement(dataElement, dataReader);
         pixelRepresentation = dataElement.value[0];
       } else {
         logger.warn(
@@ -1187,9 +1187,9 @@ export class DicomParser {
       }
 
       // BitsAllocated
-      dataElement = this.#dataElements[TagKeys.BitsAllocated];
+      dataElement = this._dataElements[TagKeys.BitsAllocated];
       if (typeof dataElement !== 'undefined') {
-        dataElement.value = this.#interpretElement(dataElement, dataReader);
+        dataElement.value = this._interpretElement(dataElement, dataReader);
         bitsAllocated = dataElement.value[0];
       } else {
         logger.warn('Reading DICOM pixel data with default bitsAllocated.');
@@ -1197,14 +1197,14 @@ export class DicomParser {
     }
 
     // default character set
-    if (typeof this.#defaultCharacterSet !== 'undefined') {
-      this.setDecoderCharacterSet(this.#defaultCharacterSet);
+    if (typeof this._defaultCharacterSet !== 'undefined') {
+      this.setDecoderCharacterSet(this._defaultCharacterSet);
     }
 
     // SpecificCharacterSet
-    dataElement = this.#dataElements[TagKeys.SpecificCharacterSet];
+    dataElement = this._dataElements[TagKeys.SpecificCharacterSet];
     if (typeof dataElement !== 'undefined') {
-      dataElement.value = this.#interpretElement(dataElement, dataReader);
+      dataElement.value = this._interpretElement(dataElement, dataReader);
       let charSetTerm;
       if (dataElement.value.length === 1) {
         charSetTerm = dataElement.value[0];
@@ -1217,21 +1217,21 @@ export class DicomParser {
     }
 
     // interpret the dicom elements
-    this.#interpret(
-      this.#dataElements, dataReader,
+    this._interpret(
+      this._dataElements, dataReader,
       pixelRepresentation, bitsAllocated
     );
 
     // handle fragmented pixel buffer
     // Reference: http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_8.2.html
     // (third note, "Depending on the transfer syntax...")
-    dataElement = this.#dataElements[TagKeys.PixelData];
+    dataElement = this._dataElements[TagKeys.PixelData];
     if (typeof dataElement !== 'undefined') {
       if (dataElement.undefinedLength) {
         let numberOfFrames = 1;
-        if (typeof this.#dataElements[TagKeys.NumberOfFrames] !== 'undefined') {
+        if (typeof this._dataElements[TagKeys.NumberOfFrames] !== 'undefined') {
           numberOfFrames = Number(
-            this.#dataElements[TagKeys.NumberOfFrames].value[0]
+            this._dataElements[TagKeys.NumberOfFrames].value[0]
           );
         }
         const pixItems = dataElement.value;

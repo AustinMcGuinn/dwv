@@ -693,7 +693,7 @@ export function getOrientationMatrix(dataElements) {
   const imageOrientationPatient = dataElements['00200037'];
   let orientationMatrix;
   // slice orientation (cosines are matrices' columns)
-  // http://dicom.nema.org/medical/dicom/2022a/output/chtml/part03/sect_C.7.6.2.html#sect_C.7.6.2.1.1
+  // http://dicom.nema.org/medical/dicom/2022a/output/chtml/part03/sect_C.7.6.2.html_sect_C.7.6.2.1.1
   if (typeof imageOrientationPatient !== 'undefined') {
     orientationMatrix =
       getOrientationFromCosines(
@@ -944,7 +944,7 @@ function getDecayedDose(elements) {
  * Get the PET SUV factor.
  *
  * Ref:
- * - {@link https://qibawiki.rsna.org/index.php/Standardized_Uptake_Value_(SUV)#SUV_Calculation},
+ * - {@link https://qibawiki.rsna.org/index.php/Standardized_Uptake_Value_(SUV)_SUV_Calculation},
  * - {@link https://qibawiki.rsna.org/images/6/62/SUV_vendorneutral_pseudocode_happypathonly_20180626_DAC.pdf},
  * - {@link https://qibawiki.rsna.org/images/8/86/SUV_vendorneutral_pseudocode_20180626_DAC.pdf}.
  *

@@ -133,7 +133,7 @@ export function getFindArrayInArrayCallback(arr1) {
 /**
  * Extract each element of a multipart ArrayBuffer.
  *
- * Ref: {@link https://en.wikipedia.org/wiki/MIME#Multipart_messages}.
+ * Ref: {@link https://en.wikipedia.org/wiki/MIME_Multipart_messages}.
  *
  * @param {ArrayBuffer} arr The multipart array.
  * @returns {Array} The multipart parts as an array of object as
@@ -239,7 +239,7 @@ export function parseMultipart(arr) {
  * Build a multipart message.
  *
  * Ref:
- * - {@link https://en.wikipedia.org/wiki/MIME#Multipart_messages},
+ * - {@link https://en.wikipedia.org/wiki/MIME_Multipart_messages},
  * - {@link https://hg.orthanc-server.com/orthanc-dicomweb/file/tip/Resources/Samples/JavaScript/stow-rs.js}.
  *
  * @param {Array} parts The message parts as an array of object containing

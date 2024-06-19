@@ -8,14 +8,14 @@ export class DataWriter {
    *
    * @type {boolean}
    */
-  #isLittleEndian = true;
+  _isLittleEndian = true;
 
   /**
    * The main data view.
    *
    * @type {DataView}
    */
-  #view;
+  _view;
 
   /**
    * @param {ArrayBuffer} buffer The input array buffer.
@@ -25,9 +25,9 @@ export class DataWriter {
   constructor(buffer, isLittleEndian) {
     // Set endian flag if not defined.
     if (typeof isLittleEndian !== 'undefined') {
-      this.#isLittleEndian = isLittleEndian;
+      this._isLittleEndian = isLittleEndian;
     }
-    this.#view = new DataView(buffer);
+    this._view = new DataView(buffer);
   }
 
   /**
@@ -38,7 +38,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeUint8(byteOffset, value) {
-    this.#view.setUint8(byteOffset, value);
+    this._view.setUint8(byteOffset, value);
     return byteOffset + Uint8Array.BYTES_PER_ELEMENT;
   }
 
@@ -50,7 +50,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeInt8(byteOffset, value) {
-    this.#view.setInt8(byteOffset, value);
+    this._view.setInt8(byteOffset, value);
     return byteOffset + Int8Array.BYTES_PER_ELEMENT;
   }
 
@@ -62,7 +62,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeUint16(byteOffset, value) {
-    this.#view.setUint16(byteOffset, value, this.#isLittleEndian);
+    this._view.setUint16(byteOffset, value, this._isLittleEndian);
     return byteOffset + Uint16Array.BYTES_PER_ELEMENT;
   }
 
@@ -74,7 +74,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeInt16(byteOffset, value) {
-    this.#view.setInt16(byteOffset, value, this.#isLittleEndian);
+    this._view.setInt16(byteOffset, value, this._isLittleEndian);
     return byteOffset + Int16Array.BYTES_PER_ELEMENT;
   }
 
@@ -86,7 +86,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeUint32(byteOffset, value) {
-    this.#view.setUint32(byteOffset, value, this.#isLittleEndian);
+    this._view.setUint32(byteOffset, value, this._isLittleEndian);
     return byteOffset + Uint32Array.BYTES_PER_ELEMENT;
   }
 
@@ -98,7 +98,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeUint64(byteOffset, value) {
-    this.#view.setBigUint64(byteOffset, value, this.#isLittleEndian);
+    this._view.setBigUint64(byteOffset, value, this._isLittleEndian);
     return byteOffset + BigUint64Array.BYTES_PER_ELEMENT;
   }
 
@@ -110,7 +110,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeInt32(byteOffset, value) {
-    this.#view.setInt32(byteOffset, value, this.#isLittleEndian);
+    this._view.setInt32(byteOffset, value, this._isLittleEndian);
     return byteOffset + Int32Array.BYTES_PER_ELEMENT;
   }
 
@@ -122,7 +122,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeInt64(byteOffset, value) {
-    this.#view.setBigInt64(byteOffset, value, this.#isLittleEndian);
+    this._view.setBigInt64(byteOffset, value, this._isLittleEndian);
     return byteOffset + BigInt64Array.BYTES_PER_ELEMENT;
   }
 
@@ -134,7 +134,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeFloat32(byteOffset, value) {
-    this.#view.setFloat32(byteOffset, value, this.#isLittleEndian);
+    this._view.setFloat32(byteOffset, value, this._isLittleEndian);
     return byteOffset + Float32Array.BYTES_PER_ELEMENT;
   }
 
@@ -146,7 +146,7 @@ export class DataWriter {
    * @returns {number} The new offset position.
    */
   writeFloat64(byteOffset, value) {
-    this.#view.setFloat64(byteOffset, value, this.#isLittleEndian);
+    this._view.setFloat64(byteOffset, value, this._isLittleEndian);
     return byteOffset + Float64Array.BYTES_PER_ELEMENT;
   }
 
@@ -160,7 +160,7 @@ export class DataWriter {
   writeHex(byteOffset, str) {
     // remove first two chars and parse
     const value = parseInt(str, 16);
-    this.#view.setUint16(byteOffset, value, this.#isLittleEndian);
+    this._view.setUint16(byteOffset, value, this._isLittleEndian);
     return byteOffset + Uint16Array.BYTES_PER_ELEMENT;
   }
 

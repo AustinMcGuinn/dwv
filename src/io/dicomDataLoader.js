@@ -14,14 +14,14 @@ export class DicomDataLoader {
    *
    * @type {object}
    */
-  #options = {};
+  _options = {};
 
   /**
    * Loading flag.
    *
    * @type {boolean}
    */
-  #isLoading = false;
+  _isLoading = false;
 
   /**
    * Set the loader options.
@@ -29,7 +29,7 @@ export class DicomDataLoader {
    * @param {object} opt The input options.
    */
   setOptions(opt) {
-    this.#options = opt;
+    this._options = opt;
   }
 
   /**
@@ -38,14 +38,14 @@ export class DicomDataLoader {
    * @returns {boolean} True if loading.
    */
   isLoading() {
-    return this.#isLoading;
+    return this._isLoading;
   }
 
   /**
    * DICOM buffer to View (asynchronous).
    *
    */
-  #db2v = new DicomBufferToView();
+  _db2v = new DicomBufferToView();
 
   /**
    * Load data.
@@ -56,31 +56,31 @@ export class DicomDataLoader {
    */
   load(buffer, origin, index) {
     // setup db2v ony once
-    if (!this.#isLoading) {
+    if (!this._isLoading) {
       // pass options
-      this.#db2v.setOptions(this.#options);
+      this._db2v.setOptions(this._options);
       // connect handlers
-      this.#db2v.onloadstart = this.onloadstart;
-      this.#db2v.onprogress = this.onprogress;
-      this.#db2v.onloaditem = this.onloaditem;
-      this.#db2v.onload = this.onload;
-      this.#db2v.onloadend = (event) => {
+      this._db2v.onloadstart = this.onloadstart;
+      this._db2v.onprogress = this.onprogress;
+      this._db2v.onloaditem = this.onloaditem;
+      this._db2v.onload = this.onload;
+      this._db2v.onloadend = (event) => {
         // reset loading flag
-        this.#isLoading = false;
+        this._isLoading = false;
         // call listeners
         this.onloadend(event);
       };
-      this.#db2v.onerror = (event) => {
+      this._db2v.onerror = (event) => {
         event.source = origin;
         this.onerror(event);
       };
-      this.#db2v.onabort = this.onabort;
+      this._db2v.onabort = this.onabort;
     }
 
     // set loading flag
-    this.#isLoading = true;
+    this._isLoading = true;
     // convert
-    this.#db2v.convert(buffer, origin, index);
+    this._db2v.convert(buffer, origin, index);
   }
 
   /**
@@ -88,9 +88,9 @@ export class DicomDataLoader {
    */
   abort() {
     // reset loading flag
-    this.#isLoading = false;
+    this._isLoading = false;
     // abort conversion, will trigger db2v.onabort
-    this.#db2v.abort();
+    this._db2v.abort();
   }
 
   /**

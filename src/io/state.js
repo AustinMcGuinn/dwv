@@ -73,15 +73,15 @@ export class State {
     const data = JSON.parse(json);
     let res = null;
     if (data.version === '0.1') {
-      res = this.#readV01(data);
+      res = this._readV01(data);
     } else if (data.version === '0.2') {
-      res = this.#readV02(data);
+      res = this._readV02(data);
     } else if (data.version === '0.3') {
-      res = this.#readV03(data);
+      res = this._readV03(data);
     } else if (data.version === '0.4') {
-      res = this.#readV04(data);
+      res = this._readV04(data);
     } else if (data.version === '0.5') {
-      res = this.#readV05(data);
+      res = this._readV05(data);
     } else {
       throw new Error('Unknown state file format version: \'' +
         data.version + '\'.');
@@ -156,7 +156,7 @@ export class State {
    * @param {object} data The Object representation of the state.
    * @returns {object} The state object.
    */
-  #readV01(data) {
+  _readV01(data) {
     // v0.1 -> v0.2
     const v02DAndD = v01Tov02DrawingsAndDetails(data.drawings);
     // v0.2 -> v0.3, v0.4
@@ -175,7 +175,7 @@ export class State {
    * @param {object} data The Object representation of the state.
    * @returns {object} The state object.
    */
-  #readV02(data) {
+  _readV02(data) {
     // v0.2 -> v0.3, v0.4
     data.drawings = v02Tov03Drawings(data.drawings).toObject();
     data.drawingsDetails = v03Tov04DrawingsDetails(
@@ -192,7 +192,7 @@ export class State {
    * @param {object} data The Object representation of the state.
    * @returns {object} The state object.
    */
-  #readV03(data) {
+  _readV03(data) {
     // v0.3 -> v0.4
     data.drawingsDetails = v03Tov04DrawingsDetails(data.drawingsDetails);
     // v0.4 -> v0.5
@@ -207,7 +207,7 @@ export class State {
    * @param {object} data The Object representation of the state.
    * @returns {object} The state object.
    */
-  #readV04(data) {
+  _readV04(data) {
     // v0.4 -> v0.5
     data = v04Tov05Data(data);
     data.drawings = v04Tov05Drawings(data.drawings);
@@ -219,7 +219,7 @@ export class State {
    * @param {object} data The Object representation of the state.
    * @returns {object} The state object.
    */
-  #readV05(data) {
+  _readV05(data) {
     return data;
   }
 
@@ -517,7 +517,7 @@ function v04Tov05Data(data) {
 /**
  * Convert drawing from v0.4 to v0.5:
  * - v0.4: draw id as 'slice-0_frame-1',
- * - v0.5: draw id as '#2-0_#3-1'.
+ * - v0.5: draw id as '_2-0__3-1'.
  *
  * @param {object} inputDrawings An array of drawing.
  * @returns {object} The converted drawings.
@@ -531,7 +531,7 @@ function v04Tov05Drawings(inputDrawings) {
     const ids = id.split('_');
     const sliceNumber = parseInt(ids[0].substring(6), 10); // 'slice-0'
     const frameNumber = parseInt(ids[1].substring(6), 10); // 'frame-0'
-    let newId = '#2-';
+    let newId = '_2-';
     if (sliceNumber === 0 && frameNumber !== 0) {
       newId += frameNumber;
     } else {

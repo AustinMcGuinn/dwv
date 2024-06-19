@@ -25,100 +25,100 @@ export class DrawLayer {
    *
    * @type {HTMLDivElement}
    */
-  #containerDiv;
+  _containerDiv;
 
   /**
    * Konva stage.
    *
    * @type {Konva.Stage}
    */
-  #konvaStage = null;
+  _konvaStage = null;
 
   /**
    * The layer base size as {x,y}.
    *
    * @type {Scalar2D}
    */
-  #baseSize;
+  _baseSize;
 
   /**
    * The layer base spacing as {x,y}.
    *
    * @type {Scalar2D}
    */
-  #baseSpacing;
+  _baseSpacing;
 
   /**
    * The layer fit scale.
    *
    * @type {Scalar2D}
    */
-  #fitScale = {x: 1, y: 1};
+  _fitScale = {x: 1, y: 1};
 
   /**
    * The layer flip scale.
    *
    * @type {Scalar3D}
    */
-  #flipScale = {x: 1, y: 1, z: 1};
+  _flipScale = {x: 1, y: 1, z: 1};
 
   /**
    * The base layer offset.
    *
    * @type {Scalar2D}
    */
-  #baseOffset = {x: 0, y: 0};
+  _baseOffset = {x: 0, y: 0};
 
   /**
    * The view offset.
    *
    * @type {Scalar2D}
    */
-  #viewOffset = {x: 0, y: 0};
+  _viewOffset = {x: 0, y: 0};
 
   /**
    * The zoom offset.
    *
    * @type {Scalar2D}
    */
-  #zoomOffset = {x: 0, y: 0};
+  _zoomOffset = {x: 0, y: 0};
 
   /**
    * The flip offset.
    *
    * @type {Scalar2D}
    */
-  #flipOffset = {x: 0, y: 0};
+  _flipOffset = {x: 0, y: 0};
 
   /**
    * The draw controller.
    *
    * @type {object}
    */
-  #drawController;
+  _drawController;
 
   /**
    * The plane helper.
    *
    * @type {PlaneHelper}
    */
-  #planeHelper;
+  _planeHelper;
 
   /**
    * The associated data id.
    *
    * @type {string}
    */
-  #dataId;
+  _dataId;
 
   /**
    * @param {HTMLDivElement} containerDiv The layer div, its id will be used
    *   as this layer id.
    */
   constructor(containerDiv) {
-    this.#containerDiv = containerDiv;
+    this._containerDiv = containerDiv;
     // specific css class name
-    this.#containerDiv.className += ' drawLayer';
+    this._containerDiv.className += ' drawLayer';
   }
 
   /**
@@ -127,7 +127,7 @@ export class DrawLayer {
    * @returns {string} The id.
    */
   getDataId() {
-    return this.#dataId;
+    return this._dataId;
   }
 
   /**
@@ -135,7 +135,7 @@ export class DrawLayer {
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Get the Konva stage.
@@ -143,7 +143,7 @@ export class DrawLayer {
    * @returns {Konva.Stage} The stage.
    */
   getKonvaStage() {
-    return this.#konvaStage;
+    return this._konvaStage;
   }
 
   /**
@@ -153,7 +153,7 @@ export class DrawLayer {
    */
   getKonvaLayer() {
     // there should only be one layer
-    return this.#konvaStage.getLayers()[0];
+    return this._konvaStage.getLayers()[0];
   }
 
   /**
@@ -162,7 +162,7 @@ export class DrawLayer {
    * @returns {object} The controller.
    */
   getDrawController() {
-    return this.#drawController;
+    return this._drawController;
   }
 
   /**
@@ -171,7 +171,7 @@ export class DrawLayer {
    * @param {PlaneHelper} helper The helper.
    */
   setPlaneHelper(helper) {
-    this.#planeHelper = helper;
+    this._planeHelper = helper;
   }
 
   // common layer methods [start] ---------------
@@ -182,14 +182,14 @@ export class DrawLayer {
    * @returns {string} The string id.
    */
   getId() {
-    return this.#containerDiv.id;
+    return this._containerDiv.id;
   }
 
   /**
    * Remove the HTML element from the DOM.
    */
   removeFromDOM() {
-    this.#containerDiv.remove();
+    this._containerDiv.remove();
   }
 
   /**
@@ -198,7 +198,7 @@ export class DrawLayer {
    * @returns {Scalar2D} The size as {x,y}.
    */
   getBaseSize() {
-    return this.#baseSize;
+    return this._baseSize;
   }
 
   /**
@@ -207,7 +207,7 @@ export class DrawLayer {
    * @returns {number} The opacity ([0:1] range).
    */
   getOpacity() {
-    return this.#konvaStage.opacity();
+    return this._konvaStage.opacity();
   }
 
   /**
@@ -216,7 +216,7 @@ export class DrawLayer {
    * @param {number} alpha The opacity ([0:1] range).
    */
   setOpacity(alpha) {
-    this.#konvaStage.opacity(Math.min(Math.max(alpha, 0), 1));
+    this._konvaStage.opacity(Math.min(Math.max(alpha, 0), 1));
   }
 
   /**
@@ -224,13 +224,13 @@ export class DrawLayer {
    */
   addFlipOffsetX() {
     // flip offset
-    const scale = this.#konvaStage.scale();
-    const size = this.#konvaStage.size();
-    this.#flipOffset.x += size.width / scale.x;
+    const scale = this._konvaStage.scale();
+    const size = this._konvaStage.size();
+    this._flipOffset.x += size.width / scale.x;
     // apply
-    const offset = this.#konvaStage.offset();
-    offset.x += this.#flipOffset.x;
-    this.#konvaStage.offset(offset);
+    const offset = this._konvaStage.offset();
+    offset.x += this._flipOffset.x;
+    this._konvaStage.offset(offset);
   }
 
   /**
@@ -238,34 +238,34 @@ export class DrawLayer {
    */
   addFlipOffsetY() {
     // flip offset
-    const scale = this.#konvaStage.scale();
-    const size = this.#konvaStage.size();
-    this.#flipOffset.y += size.height / scale.y;
+    const scale = this._konvaStage.scale();
+    const size = this._konvaStage.size();
+    this._flipOffset.y += size.height / scale.y;
     // apply
-    const offset = this.#konvaStage.offset();
-    offset.y += this.#flipOffset.y;
-    this.#konvaStage.offset(offset);
+    const offset = this._konvaStage.offset();
+    offset.y += this._flipOffset.y;
+    this._konvaStage.offset(offset);
   }
 
   /**
    * Flip the scale along the layer X axis.
    */
   flipScaleX() {
-    this.#flipScale.x *= -1;
+    this._flipScale.x *= -1;
   }
 
   /**
    * Flip the scale along the layer Y axis.
    */
   flipScaleY() {
-    this.#flipScale.y *= -1;
+    this._flipScale.y *= -1;
   }
 
   /**
    * Flip the scale along the layer Z axis.
    */
   flipScaleZ() {
-    this.#flipScale.z *= -1;
+    this._flipScale.z *= -1;
   }
 
   /**
@@ -276,32 +276,32 @@ export class DrawLayer {
    */
   setScale(newScale, center) {
     const orientedNewScale =
-      this.#planeHelper.getTargetOrientedPositiveXYZ({
-        x: newScale.x * this.#flipScale.x,
-        y: newScale.y * this.#flipScale.y,
-        z: newScale.z * this.#flipScale.z,
+      this._planeHelper.getTargetOrientedPositiveXYZ({
+        x: newScale.x * this._flipScale.x,
+        y: newScale.y * this._flipScale.y,
+        z: newScale.z * this._flipScale.z,
       });
     const finalNewScale = {
-      x: this.#fitScale.x * orientedNewScale.x,
-      y: this.#fitScale.y * orientedNewScale.y
+      x: this._fitScale.x * orientedNewScale.x,
+      y: this._fitScale.y * orientedNewScale.y
     };
 
-    const offset = this.#konvaStage.offset();
+    const offset = this._konvaStage.offset();
 
     if (Math.abs(newScale.x) === 1 &&
       Math.abs(newScale.y) === 1 &&
       Math.abs(newScale.z) === 1) {
       // reset zoom offset for scale=1
       const resetOffset = {
-        x: offset.x - this.#zoomOffset.x,
-        y: offset.y - this.#zoomOffset.y
+        x: offset.x - this._zoomOffset.x,
+        y: offset.y - this._zoomOffset.y
       };
       // store new offset
-      this.#zoomOffset = {x: 0, y: 0};
-      this.#konvaStage.offset(resetOffset);
+      this._zoomOffset = {x: 0, y: 0};
+      this._konvaStage.offset(resetOffset);
     } else {
       if (typeof center !== 'undefined') {
-        let worldCenter = this.#planeHelper.getPlaneOffsetFromOffset3D({
+        let worldCenter = this._planeHelper.getPlaneOffsetFromOffset3D({
           x: center.getX(),
           y: center.getY(),
           z: center.getZ()
@@ -310,26 +310,26 @@ export class DrawLayer {
         // compensated for baseOffset
         // TODO: justify...
         worldCenter = {
-          x: worldCenter.x + this.#baseOffset.x,
-          y: worldCenter.y + this.#baseOffset.y
+          x: worldCenter.x + this._baseOffset.x,
+          y: worldCenter.y + this._baseOffset.y
         };
 
         const newOffset = getScaledOffset(
-          offset, this.#konvaStage.scale(), finalNewScale, worldCenter);
+          offset, this._konvaStage.scale(), finalNewScale, worldCenter);
 
         const newZoomOffset = {
-          x: this.#zoomOffset.x + newOffset.x - offset.x,
-          y: this.#zoomOffset.y + newOffset.y - offset.y
+          x: this._zoomOffset.x + newOffset.x - offset.x,
+          y: this._zoomOffset.y + newOffset.y - offset.y
         };
         // store new offset
-        this.#zoomOffset = newZoomOffset;
-        this.#konvaStage.offset(newOffset);
+        this._zoomOffset = newZoomOffset;
+        this._konvaStage.offset(newOffset);
       }
     }
 
-    this.#konvaStage.scale(finalNewScale);
+    this._konvaStage.scale(finalNewScale);
     // update labels
-    this.#updateLabelScale(finalNewScale);
+    this._updateLabelScale(finalNewScale);
   }
 
   /**
@@ -339,18 +339,18 @@ export class DrawLayer {
    */
   setOffset(newOffset) {
     const planeNewOffset =
-      this.#planeHelper.getPlaneOffsetFromOffset3D(newOffset);
-    this.#konvaStage.offset({
+      this._planeHelper.getPlaneOffsetFromOffset3D(newOffset);
+    this._konvaStage.offset({
       x: planeNewOffset.x +
-        this.#viewOffset.x +
-        this.#baseOffset.x +
-        this.#zoomOffset.x +
-        this.#flipOffset.x,
+        this._viewOffset.x +
+        this._baseOffset.x +
+        this._zoomOffset.x +
+        this._flipOffset.x,
       y: planeNewOffset.y +
-        this.#viewOffset.y +
-        this.#baseOffset.y +
-        this.#zoomOffset.y +
-        this.#flipOffset.y
+        this._viewOffset.y +
+        this._baseOffset.y +
+        this._zoomOffset.y +
+        this._flipOffset.y
     });
   }
 
@@ -362,22 +362,22 @@ export class DrawLayer {
    * @returns {boolean} True if the offset was updated.
    */
   setBaseOffset(scrollOffset, planeOffset) {
-    const scrollIndex = this.#planeHelper.getNativeScrollIndex();
-    const newOffset = this.#planeHelper.getPlaneOffsetFromOffset3D({
+    const scrollIndex = this._planeHelper.getNativeScrollIndex();
+    const newOffset = this._planeHelper.getPlaneOffsetFromOffset3D({
       x: scrollIndex === 0 ? scrollOffset.getX() : planeOffset.getX(),
       y: scrollIndex === 1 ? scrollOffset.getY() : planeOffset.getY(),
       z: scrollIndex === 2 ? scrollOffset.getZ() : planeOffset.getZ(),
     });
-    const needsUpdate = this.#baseOffset.x !== newOffset.x ||
-      this.#baseOffset.y !== newOffset.y;
+    const needsUpdate = this._baseOffset.x !== newOffset.x ||
+      this._baseOffset.y !== newOffset.y;
     // reset offset if needed
     if (needsUpdate) {
-      const offset = this.#konvaStage.offset();
-      this.#konvaStage.offset({
-        x: offset.x - this.#baseOffset.x + newOffset.x,
-        y: offset.y - this.#baseOffset.y + newOffset.y
+      const offset = this._konvaStage.offset();
+      this._konvaStage.offset({
+        x: offset.x - this._baseOffset.x + newOffset.x,
+        y: offset.y - this._baseOffset.y + newOffset.y
       });
-      this.#baseOffset = newOffset;
+      this._baseOffset = newOffset;
     }
     return needsUpdate;
   }
@@ -388,7 +388,7 @@ export class DrawLayer {
    * @param {boolean} flag Whether to display the layer or not.
    */
   display(flag) {
-    this.#containerDiv.style.display = flag ? '' : 'none';
+    this._containerDiv.style.display = flag ? '' : 'none';
   }
 
   /**
@@ -397,7 +397,7 @@ export class DrawLayer {
    * @returns {boolean} True if the layer is visible.
    */
   isVisible() {
-    return this.#containerDiv.style.display === '';
+    return this._containerDiv.style.display === '';
   }
 
   /**
@@ -405,7 +405,7 @@ export class DrawLayer {
    * The imageData variable needs to be set.
    */
   draw() {
-    this.#konvaStage.draw();
+    this._konvaStage.draw();
   }
 
   /**
@@ -417,30 +417,30 @@ export class DrawLayer {
    */
   initialise(size, spacing, dataId) {
     // set locals
-    this.#baseSize = size;
-    this.#baseSpacing = spacing;
-    this.#dataId = dataId;
+    this._baseSize = size;
+    this._baseSpacing = spacing;
+    this._dataId = dataId;
 
     // create stage
-    this.#konvaStage = new Konva.Stage({
-      container: this.#containerDiv,
-      width: this.#baseSize.x,
-      height: this.#baseSize.y,
+    this._konvaStage = new Konva.Stage({
+      container: this._containerDiv,
+      width: this._baseSize.x,
+      height: this._baseSize.y,
       listening: false
     });
     // reset style
     // (avoids a not needed vertical scrollbar)
-    this.#konvaStage.getContent().setAttribute('style', '');
+    this._konvaStage.getContent().setAttribute('style', '');
 
     // create layer
     const konvaLayer = new Konva.Layer({
       listening: false,
       visible: true
     });
-    this.#konvaStage.add(konvaLayer);
+    this._konvaStage.add(konvaLayer);
 
     // create draw controller
-    this.#drawController = new DrawController(this);
+    this._drawController = new DrawController(this);
   }
 
   /**
@@ -452,27 +452,27 @@ export class DrawLayer {
    */
   fitToContainer(containerSize, divToWorldSizeRatio, fitOffset) {
     // update konva
-    this.#konvaStage.width(containerSize.x);
-    this.#konvaStage.height(containerSize.y);
+    this._konvaStage.width(containerSize.x);
+    this._konvaStage.height(containerSize.y);
 
     // fit scale
     const divToImageSizeRatio = {
-      x: divToWorldSizeRatio * this.#baseSpacing.x,
-      y: divToWorldSizeRatio * this.#baseSpacing.y
+      x: divToWorldSizeRatio * this._baseSpacing.x,
+      y: divToWorldSizeRatio * this._baseSpacing.y
     };
-    // #scale = inputScale * fitScale * flipScale
+    // _scale = inputScale * fitScale * flipScale
     // flipScale does not change here, we can omit it
-    // newScale = (#scale / fitScale) * newFitScale
+    // newScale = (_scale / fitScale) * newFitScale
     const newScale = {
-      x: this.#konvaStage.scale().x * divToImageSizeRatio.x / this.#fitScale.x,
-      y: this.#konvaStage.scale().y * divToImageSizeRatio.y / this.#fitScale.y
+      x: this._konvaStage.scale().x * divToImageSizeRatio.x / this._fitScale.x,
+      y: this._konvaStage.scale().y * divToImageSizeRatio.y / this._fitScale.y
     };
 
     // set scales if different from previous
-    if (this.#konvaStage.scale().x !== newScale.x ||
-      this.#konvaStage.scale().y !== newScale.y) {
-      this.#fitScale = divToImageSizeRatio;
-      this.#konvaStage.scale(newScale);
+    if (this._konvaStage.scale().x !== newScale.x ||
+      this._konvaStage.scale().y !== newScale.y) {
+      this._fitScale = divToImageSizeRatio;
+      this._konvaStage.scale(newScale);
     }
 
     // view offset
@@ -486,27 +486,27 @@ export class DrawLayer {
       y: containerSize.y / divToImageSizeRatio.y
     };
     const newFlipOffset = {
-      x: this.#flipOffset.x !== 0 ? scaledImageSize.x : 0,
-      y: this.#flipOffset.y !== 0 ? scaledImageSize.y : 0,
+      x: this._flipOffset.x !== 0 ? scaledImageSize.x : 0,
+      y: this._flipOffset.y !== 0 ? scaledImageSize.y : 0,
     };
 
     // set offsets if different from previous
-    if (this.#viewOffset.x !== newViewOffset.x ||
-      this.#viewOffset.y !== newViewOffset.y ||
-      this.#flipOffset.x !== newFlipOffset.x ||
-      this.#flipOffset.y !== newFlipOffset.y) {
+    if (this._viewOffset.x !== newViewOffset.x ||
+      this._viewOffset.y !== newViewOffset.y ||
+      this._flipOffset.x !== newFlipOffset.x ||
+      this._flipOffset.y !== newFlipOffset.y) {
       // update global offset
-      this.#konvaStage.offset({
-        x: this.#konvaStage.offset().x +
-          newViewOffset.x - this.#viewOffset.x +
-          newFlipOffset.x - this.#flipOffset.x,
-        y: this.#konvaStage.offset().y +
-          newViewOffset.y - this.#viewOffset.y +
-          newFlipOffset.y - this.#flipOffset.y,
+      this._konvaStage.offset({
+        x: this._konvaStage.offset().x +
+          newViewOffset.x - this._viewOffset.x +
+          newFlipOffset.x - this._flipOffset.x,
+        y: this._konvaStage.offset().y +
+          newViewOffset.y - this._viewOffset.y +
+          newFlipOffset.y - this._flipOffset.y,
       });
       // update private local offsets
-      this.#flipOffset = newFlipOffset;
-      this.#viewOffset = newViewOffset;
+      this._flipOffset = newFlipOffset;
+      this._viewOffset = newViewOffset;
     }
   }
 
@@ -518,7 +518,7 @@ export class DrawLayer {
    */
   isGroupVisible(id) {
     // get the group
-    const group = this.#drawController.getGroup(id);
+    const group = this._drawController.getGroup(id);
     if (typeof group === 'undefined') {
       return false;
     }
@@ -534,7 +534,7 @@ export class DrawLayer {
    */
   toggleGroupVisibility(id) {
     // get the group
-    const group = this.#drawController.getGroup(id);
+    const group = this._drawController.getGroup(id);
     if (typeof group === 'undefined') {
       return false;
     }
@@ -555,8 +555,8 @@ export class DrawLayer {
    *  DeleteCommand has been executed.
    */
   deleteDraw(id, exeCallback) {
-    if (typeof this.#drawController !== 'undefined') {
-      this.#drawController.deleteDraw(id, this.#fireEvent, exeCallback);
+    if (typeof this._drawController !== 'undefined') {
+      this._drawController.deleteDraw(id, this._fireEvent, exeCallback);
     }
   }
 
@@ -567,8 +567,8 @@ export class DrawLayer {
    *  DeleteCommand has been executed.
    */
   deleteDraws(exeCallback) {
-    if (typeof this.#drawController !== 'undefined') {
-      this.#drawController.deleteDraws(this.#fireEvent, exeCallback);
+    if (typeof this._drawController !== 'undefined') {
+      this._drawController.deleteDraws(this._fireEvent, exeCallback);
     }
   }
 
@@ -580,8 +580,8 @@ export class DrawLayer {
    */
   getNumberOfDraws() {
     let res;
-    if (typeof this.#drawController !== 'undefined') {
-      res = this.#drawController.getNumberOfDraws();
+    if (typeof this._drawController !== 'undefined') {
+      res = this._drawController.getNumberOfDraws();
     }
     return res;
   }
@@ -590,13 +590,13 @@ export class DrawLayer {
    * Enable and listen to container interaction events.
    */
   bindInteraction() {
-    this.#konvaStage.listening(true);
+    this._konvaStage.listening(true);
     // allow pointer events
-    this.#containerDiv.style.pointerEvents = 'auto';
+    this._containerDiv.style.pointerEvents = 'auto';
     // interaction events
     const names = InteractionEventNames;
     for (let i = 0; i < names.length; ++i) {
-      this.#containerDiv.addEventListener(names[i], this.#fireEvent);
+      this._containerDiv.addEventListener(names[i], this._fireEvent);
     }
   }
 
@@ -604,13 +604,13 @@ export class DrawLayer {
    * Disable and stop listening to container interaction events.
    */
   unbindInteraction() {
-    this.#konvaStage.listening(false);
+    this._konvaStage.listening(false);
     // disable pointer events
-    this.#containerDiv.style.pointerEvents = 'none';
+    this._containerDiv.style.pointerEvents = 'none';
     // interaction events
     const names = InteractionEventNames;
     for (let i = 0; i < names.length; ++i) {
-      this.#containerDiv.removeEventListener(names[i], this.#fireEvent);
+      this._containerDiv.removeEventListener(names[i], this._fireEvent);
     }
   }
 
@@ -623,7 +623,7 @@ export class DrawLayer {
    */
   setCurrentPosition(position, index) {
     this.getDrawController().activateDrawLayer(
-      index, this.#planeHelper.getScrollIndex());
+      index, this._planeHelper.getScrollIndex());
     // TODO: add check
     return true;
   }
@@ -636,7 +636,7 @@ export class DrawLayer {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -647,7 +647,7 @@ export class DrawLayer {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -655,10 +655,10 @@ export class DrawLayer {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
+  _fireEvent = (event) => {
     event.srclayerid = this.getId();
-    event.dataid = this.#dataId;
-    this.#listenerHandler.fireEvent(event);
+    event.dataid = this._dataId;
+    this._listenerHandler.fireEvent(event);
   };
 
   // common layer methods [end] ---------------
@@ -669,13 +669,13 @@ export class DrawLayer {
    *
    * @param {Scalar2D} scale The scale to compensate for as {x,y}.
    */
-  #updateLabelScale(scale) {
+  _updateLabelScale(scale) {
     // same formula as in style::applyZoomScale:
     // compensate for scale and times 2 so that font 10 looks like a 10
     const ratioX = 2 / scale.x;
     const ratioY = 2 / scale.y;
     // compensate scale for labels
-    const labels = this.#konvaStage.find('Label');
+    const labels = this._konvaStage.find('Label');
     for (let i = 0; i < labels.length; ++i) {
       labels[i].scale({x: ratioX, y: ratioY});
     }

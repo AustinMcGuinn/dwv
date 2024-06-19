@@ -61,7 +61,7 @@ export class CircleFactory {
    * @param {Point2D[]} points The points that define the circle.
    * @returns {Circle} The mathematical circle.
    */
-  #calculateMathShape(points) {
+  _calculateMathShape(points) {
     // calculate radius
     const a = Math.abs(points[0].getX() - points[1].getX());
     const b = Math.abs(points[0].getY() - points[1].getY());
@@ -77,7 +77,7 @@ export class CircleFactory {
    * @param {Style} style The drawing style.
    * @returns {Konva.Circle} The konva circle shape.
    */
-  #createShape(circle, style) {
+  _createShape(circle, style) {
     return new Konva.Circle({
       x: circle.getCenter().getX(),
       y: circle.getCenter().getY(),
@@ -97,7 +97,7 @@ export class CircleFactory {
    * @param {ViewController} viewController The associated view controller.
    * @returns {Konva.Label} The Konva label.
    */
-  #createLabel(circle, style, viewController) {
+  _createLabel(circle, style, viewController) {
     // quantification
     const ktext = new Konva.Text({
       fontSize: style.getFontSize(),
@@ -157,16 +157,16 @@ export class CircleFactory {
     group.visible(true);
 
     // Create and add shape
-    const mathShape = this.#calculateMathShape(points);
-    const kShape = this.#createShape(mathShape, style);
+    const mathShape = this._calculateMathShape(points);
+    const kShape = this._createShape(mathShape, style);
     group.add(kShape);
     // Create and add label
-    const kLabel = this.#createLabel(mathShape, style, viewController);
+    const kLabel = this._createLabel(mathShape, style, viewController);
     group.add(kLabel);
     // Add shadow (if debug)
     let kshadow;
     if (DRAW_DEBUG) {
-      kshadow = this.#getShadowCircle(mathShape);
+      kshadow = this._getShadowCircle(mathShape);
       group.add(kshadow);
     }
 
@@ -315,7 +315,7 @@ export class CircleFactory {
       // remove previous
       kshadow.destroy();
       // add new
-      group.add(this.#getShadowCircle(circle, group));
+      group.add(this._getShadowCircle(circle, group));
     }
 
     // update label position
@@ -326,7 +326,7 @@ export class CircleFactory {
     klabel.position(textPos);
 
     // update quantification
-    this.#updateCircleQuantification(group, viewController);
+    this._updateCircleQuantification(group, viewController);
   }
 
   /**
@@ -336,7 +336,7 @@ export class CircleFactory {
    * @param {ViewController} viewController The associated view controller.
    */
   updateQuantification(group, viewController) {
-    this.#updateCircleQuantification(group, viewController);
+    this._updateCircleQuantification(group, viewController);
   }
 
   /**
@@ -346,7 +346,7 @@ export class CircleFactory {
    * @param {Konva.Group} group The group with the shape.
    * @param {ViewController} viewController The associated view controller.
    */
-  #updateCircleQuantification(
+  _updateCircleQuantification(
     group, viewController) {
     // associated shape
     const kcircle = group.getChildren(function (node) {
@@ -390,7 +390,7 @@ export class CircleFactory {
    * @param {Konva.Group} [group] The associated group.
    * @returns {Konva.Group} The shadow konva group.
    */
-  #getShadowCircle(circle, group) {
+  _getShadowCircle(circle, group) {
     // possible group offset
     let offsetX = 0;
     let offsetY = 0;

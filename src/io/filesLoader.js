@@ -18,42 +18,42 @@ export class FilesLoader {
    *
    * @type {File[]}
    */
-  #inputData = null;
+  _inputData = null;
 
   /**
    * Array of launched file readers.
    *
    * @type {FileReader[]}
    */
-  #readers = [];
+  _readers = [];
 
   /**
    * Data loader.
    *
    * @type {object}
    */
-  #runningLoader = null;
+  _runningLoader = null;
 
   /**
    * Number of loaded data.
    *
    * @type {number}
    */
-  #nLoad = 0;
+  _nLoad = 0;
 
   /**
    * Number of load end events.
    *
    * @type {number}
    */
-  #nLoadend = 0;
+  _nLoadend = 0;
 
   /**
    * The default character set (optional).
    *
    * @type {string}
    */
-  #defaultCharacterSet;
+  _defaultCharacterSet;
 
   /**
    * Get the default character set.
@@ -61,7 +61,7 @@ export class FilesLoader {
    * @returns {string} The default character set.
    */
   getDefaultCharacterSet() {
-    return this.#defaultCharacterSet;
+    return this._defaultCharacterSet;
   }
 
   /**
@@ -70,7 +70,7 @@ export class FilesLoader {
    * @param {string} characterSet The character set.
    */
   setDefaultCharacterSet(characterSet) {
-    this.#defaultCharacterSet = characterSet;
+    this._defaultCharacterSet = characterSet;
   }
 
   /**
@@ -78,14 +78,14 @@ export class FilesLoader {
    *
    * @param {File[]} data The input data.
    */
-  #storeInputData(data) {
-    this.#inputData = data;
+  _storeInputData(data) {
+    this._inputData = data;
     // reset counters
-    this.#nLoad = 0;
-    this.#nLoadend = 0;
+    this._nLoad = 0;
+    this._nLoadend = 0;
     // clear storage
-    this.#clearStoredReaders();
-    this.#clearStoredLoader();
+    this._clearStoredReaders();
+    this._clearStoredLoader();
   }
 
   /**
@@ -93,16 +93,16 @@ export class FilesLoader {
    *
    * @param {FileReader} reader The launched reader.
    */
-  #storeReader(reader) {
-    this.#readers.push(reader);
+  _storeReader(reader) {
+    this._readers.push(reader);
   }
 
   /**
    * Clear the stored readers.
    *
    */
-  #clearStoredReaders() {
-    this.#readers = [];
+  _clearStoredReaders() {
+    this._readers = [];
   }
 
   /**
@@ -110,16 +110,16 @@ export class FilesLoader {
    *
    * @param {object} loader The launched loader.
    */
-  #storeLoader(loader) {
-    this.#runningLoader = loader;
+  _storeLoader(loader) {
+    this._runningLoader = loader;
   }
 
   /**
    * Clear the stored loader.
    *
    */
-  #clearStoredLoader() {
-    this.#runningLoader = null;
+  _clearStoredLoader() {
+    this._runningLoader = null;
   }
 
   /**
@@ -128,14 +128,14 @@ export class FilesLoader {
    *
    * @param {object} _event The load data event.
    */
-  #addLoad = (_event) => {
-    this.#nLoad++;
+  _addLoad = (_event) => {
+    this._nLoad++;
     // call onload when all is loaded
     // (not using the input event since it is
     //   an individual load)
-    if (this.#nLoad === this.#inputData.length) {
+    if (this._nLoad === this._inputData.length) {
       this.onload({
-        source: this.#inputData
+        source: this._inputData
       });
     }
   };
@@ -146,14 +146,14 @@ export class FilesLoader {
    *
    * @param {object} _event The load end event.
    */
-  #addLoadend = (_event) => {
-    this.#nLoadend++;
+  _addLoadend = (_event) => {
+    this._nLoadend++;
     // call onloadend when all is run
     // (not using the input event since it is
     //   an individual load end)
-    if (this.#nLoadend === this.#inputData.length) {
+    if (this._nLoadend === this._inputData.length) {
       this.onloadend({
-        source: this.#inputData
+        source: this._inputData
       });
     }
   };
@@ -170,7 +170,7 @@ export class FilesLoader {
    * @param {object} source The source to add to the event.
    * @returns {eventFn} The augmented callback.
    */
-  #augmentCallbackEvent(callback, source) {
+  _augmentCallbackEvent(callback, source) {
     return (event) => {
       event.source = source;
       callback(event);
@@ -185,7 +185,7 @@ export class FilesLoader {
    * @param {number} i The index of the element.
    * @returns {eventFn} A load handler.
    */
-  #getLoadHandler(loader, dataElement, i) {
+  _getLoadHandler(loader, dataElement, i) {
     return (event) => {
       loader.load(event.target.result, dataElement, i);
     };
@@ -202,7 +202,7 @@ export class FilesLoader {
     if (typeof data === 'undefined' || data.length === 0) {
       return;
     }
-    this.#storeInputData(data);
+    this._storeInputData(data);
 
     // send start event
     this.onloadstart({
@@ -236,13 +236,13 @@ export class FilesLoader {
         // loader.onloadstart: nothing to do
         loader.onprogress = mproghandler.getUndefinedMonoProgressHandler(1);
         loader.onloaditem = this.onloaditem;
-        loader.onload = this.#addLoad;
-        loader.onloadend = this.#addLoadend;
+        loader.onload = this._addLoad;
+        loader.onloadend = this._addLoadend;
         loader.onerror = this.onerror;
         loader.onabort = this.onabort;
 
         // store loader
-        this.#storeLoader(loader);
+        this._storeLoader(loader);
         // exit
         break;
       }
@@ -269,24 +269,24 @@ export class FilesLoader {
        */
       const reader = new FileReader();
       // store reader
-      this.#storeReader(reader);
+      this._storeReader(reader);
 
       // set reader callbacks
       // reader.onloadstart: nothing to do
-      reader.onprogress = this.#augmentCallbackEvent(
+      reader.onprogress = this._augmentCallbackEvent(
         mproghandler.getMonoProgressHandler(i, 0), dataElement);
-      reader.onload = this.#getLoadHandler(loader, dataElement, i);
+      reader.onload = this._getLoadHandler(loader, dataElement, i);
       // reader.onloadend: nothing to do
       const errorCallback =
-        this.#augmentCallbackEvent(this.onerror, dataElement);
+        this._augmentCallbackEvent(this.onerror, dataElement);
       reader.onerror = (event) => {
-        this.#addLoadend();
+        this._addLoadend();
         errorCallback(event);
       };
       const abortCallback =
-        this.#augmentCallbackEvent(this.onabort, dataElement);
+        this._augmentCallbackEvent(this.onabort, dataElement);
       reader.onabort = (event) => {
-        this.#addLoadend();
+        this._addLoadend();
         abortCallback(event);
       };
       // read
@@ -305,15 +305,15 @@ export class FilesLoader {
    */
   abort() {
     // abort readers
-    for (let i = 0; i < this.#readers.length; ++i) {
+    for (let i = 0; i < this._readers.length; ++i) {
       // 0: EMPTY, 1: LOADING, 2: DONE
-      if (this.#readers[i].readyState === 1) {
-        this.#readers[i].abort();
+      if (this._readers[i].readyState === 1) {
+        this._readers[i].abort();
       }
     }
     // abort loader
-    if (this.#runningLoader && this.#runningLoader.isLoading()) {
-      this.#runningLoader.abort();
+    if (this._runningLoader && this._runningLoader.isLoading()) {
+      this._runningLoader.abort();
     }
   }
 

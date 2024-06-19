@@ -3,7 +3,7 @@ import {logger} from './logger';
 /**
  * ListenerHandler class: handles add/removing and firing listeners.
  *
- * Ref: {@link https://developer.mozilla.org/en-US/docs/Web/API/EventTarget#example}.
+ * Ref: {@link https://developer.mozilla.org/en-US/docs/Web/API/EventTarget_example}.
  */
 export class ListenerHandler {
   /**
@@ -11,7 +11,7 @@ export class ListenerHandler {
    *
    * @type {object}
    */
-  #listeners = {};
+  _listeners = {};
 
   /**
    * Add an event listener.
@@ -22,11 +22,11 @@ export class ListenerHandler {
    */
   add(type, callback) {
     // create array if not present
-    if (typeof this.#listeners[type] === 'undefined') {
-      this.#listeners[type] = [];
+    if (typeof this._listeners[type] === 'undefined') {
+      this._listeners[type] = [];
     }
     // add callback to listeners array
-    this.#listeners[type].push(callback);
+    this._listeners[type].push(callback);
   }
 
   /**
@@ -38,15 +38,15 @@ export class ListenerHandler {
    */
   remove(type, callback) {
     // check if the type is present
-    if (typeof this.#listeners[type] === 'undefined') {
+    if (typeof this._listeners[type] === 'undefined') {
       return;
     }
     // remove from listeners array
     let nFound = 0;
-    for (let i = 0; i < this.#listeners[type].length; ++i) {
-      if (this.#listeners[type][i] === callback) {
+    for (let i = 0; i < this._listeners[type].length; ++i) {
+      if (this._listeners[type][i] === callback) {
         ++nFound;
-        this.#listeners[type].splice(i, 1);
+        this._listeners[type].splice(i, 1);
       }
     }
     if (nFound === 0) {
@@ -61,12 +61,12 @@ export class ListenerHandler {
    */
   fireEvent = (event) => {
     // check if they are listeners for the event type
-    if (typeof this.#listeners[event.type] === 'undefined') {
+    if (typeof this._listeners[event.type] === 'undefined') {
       return;
     }
     // fire events from a copy of the listeners array
     // to avoid interference from possible add/remove
-    const stack = this.#listeners[event.type].slice();
+    const stack = this._listeners[event.type].slice();
     for (let i = 0; i < stack.length; ++i) {
       stack[i](event);
     }

@@ -26,49 +26,49 @@ export class Geometry {
    *
    * @type {Point3D[]}
    */
-  #origins;
+  _origins;
 
   /**
    * Data size.
    *
    * @type {Size}
    */
-  #size;
+  _size;
 
   /**
    * Data spacing.
    *
    * @type {Spacing}
    */
-  #spacing;
+  _spacing;
 
   /**
    * Local helper object for time points.
    *
    * @type {Object<string, Point3D[]>}
    */
-  #timeOrigins = {};
+  _timeOrigins = {};
 
   /**
    * Initial time index.
    *
    * @type {number}
    */
-  #initialTime;
+  _initialTime;
 
   /**
    * Data orientation.
    *
    * @type {Matrix33}
    */
-  #orientation = getIdentityMat33();
+  _orientation = getIdentityMat33();
 
   /**
    * Flag to know if new origins were added.
    *
    * @type {boolean}
    */
-  #newOrigins = false;
+  _newOrigins = false;
 
   /**
    * @param {Point3D} origin The object origin (a 3D point).
@@ -79,16 +79,16 @@ export class Geometry {
    * @param {number} [time] Optional time index.
    */
   constructor(origin, size, spacing, orientation, time) {
-    this.#origins = [origin];
-    this.#size = size;
-    this.#spacing = spacing;
+    this._origins = [origin];
+    this._size = size;
+    this._spacing = spacing;
     if (typeof time !== 'undefined') {
-      this.#initialTime = time;
-      this.#timeOrigins[time] = [origin];
+      this._initialTime = time;
+      this._timeOrigins[time] = [origin];
     }
     // check input orientation
     if (typeof orientation !== 'undefined') {
-      this.#orientation = orientation;
+      this._orientation = orientation;
     }
   }
 
@@ -98,7 +98,7 @@ export class Geometry {
    * @returns {number} The time value.
    */
   getInitialTime() {
-    return this.#initialTime;
+    return this._initialTime;
   }
 
   /**
@@ -109,13 +109,13 @@ export class Geometry {
    * @returns {number} The total count.
    */
   getCurrentTotalNumberOfSlices() {
-    const keys = Object.keys(this.#timeOrigins);
+    const keys = Object.keys(this._timeOrigins);
     if (keys.length === 0) {
-      return this.#origins.length;
+      return this._origins.length;
     }
     let count = 0;
     for (let i = 0; i < keys.length; ++i) {
-      count += this.#timeOrigins[keys[i]].length;
+      count += this._timeOrigins[keys[i]].length;
     }
     return count;
   }
@@ -127,7 +127,7 @@ export class Geometry {
    * @returns {boolean} True if slices are present.
    */
   hasSlicesAtTime(time) {
-    return typeof this.#timeOrigins[time] !== 'undefined';
+    return typeof this._timeOrigins[time] !== 'undefined';
   }
 
   /**
@@ -138,7 +138,7 @@ export class Geometry {
    * @returns {number|undefined} The count.
    */
   getCurrentNumberOfSlicesBeforeTime(time) {
-    const keys = Object.keys(this.#timeOrigins);
+    const keys = Object.keys(this._timeOrigins);
     if (keys.length === 0) {
       return undefined;
     }
@@ -148,7 +148,7 @@ export class Geometry {
       if (parseInt(key, 10) === time) {
         break;
       }
-      count += this.#timeOrigins[key].length;
+      count += this._timeOrigins[key].length;
     }
     return count;
   }
@@ -160,7 +160,7 @@ export class Geometry {
    * @returns {Point3D} The object origin.
    */
   getOrigin() {
-    return this.#origins[0];
+    return this._origins[0];
   }
 
   /**
@@ -169,7 +169,7 @@ export class Geometry {
    * @returns {Point3D[]} The object origins.
    */
   getOrigins() {
-    return this.#origins;
+    return this._origins;
   }
 
   /**
@@ -181,8 +181,8 @@ export class Geometry {
    * @returns {boolean} True if in list.
    */
   includesOrigin(point3D, tol) {
-    for (let i = 0; i < this.#origins.length; ++i) {
-      if (this.#origins[i].isSimilar(point3D, tol)) {
+    for (let i = 0; i < this._origins.length; ++i) {
+      if (this._origins[i].isSimilar(point3D, tol)) {
         return true;
       }
     }
@@ -198,17 +198,17 @@ export class Geometry {
    * @returns {Size} The object size.
    */
   getSize(viewOrientation) {
-    let res = this.#size;
+    let res = this._size;
     if (viewOrientation && typeof viewOrientation !== 'undefined') {
       let values = getOrientedArray3D(
         [
-          this.#size.get(0),
-          this.#size.get(1),
-          this.#size.get(2)
+          this._size.get(0),
+          this._size.get(1),
+          this._size.get(2)
         ],
         viewOrientation);
       values = values.map(Math.abs);
-      res = new Size(values.concat(this.#size.getValues().slice(3)));
+      res = new Size(values.concat(this._size.getValues().slice(3)));
     }
     return res;
   }
@@ -217,16 +217,16 @@ export class Geometry {
    * Calculate slice spacing from origins and replace current
    *   if needed.
    */
-  #updateSliceSpacing() {
-    const geoSliceSpacing = getSliceGeometrySpacing(this.#origins);
+  _updateSliceSpacing() {
+    const geoSliceSpacing = getSliceGeometrySpacing(this._origins);
     // update local if needed
     if (typeof geoSliceSpacing !== 'undefined' &&
-      this.#spacing.get(2) !== geoSliceSpacing) {
+      this._spacing.get(2) !== geoSliceSpacing) {
       logger.trace('Using geometric spacing ' + geoSliceSpacing +
-        ' instead of tag spacing ' + this.#spacing.get(2));
-      const values = this.#spacing.getValues();
+        ' instead of tag spacing ' + this._spacing.get(2));
+      const values = this._spacing.getValues();
       values[2] = geoSliceSpacing;
-      this.#spacing = new Spacing(values);
+      this._spacing = new Spacing(values);
     }
   }
 
@@ -240,17 +240,17 @@ export class Geometry {
    */
   getSpacing(viewOrientation) {
     // update slice spacing after appendSlice
-    if (this.#newOrigins) {
-      this.#updateSliceSpacing();
-      this.#newOrigins = false;
+    if (this._newOrigins) {
+      this._updateSliceSpacing();
+      this._newOrigins = false;
     }
-    let res = this.#spacing;
+    let res = this._spacing;
     if (viewOrientation && typeof viewOrientation !== 'undefined') {
       let orientedValues = getOrientedArray3D(
         [
-          this.#spacing.get(0),
-          this.#spacing.get(1),
-          this.#spacing.get(2)
+          this._spacing.get(0),
+          this._spacing.get(1),
+          this._spacing.get(2)
         ],
         viewOrientation);
       orientedValues = orientedValues.map(Math.abs);
@@ -267,7 +267,7 @@ export class Geometry {
   getRealSpacing() {
     // asOneAndZeros to not change spacing values...
     return this.getSpacing(
-      this.#orientation.getInverse().asOneAndZeros()
+      this._orientation.getInverse().asOneAndZeros()
     );
   }
 
@@ -277,7 +277,7 @@ export class Geometry {
    * @returns {Matrix33} The object orientation.
    */
   getOrientation() {
-    return this.#orientation;
+    return this._orientation;
   }
 
   /**
@@ -297,9 +297,9 @@ export class Geometry {
     // cannot use this.worldToIndex(point).getK() since
     // we cannot guaranty consecutive slices...
 
-    let localOrigins = this.#origins;
+    let localOrigins = this._origins;
     if (typeof time !== 'undefined') {
-      localOrigins = this.#timeOrigins[time];
+      localOrigins = this._timeOrigins[time];
     }
 
     // find the closest origin
@@ -311,9 +311,9 @@ export class Geometry {
 
     // use third orientation matrix column as plane normal vector
     const normal = new Vector3D(
-      this.#orientation.get(0, 2),
-      this.#orientation.get(1, 2),
-      this.#orientation.get(2, 2)
+      this._orientation.get(0, 2),
+      this._orientation.get(1, 2),
+      this._orientation.get(2, 2)
     );
 
     // codirectional vectors: above slice index
@@ -339,27 +339,27 @@ export class Geometry {
     };
     if (typeof time !== 'undefined') {
       // check if not already in list
-      const found = this.#timeOrigins[time].find(equalToOrigin);
+      const found = this._timeOrigins[time].find(equalToOrigin);
       if (typeof found !== 'undefined') {
         throw new Error('Cannot append same time origin twice');
       }
       // add in origin array
-      this.#timeOrigins[time].splice(index, 0, origin);
+      this._timeOrigins[time].splice(index, 0, origin);
     }
-    if (typeof time === 'undefined' || time === this.#initialTime) {
+    if (typeof time === 'undefined' || time === this._initialTime) {
       // check if not already in list
-      const found = this.#origins.find(equalToOrigin);
+      const found = this._origins.find(equalToOrigin);
       if (typeof found !== 'undefined') {
         throw new Error('Cannot append same origin twice');
       }
       // update flag
-      this.#newOrigins = true;
+      this._newOrigins = true;
       // add in origin array
-      this.#origins.splice(index, 0, origin);
+      this._origins.splice(index, 0, origin);
       // increment second dimension
-      const values = this.#size.getValues();
+      const values = this._size.getValues();
       values[2] += 1;
-      this.#size = new Size(values);
+      this._size = new Size(values);
     }
   }
 
@@ -371,18 +371,18 @@ export class Geometry {
    */
   appendFrame(origin, time) {
     // add origin to list
-    this.#timeOrigins[time] = [origin];
+    this._timeOrigins[time] = [origin];
     // increment third dimension
-    const sizeValues = this.#size.getValues();
-    const spacingValues = this.#spacing.getValues();
+    const sizeValues = this._size.getValues();
+    const spacingValues = this._spacing.getValues();
     if (sizeValues.length === 4) {
       sizeValues[3] += 1;
     } else {
       sizeValues.push(2);
       spacingValues.push(1);
     }
-    this.#size = new Size(sizeValues);
-    this.#spacing = new Spacing(spacingValues);
+    this._size = new Size(sizeValues);
+    this._spacing = new Spacing(spacingValues);
   }
 
   /**

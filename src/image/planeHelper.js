@@ -20,28 +20,28 @@ export class PlaneHelper {
    *
    * @type {Spacing}
    */
-  #spacing;
+  _spacing;
 
   /**
    * The image orientation.
    *
    * @type {Matrix33}
    */
-  #imageOrientation;
+  _imageOrientation;
 
   /**
    * The viewe orientation.
    *
    * @type {Matrix33}
    */
-  #viewOrientation;
+  _viewOrientation;
 
   /**
    * The target orientation.
    *
    * @type {Matrix33}
    */
-  #targetOrientation;
+  _targetOrientation;
 
   /**
    * @param {Spacing} spacing The spacing.
@@ -49,11 +49,11 @@ export class PlaneHelper {
    * @param {Matrix33} viewOrientation The view orientation.
    */
   constructor(spacing, imageOrientation, viewOrientation) {
-    this.#spacing = spacing;
-    this.#imageOrientation = imageOrientation;
-    this.#viewOrientation = viewOrientation;
+    this._spacing = spacing;
+    this._imageOrientation = imageOrientation;
+    this._viewOrientation = viewOrientation;
 
-    this.#targetOrientation = getTargetOrientation(
+    this._targetOrientation = getTargetOrientation(
       imageOrientation, viewOrientation);
   }
 
@@ -71,9 +71,9 @@ export class PlaneHelper {
     const pixelOffset = this.getTargetDeOrientedVector3D(planeOffset);
     // ~indexToWorld
     return new Vector3D(
-      pixelOffset.getX() * this.#spacing.get(0),
-      pixelOffset.getY() * this.#spacing.get(1),
-      pixelOffset.getZ() * this.#spacing.get(2));
+      pixelOffset.getX() * this._spacing.get(0),
+      pixelOffset.getY() * this._spacing.get(1),
+      pixelOffset.getZ() * this._spacing.get(2));
   }
 
   /**
@@ -85,9 +85,9 @@ export class PlaneHelper {
   getPlaneOffsetFromOffset3D(offset3D) {
     // ~worldToIndex
     const pixelOffset = new Vector3D(
-      offset3D.x / this.#spacing.get(0),
-      offset3D.y / this.#spacing.get(1),
-      offset3D.z / this.#spacing.get(2));
+      offset3D.x / this._spacing.get(0),
+      offset3D.y / this._spacing.get(1),
+      offset3D.z / this._spacing.get(2));
     // orient
     const planeOffset = this.getTargetOrientedVector3D(pixelOffset);
     // make 2D
@@ -105,9 +105,9 @@ export class PlaneHelper {
    */
   getTargetOrientedVector3D(vector) {
     let planeVector = vector;
-    if (typeof this.#targetOrientation !== 'undefined') {
+    if (typeof this._targetOrientation !== 'undefined') {
       planeVector =
-        this.#targetOrientation.getInverse().multiplyVector3D(vector);
+        this._targetOrientation.getInverse().multiplyVector3D(vector);
     }
     return planeVector;
   }
@@ -120,8 +120,8 @@ export class PlaneHelper {
    */
   getTargetDeOrientedVector3D(planeVector) {
     let vector = planeVector;
-    if (typeof this.#targetOrientation !== 'undefined') {
-      vector = this.#targetOrientation.multiplyVector3D(planeVector);
+    if (typeof this._targetOrientation !== 'undefined') {
+      vector = this._targetOrientation.multiplyVector3D(planeVector);
     }
     return vector;
   }
@@ -134,8 +134,8 @@ export class PlaneHelper {
    */
   getTargetDeOrientedPoint3D(planePoint) {
     let point = planePoint;
-    if (typeof this.#targetOrientation !== 'undefined') {
-      point = this.#targetOrientation.multiplyPoint3D(planePoint);
+    if (typeof this._targetOrientation !== 'undefined') {
+      point = this._targetOrientation.multiplyPoint3D(planePoint);
     }
     return point;
   }
@@ -148,7 +148,7 @@ export class PlaneHelper {
    */
   getImageOrientedVector3D(planeVector) {
     let vector = planeVector;
-    if (typeof this.#viewOrientation !== 'undefined') {
+    if (typeof this._viewOrientation !== 'undefined') {
       // image oriented => view de-oriented
       const values = getDeOrientedArray3D(
         [
@@ -156,7 +156,7 @@ export class PlaneHelper {
           planeVector.getY(),
           planeVector.getZ()
         ],
-        this.#viewOrientation);
+        this._viewOrientation);
       vector = new Vector3D(
         values[0],
         values[1],
@@ -174,7 +174,7 @@ export class PlaneHelper {
    */
   getImageOrientedPoint3D(planePoint) {
     let point = planePoint;
-    if (typeof this.#viewOrientation !== 'undefined') {
+    if (typeof this._viewOrientation !== 'undefined') {
       // image oriented => view de-oriented
       const values = getDeOrientedArray3D(
         [
@@ -182,7 +182,7 @@ export class PlaneHelper {
           planePoint.getY(),
           planePoint.getZ()
         ],
-        this.#viewOrientation);
+        this._viewOrientation);
       point = new Point3D(
         values[0],
         values[1],
@@ -200,7 +200,7 @@ export class PlaneHelper {
    */
   getImageDeOrientedVector3D(vector) {
     let planeVector = vector;
-    if (typeof this.#viewOrientation !== 'undefined') {
+    if (typeof this._viewOrientation !== 'undefined') {
       // image de-oriented => view oriented
       const orientedValues = getOrientedArray3D(
         [
@@ -208,7 +208,7 @@ export class PlaneHelper {
           vector.getY(),
           vector.getZ()
         ],
-        this.#viewOrientation);
+        this._viewOrientation);
       planeVector = new Vector3D(
         orientedValues[0],
         orientedValues[1],
@@ -226,7 +226,7 @@ export class PlaneHelper {
    */
   getImageDeOrientedPoint3D(point) {
     let planePoint = point;
-    if (typeof this.#viewOrientation !== 'undefined') {
+    if (typeof this._viewOrientation !== 'undefined') {
       // image de-oriented => view oriented
       const orientedValues = getOrientedArray3D(
         [
@@ -234,7 +234,7 @@ export class PlaneHelper {
           point.getY(),
           point.getZ()
         ],
-        this.#viewOrientation);
+        this._viewOrientation);
       planePoint = new Point3D(
         orientedValues[0],
         orientedValues[1],
@@ -257,7 +257,7 @@ export class PlaneHelper {
         values.y,
         values.z
       ],
-      this.#targetOrientation);
+      this._targetOrientation);
     return {
       x: orientedValues[0],
       y: orientedValues[1],
@@ -272,8 +272,8 @@ export class PlaneHelper {
    */
   getScrollIndex() {
     let index = null;
-    if (typeof this.#viewOrientation !== 'undefined') {
-      index = this.#viewOrientation.getThirdColMajorDirection();
+    if (typeof this._viewOrientation !== 'undefined') {
+      index = this._viewOrientation.getThirdColMajorDirection();
     } else {
       index = 2;
     }
@@ -287,8 +287,8 @@ export class PlaneHelper {
    */
   getNativeScrollIndex() {
     let index = null;
-    if (typeof this.#imageOrientation !== 'undefined') {
-      index = this.#imageOrientation.getThirdColMajorDirection();
+    if (typeof this._imageOrientation !== 'undefined') {
+      index = this._imageOrientation.getThirdColMajorDirection();
     } else {
       index = 2;
     }

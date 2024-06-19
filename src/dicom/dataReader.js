@@ -37,35 +37,35 @@ export class DataReader {
    *
    * @type {ArrayBuffer}
    */
-  #buffer;
+  _buffer;
 
   /**
    * Is the endianness Little Endian.
    *
    * @type {boolean}
    */
-  #isLittleEndian = true;
+  _isLittleEndian = true;
 
   /**
    * Is the Native endianness Little Endian.
    *
    * @type {boolean}
    */
-  #isNativeLittleEndian = isNativeLittleEndian();
+  _isNativeLittleEndian = isNativeLittleEndian();
 
   /**
    * Flag to know if the TypedArray data needs flipping.
    *
    * @type {boolean}
    */
-  #needFlip;
+  _needFlip;
 
   /**
    * The main data view.
    *
    * @type {DataView}
    */
-  #view;
+  _view;
 
   /**
    * @param {ArrayBuffer} buffer The input array buffer.
@@ -73,13 +73,13 @@ export class DataReader {
    *   or big endian (default: true).
    */
   constructor(buffer, isLittleEndian) {
-    this.#buffer = buffer;
+    this._buffer = buffer;
     // Set endian flag if not defined.
     if (typeof isLittleEndian !== 'undefined') {
-      this.#isLittleEndian = isLittleEndian;
+      this._isLittleEndian = isLittleEndian;
     }
-    this.#needFlip = (this.#isLittleEndian !== this.#isNativeLittleEndian);
-    this.#view = new DataView(buffer);
+    this._needFlip = (this._isLittleEndian !== this._isNativeLittleEndian);
+    this._view = new DataView(buffer);
   }
 
   /**
@@ -89,7 +89,7 @@ export class DataReader {
    * @returns {number} The read data.
    */
   readUint16(byteOffset) {
-    return this.#view.getUint16(byteOffset, this.#isLittleEndian);
+    return this._view.getUint16(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -99,7 +99,7 @@ export class DataReader {
    * @returns {number} The read data.
    */
   readInt16(byteOffset) {
-    return this.#view.getInt16(byteOffset, this.#isLittleEndian);
+    return this._view.getInt16(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -109,7 +109,7 @@ export class DataReader {
    * @returns {number} The read data.
    */
   readUint32(byteOffset) {
-    return this.#view.getUint32(byteOffset, this.#isLittleEndian);
+    return this._view.getUint32(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -119,7 +119,7 @@ export class DataReader {
    * @returns {bigint} The read data.
    */
   readBigUint64(byteOffset) {
-    return this.#view.getBigUint64(byteOffset, this.#isLittleEndian);
+    return this._view.getBigUint64(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -129,7 +129,7 @@ export class DataReader {
    * @returns {number} The read data.
    */
   readInt32(byteOffset) {
-    return this.#view.getInt32(byteOffset, this.#isLittleEndian);
+    return this._view.getInt32(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -139,7 +139,7 @@ export class DataReader {
    * @returns {bigint} The read data.
    */
   readBigInt64(byteOffset) {
-    return this.#view.getBigInt64(byteOffset, this.#isLittleEndian);
+    return this._view.getBigInt64(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -149,7 +149,7 @@ export class DataReader {
    * @returns {number} The read data.
    */
   readFloat32(byteOffset) {
-    return this.#view.getFloat32(byteOffset, this.#isLittleEndian);
+    return this._view.getFloat32(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -159,7 +159,7 @@ export class DataReader {
    * @returns {number} The read data.
    */
   readFloat64(byteOffset) {
-    return this.#view.getFloat64(byteOffset, this.#isLittleEndian);
+    return this._view.getFloat64(byteOffset, this._isLittleEndian);
   }
 
   /**
@@ -171,7 +171,7 @@ export class DataReader {
    */
   readBinaryArray(byteOffset, size) {
     // input
-    const bitArray = new Uint8Array(this.#buffer, byteOffset, size);
+    const bitArray = new Uint8Array(this._buffer, byteOffset, size);
     // result
     const byteArrayLength = 8 * bitArray.length;
     const data = new Uint8Array(byteArrayLength);
@@ -195,7 +195,7 @@ export class DataReader {
    * @returns {Uint8Array} The read data.
    */
   readUint8Array(byteOffset, size) {
-    return new Uint8Array(this.#buffer, byteOffset, size);
+    return new Uint8Array(this._buffer, byteOffset, size);
   }
 
   /**
@@ -206,7 +206,7 @@ export class DataReader {
    * @returns {Int8Array} The read data.
    */
   readInt8Array(byteOffset, size) {
-    return new Int8Array(this.#buffer, byteOffset, size);
+    return new Int8Array(this._buffer, byteOffset, size);
   }
 
   /**
@@ -222,8 +222,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of Uint16Array.BYTES_PER_ELEMENT (=2)
     if (byteOffset % bpe === 0) {
-      data = new Uint16Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new Uint16Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -250,8 +250,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of Int16Array.BYTES_PER_ELEMENT (=2)
     if (byteOffset % bpe === 0) {
-      data = new Int16Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new Int16Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -278,8 +278,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of Uint32Array.BYTES_PER_ELEMENT (=4)
     if (byteOffset % bpe === 0) {
-      data = new Uint32Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new Uint32Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -306,8 +306,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of BigUint64Array.BYTES_PER_ELEMENT (=8)
     if (byteOffset % bpe === 0) {
-      data = new BigUint64Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new BigUint64Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -334,8 +334,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of Int32Array.BYTES_PER_ELEMENT (=4)
     if (byteOffset % bpe === 0) {
-      data = new Int32Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new Int32Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -362,8 +362,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of BigInt64Array.BYTES_PER_ELEMENT (=8)
     if (byteOffset % bpe === 0) {
-      data = new BigInt64Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new BigInt64Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -390,8 +390,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of Float32Array.BYTES_PER_ELEMENT (=4)
     if (byteOffset % bpe === 0) {
-      data = new Float32Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new Float32Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {
@@ -418,8 +418,8 @@ export class DataReader {
     let data = null;
     // byteOffset should be a multiple of Float64Array.BYTES_PER_ELEMENT (=8)
     if (byteOffset % bpe === 0) {
-      data = new Float64Array(this.#buffer, byteOffset, arraySize);
-      if (this.#needFlip) {
+      data = new Float64Array(this._buffer, byteOffset, arraySize);
+      if (this._needFlip) {
         flipArrayEndianness(data);
       }
     } else {

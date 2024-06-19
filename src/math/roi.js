@@ -14,7 +14,7 @@ export class ROI {
    *
    * @type {Point2D[]}
    */
-  #points = [];
+  _points = [];
 
   /**
    * Get a point of the list at a given index.
@@ -24,7 +24,7 @@ export class ROI {
    * @returns {Point2D} The Point2D at the given index.
    */
   getPoint(index) {
-    return this.#points[index];
+    return this._points[index];
   }
 
   /**
@@ -33,7 +33,7 @@ export class ROI {
    * @returns {number} The length of the point list.
    */
   getLength() {
-    return this.#points.length;
+    return this._points.length;
   }
 
   /**
@@ -42,7 +42,7 @@ export class ROI {
    * @param {Point2D} point The Point2D to add.
    */
   addPoint(point) {
-    this.#points.push(point);
+    this._points.push(point);
   }
 
   /**
@@ -51,7 +51,7 @@ export class ROI {
    * @param {Point2D[]} rhs The array of POints2D to add.
    */
   addPoints(rhs) {
-    this.#points = this.#points.concat(rhs);
+    this._points = this._points.concat(rhs);
   }
 
 } // ROI class

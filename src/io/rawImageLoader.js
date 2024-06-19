@@ -14,7 +14,7 @@ export class RawImageLoader {
    *
    * @type {boolean}
    */
-  #aborted = false;
+  _aborted = false;
 
   /**
    * Set the loader options.
@@ -41,7 +41,7 @@ export class RawImageLoader {
    * @param {string} dataType The data type.
    * @returns {string} The data URI.
    */
-  #createDataUri(response, dataType) {
+  _createDataUri(response, dataType) {
     // image type
     let imageType = dataType;
     if (!imageType || imageType === 'jpg') {
@@ -60,13 +60,13 @@ export class RawImageLoader {
    * @param {number} index The data index.
    */
   load(buffer, origin, index) {
-    this.#aborted = false;
+    this._aborted = false;
     // create a DOM image
     const image = new Image();
     // triggered by ctx.drawImage
     image.onload = (/*event*/) => {
       try {
-        if (!this.#aborted) {
+        if (!this._aborted) {
           this.onprogress({
             lengthComputable: true,
             loaded: 100,
@@ -97,7 +97,7 @@ export class RawImageLoader {
     } else if (typeof origin === 'string') {
       // url case
       const ext = origin.split('.').pop().toLowerCase();
-      image.src = this.#createDataUri(buffer, ext);
+      image.src = this._createDataUri(buffer, ext);
     }
   }
 
@@ -105,7 +105,7 @@ export class RawImageLoader {
    * Abort load.
    */
   abort() {
-    this.#aborted = true;
+    this._aborted = true;
     this.onabort({});
     this.onloadend({});
   }

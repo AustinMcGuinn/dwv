@@ -13,7 +13,7 @@ export class JSONTextLoader {
    *
    * @type {boolean}
    */
-  #isLoading = false;
+  _isLoading = false;
 
   /**
    * Set the loader options.
@@ -30,7 +30,7 @@ export class JSONTextLoader {
    * @returns {boolean} True if loading.
    */
   isLoading() {
-    return this.#isLoading;
+    return this._isLoading;
   }
 
   /**
@@ -42,7 +42,7 @@ export class JSONTextLoader {
    */
   load(text, origin, index) {
     // set loading flag
-    this.#isLoading = true;
+    this._isLoading = true;
     this.onloadstart({
       source: origin
     });
@@ -69,7 +69,7 @@ export class JSONTextLoader {
       });
     } finally {
       // reset loading flag
-      this.#isLoading = false;
+      this._isLoading = false;
       this.onloadend({
         source: origin
       });
@@ -81,7 +81,7 @@ export class JSONTextLoader {
    */
   abort() {
     // reset loading flag
-    this.#isLoading = false;
+    this._isLoading = false;
     // call listeners
     this.onabort({});
     this.onloadend({});

@@ -10,7 +10,7 @@ export class Index {
    *
    * @type {number[]}
    */
-  #values;
+  _values;
 
   /**
    * @param {number[]} values The index values.
@@ -28,7 +28,7 @@ export class Index {
     if (!values.every(valueCheck)) {
       throw new Error('Cannot create index with non number values.');
     }
-    this.#values = values;
+    this._values = values;
   }
 
   /**
@@ -38,7 +38,7 @@ export class Index {
    * @returns {number|undefined} The value or undefined if not in range.
    */
   get(i) {
-    return this.#values[i];
+    return this._values[i];
   }
 
   /**
@@ -47,7 +47,7 @@ export class Index {
    * @returns {number} The length.
    */
   length() {
-    return this.#values.length;
+    return this._values.length;
   }
 
   /**
@@ -56,7 +56,7 @@ export class Index {
    * @returns {string} The Index as a string.
    */
   toString() {
-    return '(' + this.#values.toString() + ')';
+    return '(' + this._values.toString() + ')';
   }
 
   /**
@@ -65,7 +65,7 @@ export class Index {
    * @returns {number[]} The array of values.
    */
   getValues() {
-    return this.#values.slice();
+    return this._values.slice();
   }
 
   /**
@@ -165,7 +165,7 @@ export class Index {
   }
 
   /**
-   * Get a string id from the index values in the form of: '#0-1_#1-2'.
+   * Get a string id from the index values in the form of: '_0-1__1-2'.
    *
    * @param {number[]} [dims] Optional list of dimensions to use.
    * @returns {string} The string id.
@@ -207,7 +207,7 @@ export function getZeroIndex(size) {
 }
 
 /**
- * Get an index from an id string in the form of: '#0-1_#1-2'
+ * Get an index from an id string in the form of: '_0-1__1-2'
  * (result of index.toStringId).
  *
  * @param {string} inputStr The input string.

@@ -69,7 +69,7 @@ export class DrawDetails {
   type;
 
   /**
-   * The draw color: for example 'green', '#00ff00' or 'rgb(0,255,0)'.
+   * The draw color: for example 'green', '_00ff00' or 'rgb(0,255,0)'.
    *
    * @type {string}
    */
@@ -180,28 +180,28 @@ export class DrawController {
    *
    * @type {DrawLayer}
    */
-  #drawLayer;
+  _drawLayer;
 
   /**
    * The Konva layer.
    *
    * @type {Konva.Layer}
    */
-  #konvaLayer;
+  _konvaLayer;
 
   /**
    * Current position group id.
    *
    * @type {string}
    */
-  #currentPosGroupId = null;
+  _currentPosGroupId = null;
 
   /**
    * @param {DrawLayer} drawLayer The draw layer.
    */
   constructor(drawLayer) {
-    this.#drawLayer = drawLayer;
-    this.#konvaLayer = drawLayer.getKonvaLayer();
+    this._drawLayer = drawLayer;
+    this._konvaLayer = drawLayer.getKonvaLayer();
   }
 
   /**
@@ -211,8 +211,8 @@ export class DrawController {
    */
   getCurrentPosGroup() {
     // get position groups
-    const posGroups = this.#konvaLayer.getChildren((node) => {
-      return node.id() === this.#currentPosGroupId;
+    const posGroups = this._konvaLayer.getChildren((node) => {
+      return node.id() === this._currentPosGroupId;
     });
     // if one group, use it
     // if no group, create one
@@ -224,10 +224,10 @@ export class DrawController {
     } else if (posGroups.length === 0) {
       posGroup = new Konva.Group();
       posGroup.name('position-group');
-      posGroup.id(this.#currentPosGroupId);
+      posGroup.id(this._currentPosGroupId);
       posGroup.visible(true); // dont inherit
       // add new group to layer
-      this.#konvaLayer.add(posGroup);
+      this._konvaLayer.add(posGroup);
     } else {
       logger.warn('Unexpected number of draw position groups.');
     }
@@ -239,7 +239,7 @@ export class DrawController {
    * Reset: clear the layers array.
    */
   reset() {
-    this.#konvaLayer = null;
+    this._konvaLayer = null;
   }
 
   /**
@@ -249,7 +249,7 @@ export class DrawController {
    * @returns {object|undefined} The Konva group.
    */
   getGroup(id) {
-    const group = this.#konvaLayer.findOne('#' + id);
+    const group = this._konvaLayer.findOne('#' + id);
     if (typeof group === 'undefined') {
       logger.warn('Cannot find node with id: ' + id
       );
@@ -270,15 +270,15 @@ export class DrawController {
     for (let j = 3; j < index.length(); ++j) {
       dims.push(j);
     }
-    this.#currentPosGroupId = index.toStringId(dims);
+    this._currentPosGroupId = index.toStringId(dims);
 
     // get all position groups
-    const posGroups = this.#konvaLayer.getChildren(isPositionNode);
+    const posGroups = this._konvaLayer.getChildren(isPositionNode);
     // reset or set the visible property
     let visible;
     for (let i = 0, leni = posGroups.length; i < leni; ++i) {
       visible = false;
-      if (posGroups[i].id() === this.#currentPosGroupId) {
+      if (posGroups[i].id() === this._currentPosGroupId) {
         visible = true;
       }
       // group members inherit the visible property
@@ -286,7 +286,7 @@ export class DrawController {
     }
 
     // show current draw layer
-    this.#konvaLayer.draw();
+    this._konvaLayer.draw();
   }
 
   /**
@@ -296,7 +296,7 @@ export class DrawController {
    */
   getDrawDisplayDetails() {
     const list = [];
-    const groups = this.#konvaLayer.getChildren();
+    const groups = this._konvaLayer.getChildren();
     for (let j = 0, lenj = groups.length; j < lenj; ++j) {
       const position = getIndexFromStringId(groups[j].id());
       // @ts-ignore
@@ -347,7 +347,7 @@ export class DrawController {
     const drawingsDetails = {};
 
     // get all position groups
-    const posGroups = this.#konvaLayer.getChildren(isPositionNode);
+    const posGroups = this._konvaLayer.getChildren(isPositionNode);
 
     let posKids;
     let group;
@@ -397,7 +397,7 @@ export class DrawController {
 
       // Get or create position-group if it does not exist and
       // append it to konvaLayer
-      let posGroup = this.#konvaLayer.getChildren(
+      let posGroup = this._konvaLayer.getChildren(
         isNodeWithId(statePosGroup.id()))[0];
       if (typeof posGroup === 'undefined') {
         posGroup = new Konva.Group({
@@ -405,7 +405,7 @@ export class DrawController {
           name: 'position-group',
           visible: false
         });
-        this.#konvaLayer.add(posGroup);
+        this._konvaLayer.add(posGroup);
       }
 
       const statePosKids = statePosGroup.getChildren();
@@ -422,7 +422,7 @@ export class DrawController {
         const cmd = new DrawGroupCommand(
           stateGroup,
           shape.className,
-          this.#drawLayer
+          this._drawLayer
         );
         // draw command callbacks
         cmd.onExecute = cmdCallback;
@@ -453,7 +453,7 @@ export class DrawController {
    */
   updateDraw(drawDetails) {
     // get the group
-    const group = this.#konvaLayer.findOne('#' + drawDetails.id);
+    const group = this._konvaLayer.findOne('#' + drawDetails.id);
     if (typeof group === 'undefined') {
       logger.warn(
         '[updateDraw] Cannot find group with id: ' + drawDetails.id
@@ -499,7 +499,7 @@ export class DrawController {
     }
 
     // udpate current layer
-    this.#konvaLayer.draw();
+    this._konvaLayer.draw();
   }
 
   /**
@@ -519,7 +519,7 @@ export class DrawController {
     const delcmd = new DeleteGroupCommand(
       group,
       shapeDisplayName,
-      this.#drawLayer
+      this._drawLayer
     );
     delcmd.onExecute = cmdCallback;
     delcmd.onUndo = cmdCallback;
@@ -559,7 +559,7 @@ export class DrawController {
    *  DeleteCommand has been executed.
    */
   deleteDraws(cmdCallback, exeCallback) {
-    const posGroups = this.#konvaLayer.getChildren();
+    const posGroups = this._konvaLayer.getChildren();
     for (const posGroup of posGroups) {
       if (posGroup instanceof Konva.Group) {
         const shapeGroups = posGroup.getChildren();
@@ -581,7 +581,7 @@ export class DrawController {
    * @returns {number} The total number of draws.
    */
   getNumberOfDraws() {
-    const posGroups = this.#konvaLayer.getChildren();
+    const posGroups = this._konvaLayer.getChildren();
     let count = 0;
     for (const posGroup of posGroups) {
       if (posGroup instanceof Konva.Group) {

@@ -15,7 +15,7 @@ export class Spacing {
    *
    * @type {number[]}
    */
-  #values;
+  _values;
 
   /**
    * @param {number[]} values The spacing values.
@@ -33,7 +33,7 @@ export class Spacing {
     if (!values.every(valueCheck)) {
       throw new Error('Cannot create spacing with non number or zero values.');
     }
-    this.#values = values;
+    this._values = values;
   }
 
   /**
@@ -43,7 +43,7 @@ export class Spacing {
    * @returns {number} The value.
    */
   get(i) {
-    return this.#values[i];
+    return this._values[i];
   }
 
   /**
@@ -52,7 +52,7 @@ export class Spacing {
    * @returns {number} The length.
    */
   length() {
-    return this.#values.length;
+    return this._values.length;
   }
 
   /**
@@ -61,7 +61,7 @@ export class Spacing {
    * @returns {string} The spacing as a string.
    */
   toString() {
-    return '(' + this.#values.toString() + ')';
+    return '(' + this._values.toString() + ')';
   }
 
   /**
@@ -70,7 +70,7 @@ export class Spacing {
    * @returns {number[]} The array of values.
    */
   getValues() {
-    return this.#values.slice();
+    return this._values.slice();
   }
 
   /**

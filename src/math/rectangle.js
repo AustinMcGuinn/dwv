@@ -35,14 +35,14 @@ export class Rectangle {
    *
    * @type {Point2D}
    */
-  #begin;
+  _begin;
 
   /**
    * Rectangle end point.
    *
    * @type {Point2D}
    */
-  #end;
+  _end;
 
   /**
    * @param {Point2D} begin A Point2D representing the beginning
@@ -51,11 +51,11 @@ export class Rectangle {
    *   of the rectangle.
    */
   constructor(begin, end) {
-    this.#begin = new Point2D(
+    this._begin = new Point2D(
       Math.min(begin.getX(), end.getX()),
       Math.min(begin.getY(), end.getY())
     );
-    this.#end = new Point2D(
+    this._end = new Point2D(
       Math.max(begin.getX(), end.getX()),
       Math.max(begin.getY(), end.getY())
     );
@@ -67,7 +67,7 @@ export class Rectangle {
    * @returns {Point2D} The begin point of the rectangle.
    */
   getBegin() {
-    return this.#begin;
+    return this._begin;
   }
 
   /**
@@ -76,7 +76,7 @@ export class Rectangle {
    * @returns {Point2D} The end point of the rectangle.
    */
   getEnd() {
-    return this.#end;
+    return this._end;
   }
 
   /**

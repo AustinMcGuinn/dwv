@@ -1,6 +1,6 @@
 {
 	"name": "evo-dwv",
-	"version": "0.34.0-beta.0",
+	"version": "0.34.1",
 	"description": "DICOM Web Viewer.",
 	"keywords": [
 		"DICOM",
@@ -23,6 +23,8 @@
 		">1%, last 2 versions, not dead"
 	],
 	"dependencies": {
+		"fs-extra": "^11.2.0",
+		"glob": "^10.4.2",
 		"jszip": "^3.10.1",
 		"konva": "~9.3.11",
 		"magic-wand-tool": "~1.1.7"
@@ -30,8 +32,8 @@
 	"devDependencies": {
 		"@babel/core": "^7.24.7",
 		"@babel/preset-env": "^7.24.7",
-		"@microsoft/api-extractor": "^7.47.0",
 		"@eslint/js": "^9.4.0",
+		"@microsoft/api-extractor": "^7.47.0",
 		"@stylistic/eslint-plugin-js": "^2.1.0",
 		"babel-loader": "^9.1.3",
 		"babel-plugin-istanbul": "^6.1.1",

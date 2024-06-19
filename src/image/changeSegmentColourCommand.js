@@ -15,42 +15,42 @@ export class ChangeSegmentColourCommand {
    *
    * @type {Image}
    */
-  #mask;
+  _mask;
 
   /**
    * The segment to modify.
    *
    * @type {MaskSegment}
    */
-  #segment;
+  _segment;
 
   /**
    * The new segment colour.
    *
    * @type {RGB|number}
    */
-  #newColour;
+  _newColour;
 
   /**
    * The previous segment colour.
    *
    * @type {RGB|number}
    */
-  #previousColour;
+  _previousColour;
 
   /**
    * Flag to send creation events.
    *
    * @type {boolean}
    */
-  #isSilent;
+  _isSilent;
 
   /**
    * List of offsets.
    *
    * @type {number[]}
    */
-  #offsets;
+  _offsets;
 
   /**
    * @param {Image} mask The mask image.
@@ -59,18 +59,18 @@ export class ChangeSegmentColourCommand {
    * @param {boolean} [silent] Whether to send a creation event or not.
    */
   constructor(mask, segment, newColour, silent) {
-    this.#mask = mask;
-    this.#segment = segment;
-    this.#newColour = newColour;
+    this._mask = mask;
+    this._segment = segment;
+    this._newColour = newColour;
 
-    this.#isSilent = (typeof silent === 'undefined') ? false : silent;
+    this._isSilent = (typeof silent === 'undefined') ? false : silent;
     // list of offsets with the colour to delete
     if (typeof segment.displayRGBValue !== 'undefined') {
-      this.#previousColour = segment.displayRGBValue;
+      this._previousColour = segment.displayRGBValue;
     } else {
-      this.#previousColour = segment.displayValue;
+      this._previousColour = segment.displayValue;
     }
-    this.#offsets = mask.getOffsets(this.#previousColour);
+    this._offsets = mask.getOffsets(this._previousColour);
   }
 
   /**
@@ -88,37 +88,37 @@ export class ChangeSegmentColourCommand {
    * @returns {boolean} True if the command is valid.
    */
   isValid() {
-    return this.#offsets.length !== 0;
+    return this._offsets.length !== 0;
   }
 
   /**
    * Execute the command.
    *
-   * @fires ChangeSegmentColourCommand#changemasksegmentcolour
+   * @fires ChangeSegmentColourCommand_changemasksegmentcolour
    */
   execute() {
     // remove
-    this.#mask.setAtOffsets(this.#offsets, this.#newColour);
+    this._mask.setAtOffsets(this._offsets, this._newColour);
     // update segment property
-    if (typeof this.#newColour === 'number') {
-      this.#segment.displayValue = this.#newColour;
+    if (typeof this._newColour === 'number') {
+      this._segment.displayValue = this._newColour;
     } else {
-      this.#segment.displayRGBValue = this.#newColour;
+      this._segment.displayRGBValue = this._newColour;
     }
 
     // callback
-    if (!this.#isSilent) {
+    if (!this._isSilent) {
       /**
        * Segment delete event.
        *
-       * @event ChangeSegmentColourCommand#changemasksegmentcolour
+       * @event ChangeSegmentColourCommand_changemasksegmentcolour
        * @type {object}
        * @property {number} segmentnumber The segment number.
        */
       this.onExecute({
         type: 'changemasksegmentcolour',
-        segmentnumber: this.#segment.number,
-        value: [this.#newColour]
+        segmentnumber: this._segment.number,
+        value: [this._newColour]
       });
     }
   }
@@ -126,30 +126,30 @@ export class ChangeSegmentColourCommand {
   /**
    * Undo the command.
    *
-   * @fires ChangeSegmentColourCommand#changemasksegmentcolour
+   * @fires ChangeSegmentColourCommand_changemasksegmentcolour
    */
   undo() {
     // re-draw
-    this.#mask.setAtOffsets(this.#offsets, this.#previousColour);
+    this._mask.setAtOffsets(this._offsets, this._previousColour);
     // update segment property
-    if (typeof this.#previousColour === 'number') {
-      this.#segment.displayValue = this.#previousColour;
+    if (typeof this._previousColour === 'number') {
+      this._segment.displayValue = this._previousColour;
     } else {
-      this.#segment.displayRGBValue = this.#previousColour;
+      this._segment.displayRGBValue = this._previousColour;
     }
 
     // callback
     /**
      * Segment redraw event.
      *
-     * @event ChangeSegmentColourCommand#changemasksegmentcolour
+     * @event ChangeSegmentColourCommand_changemasksegmentcolour
      * @type {object}
      * @property {number} segmentnumber The segment number.
      */
     this.onUndo({
       type: 'changemasksegmentcolour',
-      segmentnumber: this.#segment.number,
-      value: [this.#previousColour]
+      segmentnumber: this._segment.number,
+      value: [this._previousColour]
     });
   }
 

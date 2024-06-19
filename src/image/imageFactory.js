@@ -39,14 +39,14 @@ export class ImageFactory {
    *
    * @type {string|undefined}
    */
-  #warning;
+  _warning;
 
   /**
    * The PET SUV factor.
    *
    * @type {number|undefined}
    */
-  #suvFactor;
+  _suvFactor;
 
   /**
    * Get a warning string if elements are not as expected.
@@ -55,7 +55,7 @@ export class ImageFactory {
    * @returns {string|undefined} The warning.
    */
   getWarning() {
-    return this.#warning;
+    return this._warning;
   }
 
   /**
@@ -66,7 +66,7 @@ export class ImageFactory {
    */
   checkElements(dataElements) {
     // reset
-    this.#warning = undefined;
+    this._warning = undefined;
     // will throw if columns or rows is not defined
     getImage2DSize(dataElements);
     // check PET SUV
@@ -76,12 +76,12 @@ export class ImageFactory {
       modality = element.value[0];
       if (modality === 'PT') {
         const suvFactor = getSuvFactor(dataElements);
-        this.#suvFactor = suvFactor.value;
-        this.#warning = suvFactor.warning;
+        this._suvFactor = suvFactor.value;
+        this._warning = suvFactor.warning;
       }
     }
 
-    return this.#warning;
+    return this._warning;
   }
 
   /**
@@ -225,9 +225,9 @@ export class ImageFactory {
     // PET SUV
     let isPetWithSuv = false;
     let intensityFactor = 1;
-    if (typeof this.#suvFactor !== 'undefined') {
+    if (typeof this._suvFactor !== 'undefined') {
       isPetWithSuv = true;
-      intensityFactor = this.#suvFactor;
+      intensityFactor = this._suvFactor;
       logger.info('Applying PET SUV calibration: ' + intensityFactor);
       slope *= intensityFactor;
       intercept *= intensityFactor;

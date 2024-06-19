@@ -17,42 +17,42 @@ export class ToolboxController {
    *
    * @type {object}
    */
-  #toolList;
+  _toolList;
 
   /**
    * Selected tool.
    *
    * @type {object}
    */
-  #selectedTool = null;
+  _selectedTool = null;
 
   /**
    * Callback store to allow attach/detach.
    *
    * @type {Array}
    */
-  #callbackStore = [];
+  _callbackStore = [];
 
   /**
    * Current layers bound to tool.
    *
    * @type {object}
    */
-  #boundLayers = {};
+  _boundLayers = {};
 
   /**
    * @param {object} toolList The list of tool objects.
    */
   constructor(toolList) {
-    this.#toolList = toolList;
+    this._toolList = toolList;
   }
 
   /**
    * Initialise.
    */
   init() {
-    for (const key in this.#toolList) {
-      this.#toolList[key].init();
+    for (const key in this._toolList) {
+      this._toolList[key].init();
     }
     // enable shortcuts
     this.enableShortcuts(true);
@@ -67,10 +67,10 @@ export class ToolboxController {
   enableShortcuts(flag) {
     if (flag) {
       window.addEventListener('keydown',
-        this.#getCallback('window', 'keydown'), true);
+        this._getCallback('window', 'keydown'), true);
     } else {
       window.removeEventListener('keydown',
-        this.#getCallback('window', 'keydown'), true);
+        this._getCallback('window', 'keydown'), true);
     }
   }
 
@@ -80,7 +80,7 @@ export class ToolboxController {
    * @returns {Array} The list of tool objects.
    */
   getToolList() {
-    return this.#toolList;
+    return this._toolList;
   }
 
   /**
@@ -99,7 +99,7 @@ export class ToolboxController {
    * @returns {object} The selected tool.
    */
   getSelectedTool() {
-    return this.#selectedTool;
+    return this._selectedTool;
   }
 
   /**
@@ -124,13 +124,13 @@ export class ToolboxController {
       throw new Error('Unknown tool: \'' + name + '\'');
     }
     // de-activate previous
-    if (this.#selectedTool) {
-      this.#selectedTool.activate(false);
+    if (this._selectedTool) {
+      this._selectedTool.activate(false);
     }
     // set internal var
-    this.#selectedTool = this.#toolList[name];
+    this._selectedTool = this._toolList[name];
     // activate new tool
-    this.#selectedTool.activate(true);
+    this._selectedTool.activate(true);
   }
 
   /**
@@ -154,9 +154,9 @@ export class ToolboxController {
     const divId = layerGroup.getDivId();
     // listen to active layer changes
     layerGroup.addEventListener(
-      'activelayerchange', this.#getActiveLayerChangeHandler(divId));
+      'activelayerchange', this._getActiveLayerChangeHandler(divId));
     // bind the layer
-    this.#internalBindLayerGroup(divId, layer);
+    this._internalBindLayerGroup(divId, layer);
   }
 
   /**
@@ -165,15 +165,15 @@ export class ToolboxController {
    * @param {string} layerGroupDivId The layer group div id.
    * @param {ViewLayer|DrawLayer} layer The layer.
    */
-  #internalBindLayerGroup(layerGroupDivId, layer) {
+  _internalBindLayerGroup(layerGroupDivId, layer) {
     // remove from local list if preset
-    if (typeof this.#boundLayers[layerGroupDivId] !== 'undefined') {
-      this.#unbindLayer(this.#boundLayers[layerGroupDivId]);
+    if (typeof this._boundLayers[layerGroupDivId] !== 'undefined') {
+      this._unbindLayer(this._boundLayers[layerGroupDivId]);
     }
     // replace layer in local list
-    this.#boundLayers[layerGroupDivId] = layer;
+    this._boundLayers[layerGroupDivId] = layer;
     // bind layer
-    this.#bindLayer(layer);
+    this._bindLayer(layer);
   }
 
   /**
@@ -182,10 +182,10 @@ export class ToolboxController {
    * @param {string} divId The associated layer group div id.
    * @returns {Function} The event handler.
    */
-  #getActiveLayerChangeHandler(divId) {
+  _getActiveLayerChangeHandler(divId) {
     return (event) => {
       const layer = event.value[0];
-      this.#internalBindLayerGroup(divId, layer);
+      this._internalBindLayerGroup(divId, layer);
     };
   }
 
@@ -194,13 +194,13 @@ export class ToolboxController {
    *
    * @param {ViewLayer|DrawLayer} layer The layer to start listening to.
    */
-  #bindLayer(layer) {
+  _bindLayer(layer) {
     layer.bindInteraction();
     // interaction events
     const names = InteractionEventNames;
     for (let i = 0; i < names.length; ++i) {
       layer.addEventListener(names[i],
-        this.#getCallback(layer.getId(), names[i]));
+        this._getCallback(layer.getId(), names[i]));
     }
   }
 
@@ -209,13 +209,13 @@ export class ToolboxController {
    *
    * @param {ViewLayer|DrawLayer} layer The layer to stop listening to.
    */
-  #unbindLayer(layer) {
+  _unbindLayer(layer) {
     layer.unbindInteraction();
     // interaction events
     const names = InteractionEventNames;
     for (let i = 0; i < names.length; ++i) {
       layer.removeEventListener(names[i],
-        this.#getCallback(layer.getId(), names[i]));
+        this._getCallback(layer.getId(), names[i]));
     }
   }
 
@@ -228,26 +228,26 @@ export class ToolboxController {
    * @param {string} eventType The event type.
    * @returns {object} A callback for the provided layer and event.
    */
-  #getCallback(layerId, eventType) {
-    if (typeof this.#callbackStore[layerId] === 'undefined') {
-      this.#callbackStore[layerId] = [];
+  _getCallback(layerId, eventType) {
+    if (typeof this._callbackStore[layerId] === 'undefined') {
+      this._callbackStore[layerId] = [];
     }
 
-    if (typeof this.#callbackStore[layerId][eventType] === 'undefined') {
+    if (typeof this._callbackStore[layerId][eventType] === 'undefined') {
       const applySelectedTool = (event) => {
         // make sure we have a tool
-        if (this.#selectedTool) {
-          const func = this.#selectedTool[event.type];
+        if (this._selectedTool) {
+          const func = this._selectedTool[event.type];
           if (func) {
             func(event);
           }
         }
       };
       // store callback
-      this.#callbackStore[layerId][eventType] = applySelectedTool;
+      this._callbackStore[layerId][eventType] = applySelectedTool;
     }
 
-    return this.#callbackStore[layerId][eventType];
+    return this._callbackStore[layerId][eventType];
   }
 
 } // class ToolboxController

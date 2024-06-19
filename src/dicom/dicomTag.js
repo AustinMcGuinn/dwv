@@ -13,14 +13,14 @@ export class Tag {
    *
    * @type {string}
    */
-  #group;
+  _group;
 
   /**
    * The tag element.
    *
    * @type {string}
    */
-  #element;
+  _element;
 
   /**
    * @param {string} group The tag group as '####'.
@@ -39,8 +39,8 @@ export class Tag {
     if (element.length !== 4) {
       throw new Error('Cannot create tag with badly sized element: ' + element);
     }
-    this.#group = group;
-    this.#element = element;
+    this._group = group;
+    this._element = element;
   }
 
   /**
@@ -49,7 +49,7 @@ export class Tag {
    * @returns {string} The tag group.
    */
   getGroup() {
-    return this.#group;
+    return this._group;
   }
 
   /**
@@ -58,7 +58,7 @@ export class Tag {
    * @returns {string} The tag element.
    */
   getElement() {
-    return this.#element;
+    return this._element;
   }
 
   /**
@@ -79,8 +79,8 @@ export class Tag {
   equals(rhs) {
     return rhs !== null &&
       typeof rhs !== 'undefined' &&
-      this.#group === rhs.getGroup() &&
-      this.#element === rhs.getElement();
+      this._group === rhs.getGroup() &&
+      this._element === rhs.getElement();
   }
 
   /**
@@ -89,7 +89,7 @@ export class Tag {
    * @returns {string} The key as '########'.
    */
   getKey() {
-    return this.#group + this.#element;
+    return this._group + this._element;
   }
 
   /**
@@ -98,7 +98,7 @@ export class Tag {
    * @returns {string} The name.
    */
   getGroupName() {
-    return tagGroups[this.#group];
+    return tagGroups[this._group];
   }
 
   /**
@@ -109,23 +109,23 @@ export class Tag {
    * @returns {boolean} True if this tag has a VR.
    */
   isWithVR() {
-    return !(this.#group === 'FFFE' &&
-      (this.#element === 'E000' ||
-      this.#element === 'E00D' ||
-      this.#element === 'E0DD')
+    return !(this._group === 'FFFE' &&
+      (this._element === 'E000' ||
+      this._element === 'E00D' ||
+      this._element === 'E0DD')
     );
   }
 
   /**
    * Is the tag group a private tag group ?
    *
-   * See: {@link http://dicom.nema.org/medical/dicom/2022a/output/html/part05.html#sect_7.8}.
+   * See: {@link http://dicom.nema.org/medical/dicom/2022a/output/html/part05.html_sect_7.8}.
    *
    * @returns {boolean} True if the tag group is private,
    *   ie if its group is an odd number.
    */
   isPrivate() {
-    return parseInt(this.#group, 16) % 2 === 1;
+    return parseInt(this._group, 16) % 2 === 1;
   }
 
   /**
@@ -133,12 +133,12 @@ export class Tag {
    *
    * @returns {string[]|undefined} The info as [vr, multiplicity, name].
    */
-  #getInfoFromDictionary() {
+  _getInfoFromDictionary() {
     let info;
-    if (typeof dictionary[this.#group] !== 'undefined' &&
-      typeof dictionary[this.#group][this.#element] !==
+    if (typeof dictionary[this._group] !== 'undefined' &&
+      typeof dictionary[this._group][this._element] !==
         'undefined') {
-      info = dictionary[this.#group][this.#element];
+      info = dictionary[this._group][this._element];
     }
     return info;
   }
@@ -150,7 +150,7 @@ export class Tag {
    */
   getVrFromDictionary() {
     let vr;
-    const info = this.#getInfoFromDictionary();
+    const info = this._getInfoFromDictionary();
     if (typeof info !== 'undefined') {
       vr = info[0];
     }
@@ -164,7 +164,7 @@ export class Tag {
    */
   getNameFromDictionary() {
     let name;
-    const info = this.#getInfoFromDictionary();
+    const info = this._getInfoFromDictionary();
     if (typeof info !== 'undefined') {
       name = info[2];
     }

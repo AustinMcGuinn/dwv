@@ -15,27 +15,27 @@ export class MultiProgressHandler {
    *
    * @type {Array}
    */
-  #progresses = [];
+  _progresses = [];
 
   /**
    * Number of dimensions.
    *
    * @type {number}
    */
-  #numberOfDimensions = 2;
+  _numberOfDimensions = 2;
 
   /**
    * Progress callback.
    *
    * @type {Function}
    */
-  #callback;
+  _callback;
 
   /**
    * @param {Function} callback The function to pass the global progress to.
    */
   constructor(callback) {
-    this.#callback = callback;
+    this._callback = callback;
   }
 
   /**
@@ -44,7 +44,7 @@ export class MultiProgressHandler {
    * @param {number} num The number.
    */
   setNumberOfDimensions(num) {
-    this.#numberOfDimensions = num;
+    this._numberOfDimensions = num;
   }
 
   /**
@@ -54,9 +54,9 @@ export class MultiProgressHandler {
    */
   setNToLoad(n) {
     for (let i = 0; i < n; ++i) {
-      this.#progresses[i] = [];
-      for (let j = 0; j < this.#numberOfDimensions; ++j) {
-        this.#progresses[i][j] = 0;
+      this._progresses[i] = [];
+      for (let j = 0; j < this._numberOfDimensions; ++j) {
+        this._progresses[i][j] = 0;
       }
     }
   }
@@ -81,7 +81,7 @@ export class MultiProgressHandler {
     // calculate percent
     const percent = (event.loaded * 100) / event.total;
     // set percent for index
-    this.#progresses[event.index][event.subindex] = percent;
+    this._progresses[event.index][event.subindex] = percent;
 
     // item progress
     let item = null;
@@ -89,16 +89,16 @@ export class MultiProgressHandler {
       item = event.item;
     } else {
       item = {
-        loaded: this.#getItemProgress(event.index),
+        loaded: this._getItemProgress(event.index),
         total: 100,
         source: event.source
       };
     }
 
     // call callback with a global event
-    this.#callback({
+    this._callback({
       lengthComputable: true,
-      loaded: this.#getGlobalPercent(),
+      loaded: this._getGlobalPercent(),
       total: 100,
       item: item
     });
@@ -110,12 +110,12 @@ export class MultiProgressHandler {
    * @param {number} index The index of the item.
    * @returns {number} The load percentage.
    */
-  #getItemProgress(index) {
+  _getItemProgress(index) {
     let sum = 0;
-    for (let j = 0; j < this.#numberOfDimensions; ++j) {
-      sum += this.#progresses[index][j];
+    for (let j = 0; j < this._numberOfDimensions; ++j) {
+      sum += this._progresses[index][j];
     }
-    return sum / this.#numberOfDimensions;
+    return sum / this._numberOfDimensions;
   }
 
   /**
@@ -123,11 +123,11 @@ export class MultiProgressHandler {
    *
    * @returns {number} The accumulated percentage.
    */
-  #getGlobalPercent() {
+  _getGlobalPercent() {
     let sum = 0;
-    const lenprog = this.#progresses.length;
+    const lenprog = this._progresses.length;
     for (let i = 0; i < lenprog; ++i) {
-      sum += this.#getItemProgress(i);
+      sum += this._getItemProgress(i);
     }
     return Math.round(sum / lenprog);
   }

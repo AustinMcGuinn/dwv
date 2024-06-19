@@ -8,21 +8,21 @@ export class Vector3D {
    *
    * @type {number}
    */
-  #x;
+  _x;
 
   /**
    * Y coordinate.
    *
    * @type {number}
    */
-  #y;
+  _y;
 
   /**
    * Z coordinate.
    *
    * @type {number}
    */
-  #z;
+  _z;
 
   /**
    * @param {number} x The X component of the vector.
@@ -30,9 +30,9 @@ export class Vector3D {
    * @param {number} z The Z component of the vector.
    */
   constructor(x, y, z) {
-    this.#x = x;
-    this.#y = y;
-    this.#z = z;
+    this._x = x;
+    this._y = y;
+    this._z = z;
   }
 
   /**
@@ -41,7 +41,7 @@ export class Vector3D {
    * @returns {number} The X component of the vector.
    */
   getX() {
-    return this.#x;
+    return this._x;
   }
 
   /**
@@ -50,7 +50,7 @@ export class Vector3D {
    * @returns {number} The Y component of the vector.
    */
   getY() {
-    return this.#y;
+    return this._y;
   }
 
   /**
@@ -59,7 +59,7 @@ export class Vector3D {
    * @returns {number} The Z component of the vector.
    */
   getZ() {
-    return this.#z;
+    return this._z;
   }
 
   /**
@@ -70,9 +70,9 @@ export class Vector3D {
    */
   equals(rhs) {
     return rhs !== null &&
-      this.#x === rhs.getX() &&
-      this.#y === rhs.getY() &&
-      this.#z === rhs.getZ();
+      this._x === rhs.getX() &&
+      this._y === rhs.getY() &&
+      this._z === rhs.getZ();
   }
 
   /**
@@ -81,9 +81,9 @@ export class Vector3D {
    * @returns {string} The vector as a string.
    */
   toString() {
-    return '(' + this.#x +
-      ', ' + this.#y +
-      ', ' + this.#z + ')';
+    return '(' + this._x +
+      ', ' + this._y +
+      ', ' + this._z + ')';
   }
 
   /**
@@ -93,9 +93,9 @@ export class Vector3D {
    */
   norm() {
     return Math.sqrt(
-      (this.#x * this.#x) +
-      (this.#y * this.#y) +
-      (this.#z * this.#z)
+      (this._x * this._x) +
+      (this._y * this._y) +
+      (this._z * this._z)
     );
   }
 
@@ -111,9 +111,9 @@ export class Vector3D {
    */
   crossProduct(vector3D) {
     return new Vector3D(
-      (this.#y * vector3D.getZ()) - (vector3D.getY() * this.#z),
-      (this.#z * vector3D.getX()) - (vector3D.getZ() * this.#x),
-      (this.#x * vector3D.getY()) - (vector3D.getX() * this.#y));
+      (this._y * vector3D.getZ()) - (vector3D.getY() * this._z),
+      (this._z * vector3D.getX()) - (vector3D.getZ() * this._x),
+      (this._x * vector3D.getY()) - (vector3D.getX() * this._y));
   }
 
   /**
@@ -125,9 +125,9 @@ export class Vector3D {
    * @returns {number} The dot product.
    */
   dotProduct(vector3D) {
-    return (this.#x * vector3D.getX()) +
-      (this.#y * vector3D.getY()) +
-      (this.#z * vector3D.getZ());
+    return (this._x * vector3D.getX()) +
+      (this._y * vector3D.getY()) +
+      (this._z * vector3D.getZ());
   }
 
   /**
@@ -138,7 +138,7 @@ export class Vector3D {
    */
   isCodirectional(vector3D) {
     // a.dot(b) = ||a|| * ||b|| * cos(theta)
-    // (https://en.wikipedia.org/wiki/Dot_product#Geometric_definition)
+    // (https://en.wikipedia.org/wiki/Dot_product_Geometric_definition)
     // -> the sign of the dot product depends on the cosinus of
     //    the angle between the vectors
     //   -> >0 => vectors are codirectional

@@ -58,7 +58,7 @@ class ScrollSum {
    *
    * @type {number}
    */
-  #sum = 0;
+  _sum = 0;
 
   /**
    * Get the scroll sum.
@@ -66,7 +66,7 @@ class ScrollSum {
    * @returns {number} The scroll sum.
    */
   getSum() {
-    return this.#sum;
+    return this._sum;
   }
 
   /**
@@ -75,14 +75,14 @@ class ScrollSum {
    * @param {object} event The wheel event.
    */
   add(event) {
-    this.#sum += getSpinY(event);
+    this._sum += getSpinY(event);
   }
 
   /**
    * Clear the scroll sum.
    */
   clear() {
-    this.#sum = 0;
+    this._sum = 0;
   }
 
   /**
@@ -91,7 +91,7 @@ class ScrollSum {
    * @returns {boolean} True if the sum corresponds to a 'tick'.
    */
   isTick() {
-    return Math.abs(this.#sum) >= 1;
+    return Math.abs(this._sum) >= 1;
   }
 }
 
@@ -105,20 +105,20 @@ export class ScrollWheel {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * Accumulated scroll.
    *
    * @type {ScrollSum}
    */
-  #scrollSum = new ScrollSum();
+  _scrollSum = new ScrollSum();
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -127,21 +127,21 @@ export class ScrollWheel {
    * @param {WheelEvent} event The mouse wheel event.
    */
   wheel(event) {
-    this.#scrollSum.add(event);
-    const up = this.#scrollSum.getSum() >= 0;
+    this._scrollSum.add(event);
+    const up = this._scrollSum.getSum() >= 0;
 
     // exit if no tick
-    if (!this.#scrollSum.isTick()) {
+    if (!this._scrollSum.isTick()) {
       return;
     } else {
-      this.#scrollSum.clear();
+      this._scrollSum.clear();
     }
 
     // prevent default page scroll
     event.preventDefault();
 
     const layerDetails = getLayerDetailsFromEvent(event);
-    const layerGroup = this.#app.getLayerGroupByDivId(layerDetails.groupDivId);
+    const layerGroup = this._app.getLayerGroupByDivId(layerDetails.groupDivId);
     const viewController =
       layerGroup.getActiveViewLayer().getViewController();
     let newPosition;

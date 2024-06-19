@@ -36,13 +36,13 @@ export class Floodfill {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -50,116 +50,116 @@ export class Floodfill {
    *
    * @type {number}
    */
-  #blurRadius = 5;
+  _blurRadius = 5;
   /**
    * Original variables from external library. Used as in the lib example.
    *
    * @type {number}
    */
-  #simplifyTolerant = 0;
+  _simplifyTolerant = 0;
 
   /**
    * Original variables from external library. Used as in the lib example.
    *
    * @type {number}
    */
-  #simplifyCount = 2000;
+  _simplifyCount = 2000;
 
   /**
    * Canvas info.
    *
    * @type {object}
    */
-  #imageInfo = null;
+  _imageInfo = null;
 
   /**
    * Object created by MagicWand lib containing border points.
    *
    * @type {object}
    */
-  #mask = null;
+  _mask = null;
 
   /**
    * Threshold default tolerance of the tool border.
    *
    * @type {number}
    */
-  #initialthreshold = 10;
+  _initialthreshold = 10;
 
   /**
    * Threshold tolerance of the tool border.
    *
    * @type {number}
    */
-  #currentthreshold = null;
+  _currentthreshold = null;
 
   /**
    * Interaction start flag.
    *
    * @type {boolean}
    */
-  #started = false;
+  _started = false;
   /**
    * Draw command.
    *
    * @type {object}
    */
-  #command = null;
+  _command = null;
 
   /**
    * Current shape group.
    *
    * @type {object}
    */
-  #shapeGroup = null;
+  _shapeGroup = null;
 
   /**
    * Coordinates of the fist mousedown event.
    *
    * @type {object}
    */
-  #initialpoint;
+  _initialpoint;
 
   /**
    * Floodfill border.
    *
    * @type {object}
    */
-  #border = null;
+  _border = null;
 
   /**
    * List of parent points.
    *
    * @type {Array}
    */
-  #parentPoints = [];
+  _parentPoints = [];
 
   /**
    * Assistant variable to paint border on all slices.
    *
    * @type {boolean}
    */
-  #extender = false;
+  _extender = false;
 
   /**
    * Timeout for painting on mousemove.
    *
    */
-  #painterTimeout;
+  _painterTimeout;
 
   /**
    * Drawing style.
    *
    * @type {Style}
    */
-  #style = new Style();
+  _style = new Style();
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Set extend option for painting border on all slices.
@@ -167,7 +167,7 @@ export class Floodfill {
    * @param {boolean} bool The option to set.
    */
   setExtend(bool) {
-    this.#extender = bool;
+    this._extender = bool;
   }
 
   /**
@@ -177,7 +177,7 @@ export class Floodfill {
    *   on museup.
    */
   getExtend() {
-    return this.#extender;
+    return this._extender;
   }
 
   /**
@@ -187,8 +187,8 @@ export class Floodfill {
    * @param {string} divId The layer group divId.
    * @returns {Scalar2D} The coordinates as a {x,y}.
    */
-  #getIndex = (point, divId) => {
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
+  _getIndex = (point, divId) => {
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
     const viewLayer = layerGroup.getActiveViewLayer();
     const index = viewLayer.displayToPlaneIndex(point);
     return {
@@ -205,34 +205,34 @@ export class Floodfill {
    * @param {boolean} simple Return first points or a list.
    * @returns {Array} The parent points.
    */
-  #calcBorder(points, threshold, simple) {
+  _calcBorder(points, threshold, simple) {
 
-    this.#parentPoints = [];
+    this._parentPoints = [];
     const image = {
-      data: this.#imageInfo.data,
-      width: this.#imageInfo.width,
-      height: this.#imageInfo.height,
+      data: this._imageInfo.data,
+      width: this._imageInfo.width,
+      height: this._imageInfo.height,
       bytes: 4
     };
 
-    this.#mask = MagicWand.floodFill(image, points.x, points.y, threshold);
-    this.#mask = MagicWand.gaussBlurOnlyBorder(this.#mask, this.#blurRadius);
+    this._mask = MagicWand.floodFill(image, points.x, points.y, threshold);
+    this._mask = MagicWand.gaussBlurOnlyBorder(this._mask, this._blurRadius);
 
-    let cs = MagicWand.traceContours(this.#mask);
+    let cs = MagicWand.traceContours(this._mask);
     cs = MagicWand.simplifyContours(
-      cs, this.#simplifyTolerant, this.#simplifyCount);
+      cs, this._simplifyTolerant, this._simplifyCount);
 
     if (cs.length > 0 && cs[0].points[0].x) {
       if (simple) {
         return cs[0].points;
       }
       for (let j = 0, icsl = cs[0].points.length; j < icsl; j++) {
-        this.#parentPoints.push(new Point2D(
+        this._parentPoints.push(new Point2D(
           cs[0].points[j].x,
           cs[0].points[j].y
         ));
       }
-      return this.#parentPoints;
+      return this._parentPoints;
     } else {
       return [];
     }
@@ -246,14 +246,14 @@ export class Floodfill {
    * @param {LayerGroup} layerGroup The origin layer group.
    * @returns {boolean} False if no border.
    */
-  #paintBorder(point, threshold, layerGroup) {
+  _paintBorder(point, threshold, layerGroup) {
     // Calculate the border
-    this.#border = this.#calcBorder(point, threshold, false);
+    this._border = this._calcBorder(point, threshold, false);
     // Paint the border
-    if (this.#border) {
+    if (this._border) {
       const factory = new RoiFactory();
-      this.#shapeGroup = factory.create(this.#border, this.#style);
-      this.#shapeGroup.id(guid());
+      this._shapeGroup = factory.create(this._border, this._style);
+      this._shapeGroup.id(guid());
 
       const drawLayer = layerGroup.getActiveDrawLayer();
       const drawController = drawLayer.getDrawController();
@@ -261,20 +261,20 @@ export class Floodfill {
       // get the position group
       const posGroup = drawController.getCurrentPosGroup();
       // add shape group to position group
-      posGroup.add(this.#shapeGroup);
+      posGroup.add(this._shapeGroup);
 
       // draw shape command
-      this.#command = new DrawGroupCommand(
-        this.#shapeGroup,
+      this._command = new DrawGroupCommand(
+        this._shapeGroup,
         'floodfill',
         drawLayer
       );
-      this.#command.onExecute = this.#fireEvent;
-      this.#command.onUndo = this.#fireEvent;
+      this._command.onExecute = this._fireEvent;
+      this._command.onUndo = this._fireEvent;
       // // draw
-      this.#command.execute();
+      this._command.execute();
       // save it in undo stack
-      this.#app.addToUndoStack(this.#command);
+      this._app.addToUndoStack(this._command);
 
       return true;
     } else {
@@ -291,12 +291,12 @@ export class Floodfill {
    */
   extend(ini, end, layerGroup) {
     //avoid errors
-    if (!this.#initialpoint) {
+    if (!this._initialpoint) {
       throw '\'initialpoint\' not found. User must click before use extend!';
     }
     // remove previous draw
-    if (this.#shapeGroup) {
-      this.#shapeGroup.destroy();
+    if (this._shapeGroup) {
+      this._shapeGroup.destroy();
     }
 
     const viewController =
@@ -304,14 +304,14 @@ export class Floodfill {
 
     const pos = viewController.getCurrentIndex();
     const imageSize = viewController.getImageSize();
-    const threshold = this.#currentthreshold || this.#initialthreshold;
+    const threshold = this._currentthreshold || this._initialthreshold;
 
     // Iterate over the next images and paint border on each slice.
     for (let i = pos.get(2),
       len = end
         ? end : imageSize.get(2);
       i < len; i++) {
-      if (!this.#paintBorder(this.#initialpoint, threshold, layerGroup)) {
+      if (!this._paintBorder(this._initialpoint, threshold, layerGroup)) {
         break;
       }
       viewController.incrementIndex(2);
@@ -320,7 +320,7 @@ export class Floodfill {
 
     // Iterate over the prev images and paint border on each slice.
     for (let j = pos.get(2), jl = ini ? ini : 0; j > jl; j--) {
-      if (!this.#paintBorder(this.#initialpoint, threshold, layerGroup)) {
+      if (!this._paintBorder(this._initialpoint, threshold, layerGroup)) {
         break;
       }
       viewController.decrementIndex(2);
@@ -336,25 +336,25 @@ export class Floodfill {
    */
   modifyThreshold(modifyThreshold, shape) {
 
-    if (!shape && this.#shapeGroup) {
-      shape = this.#shapeGroup.getChildren(function (node) {
+    if (!shape && this._shapeGroup) {
+      shape = this._shapeGroup.getChildren(function (node) {
         return node.name() === 'shape';
       })[0];
     } else {
       throw 'No shape found';
     }
 
-    clearTimeout(this.#painterTimeout);
-    this.#painterTimeout = setTimeout(() => {
-      this.#border = this.#calcBorder(
-        this.#initialpoint, modifyThreshold, true);
-      if (!this.#border) {
+    clearTimeout(this._painterTimeout);
+    this._painterTimeout = setTimeout(() => {
+      this._border = this._calcBorder(
+        this._initialpoint, modifyThreshold, true);
+      if (!this._border) {
         return false;
       }
       const arr = [];
-      for (let i = 0, bl = this.#border.length; i < bl; ++i) {
-        arr.push(this.#border[i].x);
-        arr.push(this.#border[i].y);
+      for (let i = 0, bl = this._border.length; i < bl; ++i) {
+        arr.push(this._border[i].x);
+        arr.push(this._border[i].y);
       }
       shape.setPoints(arr);
       const shapeLayer = shape.getLayer();
@@ -378,25 +378,25 @@ export class Floodfill {
    * @param {Point2D} point The start point.
    * @param {string} divId The layer group divId.
    */
-  #start(point, divId) {
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
+  _start(point, divId) {
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
     const viewLayer = layerGroup.getActiveViewLayer();
     const drawLayer = layerGroup.getActiveDrawLayer();
 
-    this.#imageInfo = viewLayer.getImageData();
-    if (!this.#imageInfo) {
+    this._imageInfo = viewLayer.getImageData();
+    if (!this._imageInfo) {
       logger.error('No image found');
       return;
     }
 
     // update zoom scale
-    this.#style.setZoomScale(
+    this._style.setZoomScale(
       drawLayer.getKonvaLayer().getAbsoluteScale());
 
-    this.#started = true;
-    this.#initialpoint = this.#getIndex(point, divId);
-    this.#paintBorder(this.#initialpoint, this.#initialthreshold, layerGroup);
-    this.onThresholdChange(this.#initialthreshold);
+    this._started = true;
+    this._initialpoint = this._getIndex(point, divId);
+    this._paintBorder(this._initialpoint, this._initialthreshold, layerGroup);
+    this.onThresholdChange(this._initialthreshold);
   }
 
   /**
@@ -405,27 +405,27 @@ export class Floodfill {
    * @param {Point2D} point The update point.
    * @param {string} divId The layer group divId.
    */
-  #update(point, divId) {
-    if (!this.#started) {
+  _update(point, divId) {
+    if (!this._started) {
       return;
     }
 
-    const movedpoint = this.#getIndex(point, divId);
-    this.#currentthreshold = Math.round(Math.sqrt(
-      Math.pow((this.#initialpoint.x - movedpoint.x), 2) +
-      Math.pow((this.#initialpoint.y - movedpoint.y), 2)) / 2);
-    this.#currentthreshold = this.#currentthreshold < this.#initialthreshold
-      ? this.#initialthreshold
-      : this.#currentthreshold - this.#initialthreshold;
-    this.modifyThreshold(this.#currentthreshold);
+    const movedpoint = this._getIndex(point, divId);
+    this._currentthreshold = Math.round(Math.sqrt(
+      Math.pow((this._initialpoint.x - movedpoint.x), 2) +
+      Math.pow((this._initialpoint.y - movedpoint.y), 2)) / 2);
+    this._currentthreshold = this._currentthreshold < this._initialthreshold
+      ? this._initialthreshold
+      : this._currentthreshold - this._initialthreshold;
+    this.modifyThreshold(this._currentthreshold);
   }
 
   /**
    * Finish tool interaction.
    */
-  #finish() {
-    if (this.#started) {
-      this.#started = false;
+  _finish() {
+    if (this._started) {
+      this._started = false;
     }
   }
 
@@ -437,7 +437,7 @@ export class Floodfill {
   mousedown = (event) => {
     const mousePoint = getMousePoint(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#start(mousePoint, layerDetails.groupDivId);
+    this._start(mousePoint, layerDetails.groupDivId);
   };
 
   /**
@@ -448,7 +448,7 @@ export class Floodfill {
   mousemove = (event) => {
     const mousePoint = getMousePoint(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#update(mousePoint, layerDetails.groupDivId);
+    this._update(mousePoint, layerDetails.groupDivId);
   };
 
   /**
@@ -457,12 +457,12 @@ export class Floodfill {
    * @param {object} _event The mouse up event.
    */
   mouseup = (_event) => {
-    this.#finish();
+    this._finish();
     // TODO: re-activate
-    // if (this.#extender) {
+    // if (this._extender) {
     //   const layerDetails = getLayerDetailsFromEvent(event);
     //   const layerGroup =
-    //     this.#app.getLayerGroupByDivId(layerDetails.groupDivId);
+    //     this._app.getLayerGroupByDivId(layerDetails.groupDivId);
     //   this.extend(layerGroup);
     // }
   };
@@ -473,7 +473,7 @@ export class Floodfill {
    * @param {object} _event The mouse out event.
    */
   mouseout = (_event) => {
-    this.#finish();
+    this._finish();
   };
 
   /**
@@ -484,7 +484,7 @@ export class Floodfill {
   touchstart = (event) => {
     const touchPoints = getTouchPoints(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#start(touchPoints[0], layerDetails.groupDivId);
+    this._start(touchPoints[0], layerDetails.groupDivId);
   };
 
   /**
@@ -495,7 +495,7 @@ export class Floodfill {
   touchmove = (event) => {
     const touchPoints = getTouchPoints(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#update(touchPoints[0], layerDetails.groupDivId);
+    this._update(touchPoints[0], layerDetails.groupDivId);
   };
 
   /**
@@ -504,7 +504,7 @@ export class Floodfill {
    * @param {object} _event The touch end event.
    */
   touchend = (_event) => {
-    this.#finish();
+    this._finish();
   };
 
   /**
@@ -514,7 +514,7 @@ export class Floodfill {
    */
   keydown = (event) => {
     event.context = 'Floodfill';
-    this.#app.onKeydown(event);
+    this._app.onKeydown(event);
   };
 
   /**
@@ -525,9 +525,9 @@ export class Floodfill {
   activate(bool) {
     if (bool) {
       // init with the app window scale
-      this.#style.setBaseScale(this.#app.getBaseScale());
+      this._style.setBaseScale(this._app.getBaseScale());
       // set the default to the first in the list
-      this.setFeatures({shapeColour: this.#style.getLineColour()});
+      this.setFeatures({shapeColour: this._style.getLineColour()});
     }
   }
 
@@ -555,7 +555,7 @@ export class Floodfill {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -566,7 +566,7 @@ export class Floodfill {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -574,8 +574,8 @@ export class Floodfill {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   /**
@@ -585,7 +585,7 @@ export class Floodfill {
    */
   setFeatures(features) {
     if (typeof features.shapeColour !== 'undefined') {
-      this.#style.setLineColour(features.shapeColour);
+      this._style.setLineColour(features.shapeColour);
     }
   }
 

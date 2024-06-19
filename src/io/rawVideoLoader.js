@@ -37,7 +37,7 @@ export class RawVideoLoader {
    * @param {string} dataType The data type.
    * @returns {string} The data URI.
    */
-  #createDataUri(response, dataType) {
+  _createDataUri(response, dataType) {
     // image data as string
     const bytes = new Uint8Array(response);
     let videoDataStr = '';
@@ -63,7 +63,7 @@ export class RawVideoLoader {
     if (typeof origin === 'string') {
       // url case
       const ext = origin.split('.').pop().toLowerCase();
-      video.src = this.#createDataUri(buffer, ext);
+      video.src = this._createDataUri(buffer, ext);
     } else {
       video.src = buffer;
     }

@@ -35,14 +35,14 @@ export class Circle {
    *
    * @type {Point2D}
    */
-  #centre;
+  _centre;
 
   /**
    * Circle radius.
    *
    * @type {number}
    */
-  #radius;
+  _radius;
 
   /**
    * @param {Point2D} centre A Point2D representing the centre
@@ -50,8 +50,8 @@ export class Circle {
    * @param {number} radius The radius of the circle.
    */
   constructor(centre, radius) {
-    this.#centre = centre;
-    this.#radius = radius;
+    this._centre = centre;
+    this._radius = radius;
   }
 
   /**
@@ -60,7 +60,7 @@ export class Circle {
    * @returns {Point2D} The center (point) of the circle.
    */
   getCenter() {
-    return this.#centre;
+    return this._centre;
   }
 
   /**
@@ -69,7 +69,7 @@ export class Circle {
    * @returns {number} The radius of the circle.
    */
   getRadius() {
-    return this.#radius;
+    return this._radius;
   }
 
 
@@ -108,7 +108,7 @@ export class Circle {
   /**
    * Get the rounded limits of the circle.
    *
-   * See: {@link https://en.wikipedia.org/wiki/Circle#Equations}.
+   * See: {@link https://en.wikipedia.org/wiki/Circle_Equations}.
    *
    * Circle formula: `x*x + y*y = r*r`.
    *

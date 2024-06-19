@@ -11,35 +11,35 @@ export class MemoryLoader {
    *
    * @type {Array}
    */
-  #inputData = null;
+  _inputData = null;
 
   /**
    * Data loader.
    *
    * @type {object}
    */
-  #runningLoader = null;
+  _runningLoader = null;
 
   /**
    * Number of loaded data.
    *
    * @type {number}
    */
-  #nLoad = 0;
+  _nLoad = 0;
 
   /**
    * Number of load end events.
    *
    * @type {number}
    */
-  #nLoadend = 0;
+  _nLoadend = 0;
 
   /**
    * The default character set (optional).
    *
    * @type {string}
    */
-  #defaultCharacterSet;
+  _defaultCharacterSet;
 
   /**
    * Get the default character set.
@@ -47,7 +47,7 @@ export class MemoryLoader {
    * @returns {string} The default character set.
    */
   getDefaultCharacterSet() {
-    return this.#defaultCharacterSet;
+    return this._defaultCharacterSet;
   }
 
   /**
@@ -56,7 +56,7 @@ export class MemoryLoader {
    * @param {string} characterSet The character set.
    */
   setDefaultCharacterSet(characterSet) {
-    this.#defaultCharacterSet = characterSet;
+    this._defaultCharacterSet = characterSet;
   }
 
   /**
@@ -64,13 +64,13 @@ export class MemoryLoader {
    *
    * @param {object} data The input data.
    */
-  #storeInputData(data) {
-    this.#inputData = data;
+  _storeInputData(data) {
+    this._inputData = data;
     // reset counters
-    this.#nLoad = 0;
-    this.#nLoadend = 0;
+    this._nLoad = 0;
+    this._nLoadend = 0;
     // clear storage
-    this.#clearStoredLoader();
+    this._clearStoredLoader();
   }
 
   /**
@@ -78,16 +78,16 @@ export class MemoryLoader {
    *
    * @param {object} loader The launched loader.
    */
-  #storeLoader(loader) {
-    this.#runningLoader = loader;
+  _storeLoader(loader) {
+    this._runningLoader = loader;
   }
 
   /**
    * Clear the stored loader.
    *
    */
-  #clearStoredLoader() {
-    this.#runningLoader = null;
+  _clearStoredLoader() {
+    this._runningLoader = null;
   }
 
   /**
@@ -96,14 +96,14 @@ export class MemoryLoader {
    *
    * @param {object} _event The load data event.
    */
-  #addLoad = (_event) => {
-    this.#nLoad++;
+  _addLoad = (_event) => {
+    this._nLoad++;
     // call onload when all is loaded
     // (not using the input event since it is not the
     //   general load)
-    if (this.#nLoad === this.#inputData.length) {
+    if (this._nLoad === this._inputData.length) {
       this.onload({
-        source: this.#inputData
+        source: this._inputData
       });
     }
   };
@@ -114,14 +114,14 @@ export class MemoryLoader {
    *
    * @param {object} _event The load end event.
    */
-  #addLoadend = (_event) => {
-    this.#nLoadend++;
+  _addLoadend = (_event) => {
+    this._nLoadend++;
     // call onloadend when all is run
     // (not using the input event since it is not the
     //   general load end)
-    if (this.#nLoadend === this.#inputData.length) {
+    if (this._nLoadend === this._inputData.length) {
       this.onloadend({
-        source: this.#inputData
+        source: this._inputData
       });
     }
   };
@@ -136,7 +136,7 @@ export class MemoryLoader {
     if (typeof data === 'undefined' || data.length === 0) {
       return;
     }
-    this.#storeInputData(data);
+    this._storeInputData(data);
 
     // send start event
     this.onloadstart({
@@ -171,13 +171,13 @@ export class MemoryLoader {
         // loader.onloadstart: nothing to do
         loader.onprogress = mproghandler.getUndefinedMonoProgressHandler(0);
         loader.onloaditem = this.onloaditem;
-        loader.onload = this.#addLoad;
-        loader.onloadend = this.#addLoadend;
+        loader.onload = this._addLoad;
+        loader.onloadend = this._addLoadend;
         loader.onerror = this.onerror;
         loader.onabort = this.onabort;
 
         // store loader
-        this.#storeLoader(loader);
+        this._storeLoader(loader);
         // exit
         break;
       }
@@ -204,8 +204,8 @@ export class MemoryLoader {
    */
   abort() {
     // abort loader
-    if (this.#runningLoader && this.#runningLoader.isLoading()) {
-      this.#runningLoader.abort();
+    if (this._runningLoader && this._runningLoader.isLoading()) {
+      this._runningLoader.abort();
     }
   }
 

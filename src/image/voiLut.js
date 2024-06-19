@@ -21,63 +21,63 @@ export class VoiLut {
    *
    * @type {WindowLevel}
    */
-  #windowLevel;
+  _windowLevel;
 
   /**
    * Signed data offset. Defaults to 0.
    *
    * @type {number}
    */
-  #signedOffset = 0;
+  _signedOffset = 0;
 
   /**
    * Output value minimum. Defaults to 0.
    *
    * @type {number}
    */
-  #ymin = 0;
+  _ymin = 0;
 
   /**
    * Output value maximum. Defaults to 255.
    *
    * @type {number}
    */
-  #ymax = 255;
+  _ymax = 255;
 
   /**
    * Input value minimum (calculated).
    *
    * @type {number}
    */
-  #xmin = null;
+  _xmin = null;
 
   /**
    * Input value maximum (calculated).
    *
    * @type {number}
    */
-  #xmax = null;
+  _xmax = null;
 
   /**
    * Window level equation slope (calculated).
    *
    * @type {number}
    */
-  #slope = null;
+  _slope = null;
 
   /**
    * Window level equation intercept (calculated).
    *
    * @type {number}
    */
-  #inter = null;
+  _inter = null;
 
   /**
    * @param {WindowLevel} wl The window center and width.
    */
   constructor(wl) {
-    this.#windowLevel = wl;
-    this.#init();
+    this._windowLevel = wl;
+    this._init();
   }
 
   /**
@@ -86,27 +86,27 @@ export class VoiLut {
    * @returns {WindowLevel} The window center and width.
    */
   getWindowLevel() {
-    return this.#windowLevel;
+    return this._windowLevel;
   }
 
   /**
    * Initialise members. Called at construction.
    *
    */
-  #init() {
-    const center = this.#windowLevel.center;
-    const width = this.#windowLevel.width;
-    const c = center + this.#signedOffset;
+  _init() {
+    const center = this._windowLevel.center;
+    const width = this._windowLevel.width;
+    const c = center + this._signedOffset;
     // from the standard
-    this.#xmin = c - 0.5 - ((width - 1) / 2);
-    this.#xmax = c - 0.5 + ((width - 1) / 2);
+    this._xmin = c - 0.5 - ((width - 1) / 2);
+    this._xmax = c - 0.5 + ((width - 1) / 2);
     // develop the equation:
     // y = ( ( x - (c - 0.5) ) / (w-1) + 0.5 ) * (ymax - ymin) + ymin
     // y = ( x / (w-1) ) * (ymax - ymin) +
     //     ( -(c - 0.5) / (w-1) + 0.5 ) * (ymax - ymin) + ymin
-    this.#slope = (this.#ymax - this.#ymin) / (width - 1);
-    this.#inter = (-(c - 0.5) / (width - 1) + 0.5) *
-      (this.#ymax - this.#ymin) + this.#ymin;
+    this._slope = (this._ymax - this._ymin) / (width - 1);
+    this._inter = (-(c - 0.5) / (width - 1) + 0.5) *
+      (this._ymax - this._ymin) + this._ymin;
   }
 
   /**
@@ -116,9 +116,9 @@ export class VoiLut {
    *   typically: slope * ( size / 2).
    */
   setSignedOffset(offset) {
-    this.#signedOffset = offset;
+    this._signedOffset = offset;
     // re-initialise
-    this.#init();
+    this._init();
   }
 
   /**
@@ -129,12 +129,12 @@ export class VoiLut {
    *  [ymin, ymax] range (default [0,255]).
    */
   apply(value) {
-    if (value <= this.#xmin) {
-      return this.#ymin;
-    } else if (value > this.#xmax) {
-      return this.#ymax;
+    if (value <= this._xmin) {
+      return this._ymin;
+    } else if (value > this._xmax) {
+      return this._ymax;
     } else {
-      return (value * this.#slope) + this.#inter;
+      return (value * this._slope) + this._inter;
     }
   }
 

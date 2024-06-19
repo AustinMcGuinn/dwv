@@ -18,20 +18,20 @@ export class MaskSegmentHelper {
    *
    * @type {Image}
    */
-  #mask;
+  _mask;
 
   /**
    * The segments: array of segment description.
    *
    * @type {MaskSegment[]}
    */
-  #segments;
+  _segments;
 
   /**
    * @param {Image} mask The associated mask image.
    */
   constructor(mask) {
-    this.#mask = mask;
+    this._mask = mask;
     // check segments in meta
     const meta = mask.getMeta();
     if (typeof meta.custom === 'undefined') {
@@ -40,7 +40,7 @@ export class MaskSegmentHelper {
     if (typeof meta.custom.segments === 'undefined') {
       meta.custom.segments = [];
     }
-    this.#segments = meta.custom.segments;
+    this._segments = meta.custom.segments;
   }
 
   /**
@@ -49,8 +49,8 @@ export class MaskSegmentHelper {
    * @param {number} segmentNumber The number to find.
    * @returns {number} The index in the segments list, -1 if not found.
    */
-  #findSegmentIndex(segmentNumber) {
-    return this.#segments.findIndex(function (item) {
+  _findSegmentIndex(segmentNumber) {
+    return this._segments.findIndex(function (item) {
       return item.number === segmentNumber;
     });
   }
@@ -62,7 +62,7 @@ export class MaskSegmentHelper {
    * @returns {boolean} True if the segment is included.
    */
   hasSegment(segmentNumber) {
-    return this.#findSegmentIndex(segmentNumber) !== -1;
+    return this._findSegmentIndex(segmentNumber) !== -1;
   }
 
   /**
@@ -89,7 +89,7 @@ export class MaskSegmentHelper {
         unknowns.push(i);
       }
     }
-    const res = this.#mask.hasValues(values);
+    const res = this._mask.hasValues(values);
     // insert unknowns as false in result
     for (let j = 0; j < unknowns.length; ++j) {
       res.splice(unknowns[j], 0, false);
@@ -105,9 +105,9 @@ export class MaskSegmentHelper {
    */
   getSegment(segmentNumber) {
     let segment;
-    const index = this.#findSegmentIndex(segmentNumber);
+    const index = this._findSegmentIndex(segmentNumber);
     if (index !== -1) {
-      segment = this.#segments[index];
+      segment = this._segments[index];
     }
     return segment;
   }
@@ -118,9 +118,9 @@ export class MaskSegmentHelper {
    * @param {MaskSegment} segment The segment to add.
    */
   addSegment(segment) {
-    const index = this.#findSegmentIndex(segment.number);
+    const index = this._findSegmentIndex(segment.number);
     if (index === -1) {
-      this.#segments.push(segment);
+      this._segments.push(segment);
     } else {
       logger.warn(
         'Not adding segment, it is allready in the segments list: ' +
@@ -134,9 +134,9 @@ export class MaskSegmentHelper {
    * @param {number} segmentNumber The segment number.
    */
   removeSegment(segmentNumber) {
-    const index = this.#findSegmentIndex(segmentNumber);
+    const index = this._findSegmentIndex(segmentNumber);
     if (index !== -1) {
-      this.#segments.splice(index, 1);
+      this._segments.splice(index, 1);
     } else {
       logger.warn(
         'Cannot remove segment, it is not in the segments list: ' +
@@ -150,9 +150,9 @@ export class MaskSegmentHelper {
    * @param {MaskSegment} segment The segment to update.
    */
   updateSegment(segment) {
-    const index = this.#findSegmentIndex(segment.number);
+    const index = this._findSegmentIndex(segment.number);
     if (index !== -1) {
-      this.#segments[index] = segment;
+      this._segments[index] = segment;
     } else {
       logger.warn(
         'Cannot update segment, it is not in the segments list: ' +

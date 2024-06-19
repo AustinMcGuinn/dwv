@@ -43,21 +43,21 @@ export class DataController {
    *
    * @type {Object<string, DicomData>}
    */
-  #dataList = {};
+  _dataList = {};
 
   /**
    * Distinct data loaded counter.
    *
    * @type {number}
    */
-  #dataIdCounter = -1;
+  _dataIdCounter = -1;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Get the next data id.
@@ -65,8 +65,8 @@ export class DataController {
    * @returns {string} The data id.
    */
   getNextDataId() {
-    ++this.#dataIdCounter;
-    return this.#dataIdCounter.toString();
+    ++this._dataIdCounter;
+    return this._dataIdCounter.toString();
   }
 
   /**
@@ -75,14 +75,14 @@ export class DataController {
    * @returns {string[]} The list of data ids.
    */
   getDataIds() {
-    return Object.keys(this.#dataList);
+    return Object.keys(this._dataList);
   }
 
   /**
    * Reset the class: empty the data storage.
    */
   reset() {
-    this.#dataList = {};
+    this._dataList = {};
   }
 
   /**
@@ -92,7 +92,7 @@ export class DataController {
    * @returns {DicomData|undefined} The DICOM data.
    */
   get(dataId) {
-    return this.#dataList[dataId];
+    return this._dataList[dataId];
   }
 
   /**
@@ -108,9 +108,9 @@ export class DataController {
       uids.length === 0) {
       return res;
     }
-    const keys = Object.keys(this.#dataList);
+    const keys = Object.keys(this._dataList);
     for (const key of keys) {
-      if (this.#dataList[key].image.containsImageUids(uids)) {
+      if (this._dataList[key].image.containsImageUids(uids)) {
         res.push(key);
       }
     }
@@ -124,16 +124,16 @@ export class DataController {
    * @param {Image} image The image to set.
    */
   setImage(dataId, image) {
-    this.#dataList[dataId].image = image;
+    this._dataList[dataId].image = image;
     // fire image set
-    this.#fireEvent({
+    this._fireEvent({
       type: 'imageset',
       value: [image],
       dataid: dataId
     });
     // listen to image change
-    image.addEventListener('imagecontentchange', this.#getFireEvent(dataId));
-    image.addEventListener('imagegeometrychange', this.#getFireEvent(dataId));
+    image.addEventListener('imagecontentchange', this._getFireEvent(dataId));
+    image.addEventListener('imagegeometrychange', this._getFireEvent(dataId));
   }
 
   /**
@@ -144,15 +144,15 @@ export class DataController {
    * @param {object} meta The image meta.
    */
   addNew(dataId, image, meta) {
-    if (typeof this.#dataList[dataId] !== 'undefined') {
+    if (typeof this._dataList[dataId] !== 'undefined') {
       throw new Error('Data id already used in storage: ' + dataId);
     }
     // store the new image
-    this.#dataList[dataId] = new DicomData(meta, image);
+    this._dataList[dataId] = new DicomData(meta, image);
     // listen to image change
     if (typeof image !== 'undefined') {
-      image.addEventListener('imagecontentchange', this.#getFireEvent(dataId));
-      image.addEventListener('imagegeometrychange', this.#getFireEvent(dataId));
+      image.addEventListener('imagecontentchange', this._getFireEvent(dataId));
+      image.addEventListener('imagegeometrychange', this._getFireEvent(dataId));
     }
   }
 
@@ -162,22 +162,22 @@ export class DataController {
    * @param {string} dataId The data id.
    */
   remove(dataId) {
-    if (typeof this.#dataList[dataId] !== 'undefined') {
+    if (typeof this._dataList[dataId] !== 'undefined') {
       // stop listeners
-      const image = this.#dataList[dataId].image;
+      const image = this._dataList[dataId].image;
       if (typeof image !== 'undefined') {
         image.removeEventListener(
-          'imagecontentchange', this.#getFireEvent(dataId));
+          'imagecontentchange', this._getFireEvent(dataId));
         image.removeEventListener(
-          'imagegeometrychange', this.#getFireEvent(dataId));
+          'imagegeometrychange', this._getFireEvent(dataId));
       }
       // fire a data remove event
-      this.#fireEvent({
+      this._fireEvent({
         type: 'imageremove',
         dataid: dataId
       });
       // remove data from list
-      delete this.#dataList[dataId];
+      delete this._dataList[dataId];
     }
   }
 
@@ -189,10 +189,10 @@ export class DataController {
    * @param {object} meta The image meta.
    */
   update(dataId, image, meta) {
-    if (typeof this.#dataList[dataId] === 'undefined') {
+    if (typeof this._dataList[dataId] === 'undefined') {
       throw new Error('Cannot find data to update: ' + dataId);
     }
-    const dataToUpdate = this.#dataList[dataId];
+    const dataToUpdate = this._dataList[dataId];
 
     // add slice to current image
     if (typeof dataToUpdate.image !== 'undefined' &&
@@ -225,7 +225,7 @@ export class DataController {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -236,7 +236,7 @@ export class DataController {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -244,8 +244,8 @@ export class DataController {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   /**
@@ -255,10 +255,10 @@ export class DataController {
    * @param {string} dataId The data id.
    * @returns {Function} A fireEvent function.
    */
-  #getFireEvent(dataId) {
+  _getFireEvent(dataId) {
     return (event) => {
       event.dataid = dataId;
-      this.#fireEvent(event);
+      this._fireEvent(event);
     };
   }
 

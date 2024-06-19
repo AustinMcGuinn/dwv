@@ -44,35 +44,35 @@ export class DrawGroupCommand {
    *
    * @type {Konva.Group}
    */
-  #group;
+  _group;
 
   /**
    * The shape display name.
    *
    * @type {string}
    */
-  #name;
+  _name;
 
   /**
    * The draw layer.
    *
    * @type {DrawLayer}
    */
-  #layer;
+  _layer;
 
   /**
    * Flag to send events.
    *
    * @type {boolean}
    */
-  #isSilent;
+  _isSilent;
 
   /**
    * The group parent.
    *
    * @type {object}
    */
-  #parent;
+  _parent;
 
   /**
    * @param {Konva.Group} group The group draw.
@@ -81,11 +81,11 @@ export class DrawGroupCommand {
    * @param {boolean} [silent] Whether to send a creation event or not.
    */
   constructor(group, name, layer, silent) {
-    this.#group = group;
-    this.#name = name;
-    this.#layer = layer;
-    this.#isSilent = (typeof silent === 'undefined') ? false : silent;
-    this.#parent = group.getParent();
+    this._group = group;
+    this._name = name;
+    this._layer = layer;
+    this._isSilent = (typeof silent === 'undefined') ? false : silent;
+    this._parent = group.getParent();
   }
 
   /**
@@ -94,25 +94,25 @@ export class DrawGroupCommand {
    * @returns {string} The command name.
    */
   getName() {
-    return 'Draw-' + this.#name;
+    return 'Draw-' + this._name;
   }
 
   /**
    * Execute the command.
    *
-   * @fires DrawGroupCommand#drawcreate
+   * @fires DrawGroupCommand_drawcreate
    */
   execute() {
     // add the group to the parent (in case of undo/redo)
-    this.#parent.add(this.#group);
+    this._parent.add(this._group);
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
-    if (!this.#isSilent) {
+    if (!this._isSilent) {
       /**
        * Draw create event.
        *
-       * @event DrawGroupCommand#drawcreate
+       * @event DrawGroupCommand_drawcreate
        * @type {object}
        * @property {string} id The id of the created draw.
        * @property {string} srclayerid The id of the layer of the draw.
@@ -120,9 +120,9 @@ export class DrawGroupCommand {
        */
       this.onExecute({
         type: 'drawcreate',
-        id: this.#group.id(),
-        srclayerid: this.#layer.getId(),
-        dataid: this.#layer.getDataId()
+        id: this._group.id(),
+        srclayerid: this._layer.getId(),
+        dataid: this._layer.getDataId()
       });
     }
   }
@@ -130,19 +130,19 @@ export class DrawGroupCommand {
   /**
    * Undo the command.
    *
-   * @fires DeleteGroupCommand#drawdelete
+   * @fires DeleteGroupCommand_drawdelete
    */
   undo() {
     // remove the group from the parent layer
-    this.#group.remove();
+    this._group.remove();
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     this.onUndo({
       type: 'drawdelete',
-      id: this.#group.id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._group.id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 
@@ -177,28 +177,28 @@ export class MoveGroupCommand {
    *
    * @type {Konva.Group}
    */
-  #group;
+  _group;
 
   /**
    * The shape display name.
    *
    * @type {string}
    */
-  #name;
+  _name;
 
   /**
    * The 2D translation as {x,y}.
    *
    * @type {Scalar2D}
    */
-  #translation;
+  _translation;
 
   /**
    * The draw layer.
    *
    * @type {DrawLayer}
    */
-  #layer;
+  _layer;
 
   /**
    * @param {Konva.Group} group The group draw.
@@ -207,10 +207,10 @@ export class MoveGroupCommand {
    * @param {DrawLayer} layer The layer where to move the group.
    */
   constructor(group, name, translation, layer) {
-    this.#group = group;
-    this.#name = name;
-    this.#translation = translation;
-    this.#layer = layer;
+    this._group = group;
+    this._name = name;
+    this._translation = translation;
+    this._layer = layer;
   }
 
   /**
@@ -219,24 +219,24 @@ export class MoveGroupCommand {
    * @returns {string} The command name.
    */
   getName() {
-    return 'Move-' + this.#name;
+    return 'Move-' + this._name;
   }
 
   /**
    * Execute the command.
    *
-   * @fires MoveGroupCommand#drawmove
+   * @fires MoveGroupCommand_drawmove
    */
   execute() {
     // translate group
-    this.#group.move(this.#translation);
+    this._group.move(this._translation);
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     /**
      * Draw move event.
      *
-     * @event MoveGroupCommand#drawmove
+     * @event MoveGroupCommand_drawmove
      * @type {object}
      * @property {string} id The id of the create draw.
      * @property {string} srclayerid The id of the layer of the draw.
@@ -244,32 +244,32 @@ export class MoveGroupCommand {
      */
     this.onExecute({
       type: 'drawmove',
-      id: this.#group.id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._group.id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 
   /**
    * Undo the command.
    *
-   * @fires MoveGroupCommand#drawmove
+   * @fires MoveGroupCommand_drawmove
    */
   undo() {
     // invert translate group
     const minusTrans = {
-      x: -this.#translation.x,
-      y: -this.#translation.y
+      x: -this._translation.x,
+      y: -this._translation.y
     };
-    this.#group.move(minusTrans);
+    this._group.move(minusTrans);
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     this.onUndo({
       type: 'drawmove',
-      id: this.#group.id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._group.id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 
@@ -304,49 +304,49 @@ export class ChangeGroupCommand {
    *
    * @type {string}
    */
-  #name;
+  _name;
 
   /**
    * The shape factory.
    *
    * @type {object}
    */
-  #factory;
+  _factory;
 
   /**
    * The start anchor.
    *
    * @type {object}
    */
-  #startAnchor;
+  _startAnchor;
 
   /**
    * The end anchor.
    *
    * @type {object}
    */
-  #endAnchor;
+  _endAnchor;
 
   /**
    * The draw layer.
    *
    * @type {DrawLayer}
    */
-  #layer;
+  _layer;
 
   /**
    * The associated view controller.
    *
    * @type {ViewController}
    */
-  #viewController;
+  _viewController;
 
   /**
    * The app style.
    *
    * @type {Style}
    */
-  #style;
+  _style;
 
   /**
    * @param {string} name The shape display name.
@@ -359,13 +359,13 @@ export class ChangeGroupCommand {
    */
   constructor(
     name, factory, startAnchor, endAnchor, layer, viewController, style) {
-    this.#name = name;
-    this.#factory = factory;
-    this.#startAnchor = startAnchor;
-    this.#endAnchor = endAnchor;
-    this.#layer = layer;
-    this.#viewController = viewController;
-    this.#style = style;
+    this._name = name;
+    this._factory = factory;
+    this._startAnchor = startAnchor;
+    this._endAnchor = endAnchor;
+    this._layer = layer;
+    this._viewController = viewController;
+    this._style = style;
   }
 
   /**
@@ -374,28 +374,28 @@ export class ChangeGroupCommand {
    * @returns {string} The command name.
    */
   getName() {
-    return 'Change-' + this.#name;
+    return 'Change-' + this._name;
   }
 
   /**
    * Execute the command.
    *
-   * @fires ChangeGroupCommand#drawchange
+   * @fires ChangeGroupCommand_drawchange
    */
   execute() {
     // change shape
-    this.#factory.update(
-      this.#endAnchor,
-      this.#style,
-      this.#viewController
+    this._factory.update(
+      this._endAnchor,
+      this._style,
+      this._viewController
     );
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     /**
      * Draw change event.
      *
-     * @event ChangeGroupCommand#drawchange
+     * @event ChangeGroupCommand_drawchange
      * @type {object}
      * @property {string} id The id of the created draw.
      * @property {string} srclayerid The id of the layer of the draw.
@@ -403,32 +403,32 @@ export class ChangeGroupCommand {
      */
     this.onExecute({
       type: 'drawchange',
-      id: this.#endAnchor.getParent().id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._endAnchor.getParent().id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 
   /**
    * Undo the command.
    *
-   * @fires ChangeGroupCommand#drawchange
+   * @fires ChangeGroupCommand_drawchange
    */
   undo() {
     // invert change shape
-    this.#factory.update(
-      this.#startAnchor,
-      this.#style,
-      this.#viewController
+    this._factory.update(
+      this._startAnchor,
+      this._style,
+      this._viewController
     );
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     this.onUndo({
       type: 'drawchange',
-      id: this.#startAnchor.getParent().id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._startAnchor.getParent().id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 
@@ -462,28 +462,28 @@ export class DeleteGroupCommand {
    *
    * @type {Konva.Group}
    */
-  #group;
+  _group;
 
   /**
    * The shape display name.
    *
    * @type {string}
    */
-  #name;
+  _name;
 
   /**
    * The draw layer.
    *
    * @type {DrawLayer}
    */
-  #layer;
+  _layer;
 
   /**
    * The group parent.
    *
    * @type {Konva.Container}
    */
-  #parent;
+  _parent;
 
   /**
    * @param {Konva.Group} group The group draw.
@@ -491,10 +491,10 @@ export class DeleteGroupCommand {
    * @param {DrawLayer} layer The layer where to delete the group.
    */
   constructor(group, name, layer) {
-    this.#group = group;
-    this.#name = name;
-    this.#layer = layer;
-    this.#parent = group.getParent();
+    this._group = group;
+    this._name = name;
+    this._layer = layer;
+    this._parent = group.getParent();
   }
 
   /**
@@ -503,24 +503,24 @@ export class DeleteGroupCommand {
    * @returns {string} The command name.
    */
   getName() {
-    return 'Delete-' + this.#name;
+    return 'Delete-' + this._name;
   }
 
   /**
    * Execute the command.
    *
-   * @fires DeleteGroupCommand#drawdelete
+   * @fires DeleteGroupCommand_drawdelete
    */
   execute() {
     // remove the group from its parent
-    this.#group.remove();
+    this._group.remove();
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     /**
      * Draw delete event.
      *
-     * @event DeleteGroupCommand#drawdelete
+     * @event DeleteGroupCommand_drawdelete
      * @type {object}
      * @property {string} id The id of the created draw.
      * @property {string} srclayerid The id of the layer of the draw.
@@ -528,28 +528,28 @@ export class DeleteGroupCommand {
      */
     this.onExecute({
       type: 'drawdelete',
-      id: this.#group.id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._group.id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 
   /**
    * Undo the command.
    *
-   * @fires DrawGroupCommand#drawcreate
+   * @fires DrawGroupCommand_drawcreate
    */
   undo() {
     // add the group to its parent
-    this.#parent.add(this.#group);
+    this._parent.add(this._group);
     // draw
-    this.#layer.getKonvaLayer().draw();
+    this._layer.getKonvaLayer().draw();
     // callback
     this.onUndo({
       type: 'drawcreate',
-      id: this.#group.id(),
-      srclayerid: this.#layer.getId(),
-      dataid: this.#layer.getDataId()
+      id: this._group.id(),
+      srclayerid: this._layer.getId(),
+      dataid: this._layer.getDataId()
     });
   }
 

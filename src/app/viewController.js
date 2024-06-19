@@ -34,28 +34,28 @@ export class ViewController {
    *
    * @type {View}
    */
-  #view;
+  _view;
 
   /**
    * Plane helper.
    *
    * @type {PlaneHelper}
    */
-  #planeHelper;
+  _planeHelper;
 
   /**
    * Third dimension player ID (created by setInterval).
    *
    * @type {number|undefined}
    */
-  #playerID;
+  _playerID;
 
   /**
    * Is DICOM seg mask flag.
    *
    * @type {boolean}
    */
-  #isMask = false;
+  _isMask = false;
 
   /**
    * @param {View} view The associated view.
@@ -66,10 +66,10 @@ export class ViewController {
       throw new Error('View does not have an image, cannot setup controller');
     }
 
-    this.#view = view;
+    this._view = view;
 
     // setup the plane helper
-    this.#planeHelper = new PlaneHelper(
+    this._planeHelper = new PlaneHelper(
       view.getImage().getGeometry().getRealSpacing(),
       view.getImage().getGeometry().getOrientation(),
       view.getOrientation()
@@ -77,7 +77,7 @@ export class ViewController {
 
     // mask segment helper
     if (view.getImage().getMeta().Modality === 'SEG') {
-      this.#isMask = true;
+      this._isMask = true;
     }
   }
 
@@ -87,7 +87,7 @@ export class ViewController {
    * @returns {PlaneHelper} The helper.
    */
   getPlaneHelper() {
-    return this.#planeHelper;
+    return this._planeHelper;
   }
 
   /**
@@ -96,7 +96,7 @@ export class ViewController {
    * @returns {boolean} True if the associated image is a mask.
    */
   isMask() {
-    return this.#isMask;
+    return this._isMask;
   }
 
   /**
@@ -117,7 +117,7 @@ export class ViewController {
    * @returns {string} The modality.
    */
   getModality() {
-    return this.#view.getImage().getMeta().Modality;
+    return this._view.getImage().getMeta().Modality;
   }
 
   /**
@@ -126,7 +126,7 @@ export class ViewController {
    * @returns {string[]} The presets names.
    */
   getWindowLevelPresetsNames() {
-    return this.#view.getWindowPresetsNames();
+    return this._view.getWindowPresetsNames();
   }
 
   /**
@@ -136,7 +136,7 @@ export class ViewController {
    * @returns {object} The list of presets.
    */
   addWindowLevelPresets(presets) {
-    return this.#view.addWindowPresets(presets);
+    return this._view.addWindowPresets(presets);
   }
 
   /**
@@ -145,7 +145,7 @@ export class ViewController {
    * @param {string} name The name of the preset to activate.
    */
   setWindowLevelPreset(name) {
-    this.#view.setWindowLevelPreset(name);
+    this._view.setWindowLevelPreset(name);
   }
 
   /**
@@ -154,7 +154,7 @@ export class ViewController {
    * @param {number} id The id of the preset to activate.
    */
   setWindowLevelPresetById(id) {
-    this.#view.setWindowLevelPresetById(id);
+    this._view.setWindowLevelPresetById(id);
   }
 
   /**
@@ -163,7 +163,7 @@ export class ViewController {
    * @returns {boolean} True if the controler is playing.
    */
   isPlaying() {
-    return (typeof this.#playerID !== 'undefined');
+    return (typeof this._playerID !== 'undefined');
   }
 
   /**
@@ -172,7 +172,7 @@ export class ViewController {
    * @returns {Point} The position.
    */
   getCurrentPosition() {
-    return this.#view.getCurrentPosition();
+    return this._view.getCurrentPosition();
   }
 
   /**
@@ -181,7 +181,7 @@ export class ViewController {
    * @returns {Index} The current index.
    */
   getCurrentIndex() {
-    return this.#view.getCurrentIndex();
+    return this._view.getCurrentIndex();
   }
 
   /**
@@ -190,10 +190,10 @@ export class ViewController {
    * @returns {Index} The index.
    */
   getCurrentOrientedIndex() {
-    let res = this.#view.getCurrentIndex();
-    if (typeof this.#view.getOrientation() !== 'undefined') {
+    let res = this._view.getCurrentIndex();
+    if (typeof this._view.getOrientation() !== 'undefined') {
       // view oriented => image de-oriented
-      const vector = this.#planeHelper.getImageDeOrientedVector3D(
+      const vector = this._planeHelper.getImageDeOrientedVector3D(
         new Vector3D(res.get(0), res.get(1), res.get(2))
       );
       res = new Index([
@@ -209,7 +209,7 @@ export class ViewController {
    * @returns {number} The index.
    */
   getScrollIndex() {
-    return this.#view.getScrollIndex();
+    return this._view.getScrollIndex();
   }
 
   /**
@@ -218,7 +218,7 @@ export class ViewController {
    * @returns {object} The value.
    */
   getCurrentScrollIndexValue() {
-    return this.#view.getCurrentIndex().get(this.#view.getScrollIndex());
+    return this._view.getCurrentIndex().get(this._view.getScrollIndex());
   }
 
   /**
@@ -228,7 +228,7 @@ export class ViewController {
    * @returns {Point3D} The origin.
    */
   getOrigin(position) {
-    return this.#view.getOrigin(position);
+    return this._view.getOrigin(position);
   }
 
   /**
@@ -237,8 +237,8 @@ export class ViewController {
    * @returns {object} The value.
    */
   getCurrentScrollPosition() {
-    const scrollIndex = this.#view.getScrollIndex();
-    return this.#view.getCurrentPosition().get(scrollIndex);
+    const scrollIndex = this._view.getScrollIndex();
+    return this._view.getCurrentPosition().get(scrollIndex);
   }
 
   /**
@@ -249,7 +249,7 @@ export class ViewController {
    *   otherwise generates at current index.
    */
   generateImageData(array, index) {
-    this.#view.generateImageData(array, index);
+    this._view.generateImageData(array, index);
   }
 
   /**
@@ -258,7 +258,7 @@ export class ViewController {
    * @param {Image} img The associated image.
    */
   setImage(img) {
-    this.#view.setImage(img);
+    this._view.setImage(img);
   }
 
   /**
@@ -267,8 +267,8 @@ export class ViewController {
    * @returns {Scalar2D} The spacing as a 2D array.
    */
   get2DSpacing() {
-    const spacing = this.#view.getImage().getGeometry().getSpacing(
-      this.#view.getOrientation());
+    const spacing = this._view.getImage().getGeometry().getSpacing(
+      this._view.getOrientation());
     return spacing.get2D();
   }
 
@@ -280,7 +280,7 @@ export class ViewController {
    *   or no quantifiable (for ex RGB).
    */
   getRescaledImageValue(position) {
-    const image = this.#view.getImage();
+    const image = this._view.getImage();
     if (!image.canQuantify()) {
       return;
     }
@@ -299,7 +299,7 @@ export class ViewController {
    * @returns {string} The unit.
    */
   getPixelUnit() {
-    return this.#view.getImage().getMeta().pixelUnit;
+    return this._view.getImage().getMeta().pixelUnit;
   }
 
   /**
@@ -311,7 +311,7 @@ export class ViewController {
    * @param {Matrix33} orientation The desired orientation.
    * @returns {Image} The extracted slice.
    */
-  #getSlice(image, index, isRescaled, orientation) {
+  _getSlice(image, index, isRescaled, orientation) {
     // generate slice values
     const sliceIter = getSliceIterator(
       image,
@@ -345,14 +345,14 @@ export class ViewController {
    * @returns {Array} A list of values.
    */
   getImageRegionValues(min, max) {
-    let image = this.#view.getImage();
-    const orientation = this.#view.getOrientation();
+    let image = this._view.getImage();
+    const orientation = this._view.getOrientation();
     let currentIndex = this.getCurrentIndex();
     let rescaled = true;
 
     // create oriented slice if needed
     if (!isIdentityMat33(orientation)) {
-      image = this.#getSlice(image, currentIndex, rescaled, orientation);
+      image = this._getSlice(image, currentIndex, rescaled, orientation);
       // update position
       currentIndex = new Index([0, 0, 0]);
       rescaled = false;
@@ -375,14 +375,14 @@ export class ViewController {
    * @returns {Array} A list of values.
    */
   getImageVariableRegionValues(regions) {
-    let image = this.#view.getImage();
-    const orientation = this.#view.getOrientation();
+    let image = this._view.getImage();
+    const orientation = this._view.getOrientation();
     let currentIndex = this.getCurrentIndex();
     let rescaled = true;
 
     // create oriented slice if needed
     if (!isIdentityMat33(orientation)) {
-      image = this.#getSlice(image, currentIndex, rescaled, orientation);
+      image = this._getSlice(image, currentIndex, rescaled, orientation);
       // update position
       currentIndex = new Index([0, 0, 0]);
       rescaled = false;
@@ -404,7 +404,7 @@ export class ViewController {
    * @returns {boolean} True if possible.
    */
   canQuantifyImage() {
-    return this.#view.getImage().canQuantify();
+    return this._view.getImage().canQuantify();
   }
 
   /**
@@ -423,7 +423,7 @@ export class ViewController {
    * @returns {boolean} True if the data is monochrome.
    */
   isMonochrome() {
-    return this.#view.getImage().isMonochrome();
+    return this._view.getImage().isMonochrome();
   }
 
   /**
@@ -433,7 +433,7 @@ export class ViewController {
    * or above greater than one.
    */
   canScroll() {
-    return this.#view.getImage().canScroll(this.#view.getOrientation());
+    return this._view.getImage().canScroll(this._view.getOrientation());
   }
 
   /**
@@ -442,8 +442,8 @@ export class ViewController {
    * @returns {Size} The size.
    */
   getImageSize() {
-    return this.#view.getImage().getGeometry().getSize(
-      this.#view.getOrientation());
+    return this._view.getImage().getGeometry().getSize(
+      this._view.getOrientation());
   }
 
 
@@ -464,9 +464,9 @@ export class ViewController {
    * @returns {Scalar2D} The 2D size as {x,y}.
    */
   getImageWorldSize() {
-    const geometry = this.#view.getImage().getGeometry();
-    const size = geometry.getSize(this.#view.getOrientation()).get2D();
-    const spacing = geometry.getSpacing(this.#view.getOrientation()).get2D();
+    const geometry = this._view.getImage().getGeometry();
+    const size = geometry.getSize(this._view.getOrientation()).get2D();
+    const spacing = geometry.getSpacing(this._view.getOrientation()).get2D();
     return {
       x: size.x * spacing.x,
       y: size.y * spacing.y
@@ -479,7 +479,7 @@ export class ViewController {
    * @returns {object} The range as {min, max}.
    */
   getImageRescaledDataRange() {
-    return this.#view.getImage().getRescaledDataRange();
+    return this._view.getImage().getRescaledDataRange();
   }
 
   /**
@@ -489,7 +489,7 @@ export class ViewController {
    * @returns {boolean} True if the associated image has equal meta data.
    */
   equalImageMeta(meta) {
-    const imageMeta = this.#view.getImage().getMeta();
+    const imageMeta = this._view.getImage().getMeta();
     // loop through input meta keys
     const metaKeys = Object.keys(meta);
     for (let i = 0; i < metaKeys.length; ++i) {
@@ -512,7 +512,7 @@ export class ViewController {
    * @returns {boolean} True is the position is in bounds.
    */
   isPositionInBounds(position) {
-    return this.#view.isPositionInBounds(position);
+    return this._view.isPositionInBounds(position);
   }
 
   /**
@@ -524,7 +524,7 @@ export class ViewController {
    * @returns {boolean} False if not in bounds.
    */
   setCurrentPosition(pos, silent) {
-    return this.#view.setCurrentPosition(pos, silent);
+    return this._view.setCurrentPosition(pos, silent);
   }
 
   /**
@@ -538,9 +538,9 @@ export class ViewController {
     const k = this.getCurrentScrollIndexValue();
     const planePoint = new Point3D(point2D.getX(), point2D.getY(), k);
     // de-orient
-    const point = this.#planeHelper.getImageOrientedPoint3D(planePoint);
+    const point = this._planeHelper.getImageOrientedPoint3D(planePoint);
     // ~indexToWorld to not loose precision
-    const geometry = this.#view.getImage().getGeometry();
+    const geometry = this._view.getImage().getGeometry();
     const point3D = geometry.pointToWorld(point);
     // merge with current position to keep extra dimensions
     return this.getCurrentPosition().mergeWith3D(point3D);
@@ -554,10 +554,10 @@ export class ViewController {
    */
   getPlanePositionFromPosition(point) {
     // orient
-    const geometry = this.#view.getImage().getGeometry();
+    const geometry = this._view.getImage().getGeometry();
     // ~worldToIndex to not loose precision
     const point3D = geometry.worldToPoint(point);
-    const planePoint = this.#planeHelper.getImageDeOrientedPoint3D(point3D);
+    const planePoint = this._planeHelper.getImageDeOrientedPoint3D(point3D);
     // return
     return new Point2D(
       planePoint.getX(),
@@ -573,7 +573,7 @@ export class ViewController {
    * @returns {boolean} False if not in bounds.
    */
   setCurrentIndex(index, silent) {
-    return this.#view.setCurrentIndex(index, silent);
+    return this._view.setCurrentIndex(index, silent);
   }
 
   /**
@@ -588,9 +588,9 @@ export class ViewController {
     const k = this.getCurrentScrollIndexValue();
     const planePoint = new Point3D(point2D.getX(), point2D.getY(), k);
     // de-orient
-    const point = this.#planeHelper.getTargetDeOrientedPoint3D(planePoint);
+    const point = this._planeHelper.getTargetDeOrientedPoint3D(planePoint);
     // ~indexToWorld to not loose precision
-    const geometry = this.#view.getImage().getGeometry();
+    const geometry = this._view.getImage().getGeometry();
     const spacing = geometry.getRealSpacing();
     return new Point3D(
       point.getX() * spacing.get(0),
@@ -605,7 +605,7 @@ export class ViewController {
    * @returns {Vector3D} The 3D world offset.
    */
   getOffset3DFromPlaneOffset(offset2D) {
-    return this.#planeHelper.getOffset3DFromPlaneOffset(offset2D);
+    return this._planeHelper.getOffset3DFromPlaneOffset(offset2D);
   }
 
   /**
@@ -614,7 +614,7 @@ export class ViewController {
    * @param {number} dim The direction in which to increment.
    * @returns {Index} The resulting index.
    */
-  #getIncrementIndex(dim) {
+  _getIncrementIndex(dim) {
     const index = this.getCurrentIndex();
     const values = new Array(index.length());
     values.fill(0);
@@ -633,7 +633,7 @@ export class ViewController {
    * @param {number} dim The direction in which to decrement.
    * @returns {Index} The resulting index.
    */
-  #getDecrementIndex(dim) {
+  _getDecrementIndex(dim) {
     const index = this.getCurrentIndex();
     const values = new Array(index.length());
     values.fill(0);
@@ -651,8 +651,8 @@ export class ViewController {
    *
    * @returns {Index} The resulting index.
    */
-  #getIncrementScrollIndex() {
-    return this.#getIncrementIndex(this.getScrollIndex());
+  _getIncrementScrollIndex() {
+    return this._getIncrementIndex(this.getScrollIndex());
   }
 
   /**
@@ -660,8 +660,8 @@ export class ViewController {
    *
    * @returns {Index} The resulting index.
    */
-  #getDecrementScrollIndex() {
-    return this.#getDecrementIndex(this.getScrollIndex());
+  _getDecrementScrollIndex() {
+    return this._getDecrementIndex(this.getScrollIndex());
   }
 
   /**
@@ -671,8 +671,8 @@ export class ViewController {
    * @returns {Point} The resulting point.
    */
   getIncrementPosition(dim) {
-    const geometry = this.#view.getImage().getGeometry();
-    return geometry.indexToWorld(this.#getIncrementIndex(dim));
+    const geometry = this._view.getImage().getGeometry();
+    return geometry.indexToWorld(this._getIncrementIndex(dim));
   }
 
   /**
@@ -682,8 +682,8 @@ export class ViewController {
    * @returns {Point} The resulting point.
    */
   getDecrementPosition(dim) {
-    const geometry = this.#view.getImage().getGeometry();
-    return geometry.indexToWorld(this.#getDecrementIndex(dim));
+    const geometry = this._view.getImage().getGeometry();
+    return geometry.indexToWorld(this._getDecrementIndex(dim));
   }
 
   /**
@@ -692,8 +692,8 @@ export class ViewController {
    * @returns {Point} The resulting point.
    */
   getIncrementScrollPosition() {
-    const geometry = this.#view.getImage().getGeometry();
-    return geometry.indexToWorld(this.#getIncrementScrollIndex());
+    const geometry = this._view.getImage().getGeometry();
+    return geometry.indexToWorld(this._getIncrementScrollIndex());
   }
 
   /**
@@ -702,8 +702,8 @@ export class ViewController {
    * @returns {Point} The resulting point.
    */
   getDecrementScrollPosition() {
-    const geometry = this.#view.getImage().getGeometry();
-    return geometry.indexToWorld(this.#getDecrementScrollIndex());
+    const geometry = this._view.getImage().getGeometry();
+    return geometry.indexToWorld(this._getDecrementScrollIndex());
   }
 
   /**
@@ -714,7 +714,7 @@ export class ViewController {
    * @returns {boolean} False if not in bounds.
    */
   incrementIndex(dim, silent) {
-    return this.setCurrentIndex(this.#getIncrementIndex(dim), silent);
+    return this.setCurrentIndex(this._getIncrementIndex(dim), silent);
   }
 
   /**
@@ -725,7 +725,7 @@ export class ViewController {
    * @returns {boolean} False if not in bounds.
    */
   decrementIndex(dim, silent) {
-    return this.setCurrentIndex(this.#getDecrementIndex(dim), silent);
+    return this.setCurrentIndex(this._getDecrementIndex(dim), silent);
   }
 
   /**
@@ -735,7 +735,7 @@ export class ViewController {
    * @returns {boolean} False if not in bounds.
    */
   decrementScrollIndex(silent) {
-    return this.setCurrentIndex(this.#getDecrementScrollIndex(), silent);
+    return this.setCurrentIndex(this._getDecrementScrollIndex(), silent);
   }
 
   /**
@@ -745,7 +745,7 @@ export class ViewController {
    * @returns {boolean} False if not in bounds.
    */
   incrementScrollIndex(silent) {
-    return this.setCurrentIndex(this.#getIncrementScrollIndex(), silent);
+    return this.setCurrentIndex(this._getIncrementScrollIndex(), silent);
   }
 
   /**
@@ -756,16 +756,16 @@ export class ViewController {
     if (!this.canScroll()) {
       return;
     }
-    if (typeof this.#playerID === 'undefined') {
-      const image = this.#view.getImage();
+    if (typeof this._playerID === 'undefined') {
+      const image = this._view.getImage();
       const recommendedDisplayFrameRate =
         image.getMeta().RecommendedDisplayFrameRate;
-      const milliseconds = this.#view.getPlaybackMilliseconds(
+      const milliseconds = this._view.getPlaybackMilliseconds(
         recommendedDisplayFrameRate);
       const size = image.getGeometry().getSize();
       const canScroll3D = size.canScroll3D();
 
-      this.#playerID = window.setInterval(() => {
+      this._playerID = window.setInterval(() => {
         let canDoMore = false;
         if (canScroll3D) {
           canDoMore = this.incrementScrollIndex();
@@ -776,14 +776,14 @@ export class ViewController {
         if (!canDoMore) {
           const pos1 = this.getCurrentIndex();
           const values = pos1.getValues();
-          const orientation = this.#view.getOrientation();
+          const orientation = this._view.getOrientation();
           if (canScroll3D) {
             values[orientation.getThirdColMajorDirection()] = 0;
           } else {
             values[3] = 0;
           }
           const index = new Index(values);
-          const geometry = this.#view.getImage().getGeometry();
+          const geometry = this._view.getImage().getGeometry();
           this.setCurrentPosition(geometry.indexToWorld(index));
         }
       }, milliseconds);
@@ -796,9 +796,9 @@ export class ViewController {
    * Stop scroll playing.
    */
   stop() {
-    if (typeof this.#playerID !== 'undefined') {
-      clearInterval(this.#playerID);
-      this.#playerID = undefined;
+    if (typeof this._playerID !== 'undefined') {
+      clearInterval(this._playerID);
+      this._playerID = undefined;
     }
   }
 
@@ -808,7 +808,7 @@ export class ViewController {
    * @returns {WindowLevel} The window and level.
    */
   getWindowLevel() {
-    return this.#view.getWindowLevel();
+    return this._view.getWindowLevel();
   }
 
   /**
@@ -817,7 +817,7 @@ export class ViewController {
    * @returns {string} The preset name.
    */
   getCurrentWindowPresetName() {
-    return this.#view.getCurrentWindowPresetName();
+    return this._view.getCurrentWindowPresetName();
   }
 
   /**
@@ -826,7 +826,7 @@ export class ViewController {
    * @param {WindowLevel} wl The window and level.
    */
   setWindowLevel(wl) {
-    this.#view.setWindowLevel(wl);
+    this._view.setWindowLevel(wl);
   }
 
   /**
@@ -835,7 +835,7 @@ export class ViewController {
    * @returns {string} The colour map name.
    */
   getColourMap() {
-    return this.#view.getColourMap();
+    return this._view.getColourMap();
   }
 
   /**
@@ -844,7 +844,7 @@ export class ViewController {
    * @param {string} name The colour map name.
    */
   setColourMap(name) {
-    this.#view.setColourMap(name);
+    this._view.setColourMap(name);
   }
 
   /**
@@ -860,7 +860,7 @@ export class ViewController {
    * @param {alphaFn} func The function.
    */
   setViewAlphaFunction(func) {
-    this.#view.setAlphaFunction(func);
+    this._view.setAlphaFunction(func);
   }
 
   /**
@@ -869,7 +869,7 @@ export class ViewController {
    * @param {ViewLayer} viewLayer The layer to bind.
    */
   bindImageAndLayer(viewLayer) {
-    const image = this.#view.getImage();
+    const image = this._view.getImage();
     image.addEventListener('imagecontentchange',
       viewLayer.onimagecontentchange
     );
@@ -884,7 +884,7 @@ export class ViewController {
    * @param {ViewLayer} viewLayer The layer to bind.
    */
   unbindImageAndLayer(viewLayer) {
-    const image = this.#view.getImage();
+    const image = this._view.getImage();
     image.removeEventListener('imagecontentchange',
       viewLayer.onimagecontentchange
     );

@@ -96,21 +96,21 @@ export class View {
    *
    * @type {Image}
    */
-  #image;
+  _image;
 
   /**
    * Window lookup tables, indexed per Rescale Slope and Intercept (RSI).
    *
    * @type {WindowLut}
    */
-  #windowLut;
+  _windowLut;
 
   /**
    * Flag for image constant RSI.
    *
    * @type {boolean}
    */
-  #isConstantRSI;
+  _isConstantRSI;
 
   /**
    * Window presets.
@@ -118,28 +118,28 @@ export class View {
    *
    * @type {object}
    */
-  #windowPresets = {minmax: {name: 'minmax'}};
+  _windowPresets = {minmax: {name: 'minmax'}};
 
   /**
    * Current window preset name.
    *
    * @type {string}
    */
-  #currentPresetName = null;
+  _currentPresetName = null;
 
   /**
    * Current window level.
    *
    * @type {WindowLevel}
    */
-  #currentWl;
+  _currentWl;
 
   /**
    * Colour map name.
    *
    * @type {string}
    */
-  #colourMapName = 'plain';
+  _colourMapName = 'plain';
 
   /**
    * Current position as a Point.
@@ -147,31 +147,31 @@ export class View {
    *
    * @type {Point}
    */
-  #currentPosition = null;
+  _currentPosition = null;
 
   /**
    * View orientation. Undefined will use the original slice ordering.
    *
    * @type {Matrix33}
    */
-  #orientation;
+  _orientation;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * @param {Image} image The associated image.
    */
   constructor(image) {
-    this.#image = image;
+    this._image = image;
 
     // listen to appendframe event to update the current position
     //   to add the extra dimension
-    this.#image.addEventListener('appendframe', () => {
+    this._image.addEventListener('appendframe', () => {
       // update current position if first appendFrame
       const index = this.getCurrentIndex();
       if (index.length() === 3) {
@@ -189,7 +189,7 @@ export class View {
    * @returns {Image} The associated image.
    */
   getImage() {
-    return this.#image;
+    return this._image;
   }
 
   /**
@@ -198,7 +198,7 @@ export class View {
    * @param {Image} inImage The associated image.
    */
   setImage(inImage) {
-    this.#image = inImage;
+    this._image = inImage;
   }
 
   /**
@@ -207,7 +207,7 @@ export class View {
    * @returns {Matrix33} The orientation matrix.
    */
   getOrientation() {
-    return this.#orientation;
+    return this._orientation;
   }
 
   /**
@@ -216,7 +216,7 @@ export class View {
    * @param {Matrix33} mat33 The orientation matrix.
    */
   setOrientation(mat33) {
-    this.#orientation = mat33;
+    this._orientation = mat33;
   }
 
   /**
@@ -230,7 +230,7 @@ export class View {
    * Set the initial index to the middle position.
    */
   setInitialIndex() {
-    const geometry = this.#image.getGeometry();
+    const geometry = this._image.getGeometry();
     const size = geometry.getSize();
     const values = new Array(size.length());
     values.fill(0);
@@ -264,7 +264,7 @@ export class View {
    * @param {number} _index The index of the value.
    * @returns {number} The coresponding alpha [0,255].
    */
-  #alphaFunction = function (_value, _index) {
+  _alphaFunction = function (_value, _index) {
     // default always returns fully visible
     return 0xff;
   };
@@ -282,24 +282,24 @@ export class View {
    * @returns {alphaFn} The function.
    */
   getAlphaFunction() {
-    return this.#alphaFunction;
+    return this._alphaFunction;
   }
 
   /**
    * Set alpha function.
    *
    * @param {alphaFn} func The function.
-   * @fires View#alphafuncchange
+   * @fires View_alphafuncchange
    */
   setAlphaFunction(func) {
-    this.#alphaFunction = func;
+    this._alphaFunction = func;
     /**
      * Alpha func change event.
      *
-     * @event View#alphafuncchange
+     * @event View_alphafuncchange
      * @type {object}
      */
-    this.#fireEvent({
+    this._fireEvent({
       type: 'alphafuncchange'
     });
   }
@@ -309,45 +309,45 @@ export class View {
    * Warning: can be undefined in no window/level was set.
    *
    * @returns {WindowLut} The window LUT of the image.
-   * @fires View#wlchange
+   * @fires View_wlchange
    */
-  #getCurrentWindowLut() {
+  _getCurrentWindowLut() {
     // special case for 'perslice' presets
-    if (this.#currentPresetName &&
-      typeof this.#windowPresets[this.#currentPresetName] !== 'undefined' &&
-      typeof this.#windowPresets[this.#currentPresetName].perslice !==
+    if (this._currentPresetName &&
+      typeof this._windowPresets[this._currentPresetName] !== 'undefined' &&
+      typeof this._windowPresets[this._currentPresetName].perslice !==
         'undefined' &&
-      this.#windowPresets[this.#currentPresetName].perslice === true) {
+      this._windowPresets[this._currentPresetName].perslice === true) {
       // check position
       if (!this.getCurrentIndex()) {
         this.setInitialIndex();
       }
       // get the slice window level
       const currentIndex = this.getCurrentIndex();
-      const offset = this.#image.getSecondaryOffset(currentIndex);
-      const currentPreset = this.#windowPresets[this.#currentPresetName];
+      const offset = this._image.getSecondaryOffset(currentIndex);
+      const currentPreset = this._windowPresets[this._currentPresetName];
       const sliceWl = currentPreset.wl[offset];
       // set window level: will send a change event, mark it as silent as
       // this change is always triggered by a position change
-      this.setWindowLevel(sliceWl, this.#currentPresetName, true);
+      this.setWindowLevel(sliceWl, this._currentPresetName, true);
     }
 
     // if no current, use first id
-    if (typeof this.#currentWl === 'undefined') {
+    if (typeof this._currentWl === 'undefined') {
       this.setWindowLevelPresetById(0, true);
     }
 
     // get the window lut
-    if (typeof this.#isConstantRSI === 'undefined' ||
-      this.#image.isConstantRSI() !== this.#isConstantRSI) {
-      this.#isConstantRSI = this.#image.isConstantRSI();
+    if (typeof this._isConstantRSI === 'undefined' ||
+      this._image.isConstantRSI() !== this._isConstantRSI) {
+      this._isConstantRSI = this._image.isConstantRSI();
       // set or update windowLut if isConstantRSI has changed
       // (can be different at first slice and after having loaded
       //  the full volume...)
       let rsi;
       let isDiscrete;
-      if (this.#isConstantRSI) {
-        rsi = this.#image.getRescaleSlopeAndIntercept();
+      if (this._isConstantRSI) {
+        rsi = this._image.getRescaleSlopeAndIntercept();
         isDiscrete = true;
       } else {
         rsi = new RescaleSlopeAndIntercept(1, 0);
@@ -356,30 +356,30 @@ export class View {
       // create the rescale lookup table
       const modalityLut = new ModalityLut(
         rsi,
-        this.#image.getMeta().BitsStored);
+        this._image.getMeta().BitsStored);
       // create the window lookup table
-      this.#windowLut = new WindowLut(
+      this._windowLut = new WindowLut(
         modalityLut,
-        this.#image.getMeta().IsSigned,
+        this._image.getMeta().IsSigned,
         isDiscrete);
     }
 
     // update VOI lut if not present or its window level
     // is different from the current one
-    const voiLut = this.#windowLut.getVoiLut();
+    const voiLut = this._windowLut.getVoiLut();
     let voiLutWl;
     if (typeof voiLut !== 'undefined') {
       voiLutWl = voiLut.getWindowLevel();
     }
     if (typeof voiLut === 'undefined' ||
-      !this.#currentWl.equals(voiLutWl)) {
+      !this._currentWl.equals(voiLutWl)) {
       // set lut window level
-      const voiLut = new VoiLut(this.#currentWl);
-      this.#windowLut.setVoiLut(voiLut);
+      const voiLut = new VoiLut(this._currentWl);
+      this._windowLut.setVoiLut(voiLut);
     }
 
     // return
-    return this.#windowLut;
+    return this._windowLut;
   }
 
   /**
@@ -388,7 +388,7 @@ export class View {
    * @returns {object} The window presets.
    */
   getWindowPresets() {
-    return this.#windowPresets;
+    return this._windowPresets;
   }
 
   /**
@@ -397,7 +397,7 @@ export class View {
    * @returns {string[]} The list of window presets names.
    */
   getWindowPresetsNames() {
-    return Object.keys(this.#windowPresets);
+    return Object.keys(this._windowPresets);
   }
 
   /**
@@ -406,7 +406,7 @@ export class View {
    * @param {object} presets The window presets.
    */
   setWindowPresets(presets) {
-    this.#windowPresets = presets;
+    this._windowPresets = presets;
   }
 
   /**
@@ -419,26 +419,26 @@ export class View {
     let key = null;
     for (let i = 0; i < keys.length; ++i) {
       key = keys[i];
-      if (typeof this.#windowPresets[key] !== 'undefined') {
-        if (typeof this.#windowPresets[key].perslice !== 'undefined' &&
-          this.#windowPresets[key].perslice === true) {
+      if (typeof this._windowPresets[key] !== 'undefined') {
+        if (typeof this._windowPresets[key].perslice !== 'undefined' &&
+          this._windowPresets[key].perslice === true) {
           throw new Error('Cannot add perslice preset');
         } else {
           // update existing
-          this.#windowPresets[key] = presets[key];
+          this._windowPresets[key] = presets[key];
         }
       } else {
         // add new
-        this.#windowPresets[key] = presets[key];
+        this._windowPresets[key] = presets[key];
         // fire event
         /**
          * Window/level add preset event.
          *
-         * @event View#wlpresetadd
+         * @event View_wlpresetadd
          * @type {object}
          * @property {string} name The name of the preset.
          */
-        this.#fireEvent({
+        this._fireEvent({
           type: 'wlpresetadd',
           name: key
         });
@@ -452,7 +452,7 @@ export class View {
    * @returns {string} The preset name.
    */
   getCurrentWindowPresetName() {
-    return this.#currentPresetName;
+    return this._currentPresetName;
   }
 
   /**
@@ -461,7 +461,7 @@ export class View {
    * @returns {string} The colour map name.
    */
   getColourMap() {
-    return this.#colourMapName;
+    return this._colourMapName;
   }
 
   /**
@@ -469,15 +469,15 @@ export class View {
    *
    * @returns {ColourMap} The colour map.
    */
-  #getColourMapLut() {
-    return luts[this.#colourMapName];
+  _getColourMapLut() {
+    return luts[this._colourMapName];
   }
 
   /**
    * Set the colour map of the image.
    *
    * @param {string} name The colour map name.
-   * @fires View#colourmapchange
+   * @fires View_colourmapchange
    */
   setColourMap(name) {
     // check if we have it
@@ -485,16 +485,16 @@ export class View {
       throw new Error('Unknown colour map: \'' + name + '\'');
     }
 
-    this.#colourMapName = name;
+    this._colourMapName = name;
 
     /**
      * Color change event.
      *
-     * @event View#colourmapchange
+     * @event View_colourmapchange
      * @type {object}
      * @property {Array} value The changed value.
      */
-    this.#fireEvent({
+    this._fireEvent({
       type: 'colourmapchange',
       value: [name]
     });
@@ -506,7 +506,7 @@ export class View {
    * @returns {Point} The current position.
    */
   getCurrentPosition() {
-    return this.#currentPosition;
+    return this._currentPosition;
   }
 
   /**
@@ -532,9 +532,9 @@ export class View {
    */
   isPositionInBounds(position) {
     if (typeof position === 'undefined') {
-      position = this.#currentPosition;
+      position = this._currentPosition;
     }
-    const geometry = this.#image.getGeometry();
+    const geometry = this._image.getGeometry();
     const index = geometry.worldToIndex(position);
     const dirs = [this.getScrollIndex()];
     if (index.length() === 4) {
@@ -550,7 +550,7 @@ export class View {
    * @returns {Point3D} The origin.
    */
   getOrigin(position) {
-    const geometry = this.#image.getGeometry();
+    const geometry = this._image.getGeometry();
     let originIndex = 0;
     if (typeof position !== 'undefined') {
       const index = geometry.worldToIndex(position);
@@ -566,11 +566,11 @@ export class View {
    * @param {Point} position The new position.
    * @param {boolean} silent Flag to fire event or not.
    * @returns {boolean} False if not in bounds.
-   * @fires View#positionchange
+   * @fires View_positionchange
    */
   setCurrentPosition(position, silent) {
     // send invalid event if not in bounds
-    const geometry = this.#image.getGeometry();
+    const geometry = this._image.getGeometry();
     const index = geometry.worldToIndex(position);
     const dirs = [this.getScrollIndex()];
     if (index.length() === 4) {
@@ -578,9 +578,9 @@ export class View {
     }
     if (!geometry.isIndexInBounds(index, dirs)) {
       if (!silent) {
-        this.#currentPosition = position;
+        this._currentPosition = position;
         // fire event with valid: false
-        this.#fireEvent({
+        this._fireEvent({
           type: 'positionchange',
           value: [
             index.getValues(),
@@ -600,7 +600,7 @@ export class View {
    * @param {Index} index The new index.
    * @param {boolean} [silent] Flag to fire event or not.
    * @returns {boolean} False if not in bounds.
-   * @fires View#positionchange
+   * @fires View_positionchange
    */
   setCurrentIndex(index, silent) {
     // check input
@@ -608,7 +608,7 @@ export class View {
       silent = false;
     }
 
-    const geometry = this.#image.getGeometry();
+    const geometry = this._image.getGeometry();
     const position = geometry.indexToWorld(index);
 
     // check if possible
@@ -618,9 +618,9 @@ export class View {
     }
     if (!geometry.isIndexInBounds(index, dirs)) {
       if (!silent) {
-        this.#currentPosition = position;
+        this._currentPosition = position;
         // fire event with valid: false
-        this.#fireEvent({
+        this._fireEvent({
           type: 'positionchange',
           value: [
             index.getValues(),
@@ -664,13 +664,13 @@ export class View {
     }
 
     // assign
-    this.#currentPosition = position;
+    this._currentPosition = position;
 
     if (!silent) {
       /**
        * Position change event.
        *
-       * @event View#positionchange
+       * @event View_positionchange
        * @type {object}
        * @property {Array} value The changed value as [index, pixelValue].
        * @property {number[]} diffDims An array of modified indices.
@@ -683,18 +683,18 @@ export class View {
         ],
         diffDims: diffDims,
         data: {
-          imageUid: this.#image.getImageUid(index)
+          imageUid: this._image.getImageUid(index)
         }
       };
 
       // add value if possible
-      if (this.#image.canQuantify()) {
-        const pixValue = this.#image.getRescaledValueAtIndex(index);
+      if (this._image.canQuantify()) {
+        const pixValue = this._image.getRescaledValueAtIndex(index);
         posEvent.value.push(pixValue);
       }
 
       // fire
-      this.#fireEvent(posEvent);
+      this._fireEvent(posEvent);
     }
 
     // all good
@@ -708,7 +708,7 @@ export class View {
    * @param {string} [name] Associated preset name, defaults to 'manual'.
    * Warning: uses the latest set rescale LUT or the default linear one.
    * @param {boolean} [silent] Flag to launch events with skipGenerate.
-   * @fires View#wlchange
+   * @fires View_wlchange
    */
   setWindowLevel(wl, name, silent) {
     // check input
@@ -716,7 +716,7 @@ export class View {
       name = 'manual';
     }
     if (name !== 'manual' &&
-      typeof this.#windowPresets[name] === 'undefined') {
+      typeof this._windowPresets[name] === 'undefined') {
       throw new Error('Unknown window level preset: \'' + name + '\'');
     }
     if (typeof silent === 'undefined') {
@@ -724,20 +724,20 @@ export class View {
     }
 
     // check if new wl
-    const isNewWl = !wl.equals(this.#currentWl);
+    const isNewWl = !wl.equals(this._currentWl);
     // check if new name
-    const isNewName = this.#currentPresetName !== name;
+    const isNewName = this._currentPresetName !== name;
 
     // compare to previous if present
     if (isNewWl || isNewName) {
       // assign
-      this.#currentWl = wl;
-      this.#currentPresetName = name;
+      this._currentWl = wl;
+      this._currentPresetName = name;
 
       // update manual
       if (name === 'manual') {
-        if (typeof this.#windowPresets[name] !== 'undefined') {
-          this.#windowPresets[name].wl[0] = wl;
+        if (typeof this._windowPresets[name] !== 'undefined') {
+          this._windowPresets[name].wl[0] = wl;
         } else {
           // add if not present
           this.addWindowPresets({
@@ -752,14 +752,14 @@ export class View {
       /**
        * Window/level change event.
        *
-       * @event View#wlchange
+       * @event View_wlchange
        * @type {object}
        * @property {Array} value The changed value.
        * @property {number} wc The new window center value.
        * @property {number} ww The new window wdth value.
        * @property {boolean} skipGenerate Flag to skip view generation.
        */
-      this.#fireEvent({
+      this._fireEvent({
         type: 'wlchange',
         value: [wl.center, wl.width, name],
         wc: wl.center,
@@ -775,8 +775,8 @@ export class View {
    * @returns {WindowLevel} The window and level.
    */
   getWindowLevel() {
-    // same as #currentWl...
-    const windowLut = this.#getCurrentWindowLut();
+    // same as _currentWl...
+    const windowLut = this._getCurrentWindowLut();
     return windowLut.getVoiLut().getWindowLevel();
   }
 
@@ -800,7 +800,7 @@ export class View {
     // check if 'perslice' case
     if (typeof preset.perslice !== 'undefined' &&
       preset.perslice === true) {
-      const offset = this.#image.getSecondaryOffset(this.getCurrentIndex());
+      const offset = this._image.getSecondaryOffset(this.getCurrentIndex());
       wl = preset.wl[offset];
     }
     // set w/l
@@ -826,7 +826,7 @@ export class View {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -837,7 +837,7 @@ export class View {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -845,8 +845,8 @@ export class View {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   /**
@@ -909,8 +909,8 @@ export class View {
         data,
         iterator,
         this.getAlphaFunction(),
-        this.#getCurrentWindowLut(),
-        this.#getColourMapLut()
+        this._getCurrentWindowLut(),
+        this._getColourMapLut()
       );
       break;
 
@@ -919,7 +919,7 @@ export class View {
         data,
         iterator,
         this.getAlphaFunction(),
-        this.#getColourMapLut(),
+        this._getColourMapLut(),
         image.getMeta().BitsStored === 16
       );
       break;

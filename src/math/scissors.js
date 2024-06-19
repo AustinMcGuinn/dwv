@@ -590,7 +590,7 @@ export class Scissors {
     return list;
   }
 
-  #costFunction = (p) => {
+  _costFunction = (p) => {
     return Math.round(this.searchGran * this.cost[p.y][p.x]);
   };
 
@@ -624,7 +624,7 @@ export class Scissors {
     }
     this.cost[sp.y][sp.x] = 0;
 
-    this.pq = new BucketQueue(this.searchGranBits, this.#costFunction);
+    this.pq = new BucketQueue(this.searchGranBits, this._costFunction);
     this.pq.push(sp);
   }
 

@@ -67,56 +67,56 @@ export class OverlayData {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * Associated data id.
    *
    * @type {string}
    */
-  #dataId;
+  _dataId;
 
   /**
    * Overlay config.
    *
    * @type {object}
    */
-  #configs;
+  _configs;
 
   /**
    * List of event used by the config.
    *
    * @type {string[]}
    */
-  #eventNames = [];
+  _eventNames = [];
 
   /**
    * Flag to know if listening to app.
    *
    * @type {boolean}
    */
-  #isListening;
+  _isListening;
 
   /**
    * Overlay data.
    *
    * @type {Array}
    */
-  #data = [];
+  _data = [];
 
   /**
    * Current data uid: set on pos change.
    *
    * @type {number}
    */
-  #currentDataUid;
+  _currentDataUid;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * @param {App} app The associated application.
@@ -124,19 +124,19 @@ export class OverlayData {
    * @param {object} configs The overlay config.
    */
   constructor(app, dataId, configs) {
-    this.#app = app;
-    this.#dataId = dataId;
-    this.#configs = configs;
+    this._app = app;
+    this._dataId = dataId;
+    this._configs = configs;
 
     // parse overlays to get the list of events to listen to
-    const keys = Object.keys(this.#configs);
+    const keys = Object.keys(this._configs);
     for (let i = 0; i < keys.length; ++i) {
-      const config = this.#configs[keys[i]];
+      const config = this._configs[keys[i]];
       for (let j = 0; j < config.length; ++j) {
         const eventType = config[j].event;
         if (typeof eventType !== 'undefined') {
-          if (!this.#eventNames.includes(eventType)) {
-            this.#eventNames.push(eventType);
+          if (!this._eventNames.includes(eventType)) {
+            this._eventNames.push(eventType);
           }
         }
       }
@@ -149,8 +149,8 @@ export class OverlayData {
    * Reset the data.
    */
   reset() {
-    this.#data = [];
-    this.#currentDataUid = undefined;
+    this._data = [];
+    this._currentDataUid = undefined;
   }
 
   /**
@@ -169,7 +169,7 @@ export class OverlayData {
       } else {
         dataUid = data.length;
       }
-      this.#data[dataUid] = createOverlayData(data, this.#configs);
+      this._data[dataUid] = createOverlayData(data, this._configs);
     } else {
       // image file case
       const keys = Object.keys(data);
@@ -180,10 +180,10 @@ export class OverlayData {
           break;
         }
       }
-      this.#data[dataUid] = createOverlayDataForDom(data, this.#configs);
+      this._data[dataUid] = createOverlayDataForDom(data, this._configs);
     }
     // store uid
-    this.#currentDataUid = dataUid;
+    this._currentDataUid = dataUid;
   }
 
   /**
@@ -191,15 +191,15 @@ export class OverlayData {
    *
    * @param {object} event The slicechange event.
    */
-  #onSliceChange = (event) => {
-    if (event.dataid !== this.#dataId) {
+  _onSliceChange = (event) => {
+    if (event.dataid !== this._dataId) {
       return;
     }
     if (typeof event.data !== 'undefined' &&
       typeof event.data.imageUid !== 'undefined' &&
-      this.#currentDataUid !== event.data.imageUid) {
-      this.#currentDataUid = event.data.imageUid;
-      this.#updateData(event);
+      this._currentDataUid !== event.data.imageUid) {
+      this._currentDataUid = event.data.imageUid;
+      this._updateData(event);
     }
   };
 
@@ -209,14 +209,14 @@ export class OverlayData {
    * @param {object} event An event defined by the overlay map and
    *   registered in toggleListeners.
    */
-  #updateData = (event) => {
-    if (event.dataid !== this.#dataId) {
+  _updateData = (event) => {
+    if (event.dataid !== this._dataId) {
       return;
     }
 
-    const sliceOverlayData = this.#data[this.#currentDataUid];
+    const sliceOverlayData = this._data[this._currentDataUid];
     if (typeof sliceOverlayData === 'undefined') {
-      console.warn('No slice overlay data for: ' + this.#currentDataUid);
+      console.warn('No slice overlay data for: ' + this._currentDataUid);
       return;
     }
 
@@ -252,7 +252,7 @@ export class OverlayData {
     }
 
     // fire valuechange for listeners
-    this.#fireEvent({type: 'valuechange', data: sliceOverlayData});
+    this._fireEvent({type: 'valuechange', data: sliceOverlayData});
   };
 
   /**
@@ -261,7 +261,7 @@ export class OverlayData {
    * @returns {boolean} True is listening to app events.
    */
   isListening() {
-    return this.#isListening;
+    return this._isListening;
   }
 
   /**
@@ -269,13 +269,13 @@ export class OverlayData {
    */
   addAppListeners() {
     // listen to update tags data
-    this.#app.addEventListener('positionchange', this.#onSliceChange);
+    this._app.addEventListener('positionchange', this._onSliceChange);
     // add event listeners
-    for (let i = 0; i < this.#eventNames.length; ++i) {
-      this.#app.addEventListener(this.#eventNames[i], this.#updateData);
+    for (let i = 0; i < this._eventNames.length; ++i) {
+      this._app.addEventListener(this._eventNames[i], this._updateData);
     }
     // update flag
-    this.#isListening = true;
+    this._isListening = true;
   }
 
   /**
@@ -283,13 +283,13 @@ export class OverlayData {
    */
   removeAppListeners() {
     // stop listening to update tags data
-    this.#app.removeEventListener('positionchange', this.#onSliceChange);
+    this._app.removeEventListener('positionchange', this._onSliceChange);
     // remove event listeners
-    for (let i = 0; i < this.#eventNames.length; ++i) {
-      this.#app.removeEventListener(this.#eventNames[i], this.#updateData);
+    for (let i = 0; i < this._eventNames.length; ++i) {
+      this._app.removeEventListener(this._eventNames[i], this._updateData);
     }
     // update flag
-    this.#isListening = false;
+    this._isListening = false;
   }
 
   /**
@@ -300,7 +300,7 @@ export class OverlayData {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -311,7 +311,7 @@ export class OverlayData {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -319,8 +319,8 @@ export class OverlayData {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent(event) {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent(event) {
+    this._listenerHandler.fireEvent(event);
   }
 
 } // class OverlayData

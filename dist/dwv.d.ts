@@ -35,6 +35,55 @@ export declare function addTagsToDictionary(group: string, tags: {
  */
 export declare class App {
     /**
+     * App options.
+     *
+     * @type {AppOptions}
+     */
+    _options: AppOptions;
+    /**
+     * Data controller.
+     *
+     * @type {DataController}
+     */
+    _dataController: DataController;
+    /**
+     * Toolbox controller.
+     *
+     * @type {ToolboxController}
+     */
+    _toolboxController: ToolboxController;
+    /**
+     * Load controller.
+     *
+     * @type {LoadController}
+     */
+    _loadController: LoadController;
+    /**
+     * Stage.
+     *
+     * @type {Stage}
+     */
+    _stage: Stage;
+    /**
+     * Undo stack.
+     *
+     * @type {UndoStack}
+     */
+    _undoStack: UndoStack;
+    /**
+     * Style.
+     *
+     * @type {Style}
+     */
+    _style: Style;
+    _overlayDatas: {};
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
      * Get the image.
      *
      * @param {string} dataId The data id.
@@ -172,7 +221,7 @@ export declare class App {
      * Add a command to the undo stack.
      *
      * @param {object} cmd The command to add.
-     * @fires UndoStack#undoadd
+     * @fires UndoStack_undoadd
      * @function
      */
     addToUndoStack: (cmd: object) => void;
@@ -199,7 +248,7 @@ export declare class App {
      *   const button = document.getElementById('render');
      *   button.disabled = false;
      *   button.onclick = function () {
-     *     // render data #0
+     *     // render data _0
      *     app.render(0);
      *   };
      * });
@@ -237,12 +286,12 @@ export declare class App {
      * Load a list of files. Can be image files or a state file.
      *
      * @param {File[]} files The list of files to load.
-     * @fires App#loadstart
-     * @fires App#loadprogress
-     * @fires App#loaditem
-     * @fires App#loadend
-     * @fires App#error
-     * @fires App#abort
+     * @fires App_loadstart
+     * @fires App_loadprogress
+     * @fires App_loaditem
+     * @fires App_loadend
+     * @fires App_error
+     * @fires App_abort
      * @function
      */
     loadFiles: (files: File[]) => void;
@@ -254,12 +303,12 @@ export declare class App {
      * - requestHeaders: an array of {name, value} to use as request headers,
      * - withCredentials: boolean xhr.withCredentials flag to pass to the request,
      * - batchSize: the size of the request url batch.
-     * @fires App#loadstart
-     * @fires App#loadprogress
-     * @fires App#loaditem
-     * @fires App#loadend
-     * @fires App#error
-     * @fires App#abort
+     * @fires App_loadstart
+     * @fires App_loadprogress
+     * @fires App_loaditem
+     * @fires App_loadend
+     * @fires App_error
+     * @fires App_abort
      * @function
      */
     loadURLs: (urls: string[], options?: object) => void;
@@ -276,12 +325,12 @@ export declare class App {
      *
      * @param {Array} data The list of ArrayBuffers to load
      *   in the form of [{name: "", filename: "", data: data}].
-     * @fires App#loadstart
-     * @fires App#loadprogress
-     * @fires App#loaditem
-     * @fires App#loadend
-     * @fires App#error
-     * @fires App#abort
+     * @fires App_loadstart
+     * @fires App_loadprogress
+     * @fires App_loaditem
+     * @fires App_loadend
+     * @fires App_error
+     * @fires App_abort
      * @function
      */
     loadImageObject: (data: any[]) => void;
@@ -375,6 +424,20 @@ export declare class App {
      */
     updateDataViewConfig(dataId: string, divId: string, config: ViewConfig): void;
     /**
+     * Create layer groups according to a data view config:
+     * adds them to stage and binds them.
+     *
+     * @param {DataViewConfigs} dataViewConfigs The data view config.
+     */
+    _createLayerGroups(dataViewConfigs: DataViewConfigs): void;
+    /**
+     * Create a layer group according to a view config:
+     * adds it to stage and binds it.
+     *
+     * @param {ViewConfig} viewConfig The view config.
+     */
+    _createLayerGroup(viewConfig: ViewConfig): void;
+    /**
      * Set the layer groups binders.
      *
      * @param {string[]} list The list of binder names.
@@ -440,7 +503,7 @@ export declare class App {
      * Key down callback. Meant to be used in tools.
      *
      * @param {KeyboardEvent} event The key down event.
-     * @fires App#keydown
+     * @fires App_keydown
      * @function
      */
     onKeydown: (event: KeyboardEvent) => void;
@@ -456,8 +519,8 @@ export declare class App {
      * Applies to the active view of the active layer group.
      *
      * @param {KeyboardEvent} event The key down event.
-     * @fires UndoStack#undo
-     * @fires UndoStack#redo
+     * @fires UndoStack_undo
+     * @fires UndoStack_redo
      * @function
      */
     defaultOnKeydown: (event: KeyboardEvent) => void;
@@ -498,13 +561,13 @@ export declare class App {
     /**
      * Undo the last action.
      *
-     * @fires UndoStack#undo
+     * @fires UndoStack_undo
      */
     undo(): void;
     /**
      * Redo the last action.
      *
-     * @fires UndoStack#redo
+     * @fires UndoStack_redo
      */
     redo(): void;
     /**
@@ -532,7 +595,75 @@ export declare class App {
      * @param {string} dataId The data id.
      */
     toggleOverlayListeners(dataId: string): void;
-
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+    /**
+     * Data load start callback.
+     *
+     * @param {object} event The load start event.
+     */
+    _onloadstart: (event: object) => void;
+    /**
+     * Data load progress callback.
+     *
+     * @param {object} event The progress event.
+     */
+    _onloadprogress: (event: object) => void;
+    /**
+     * Data load callback.
+     *
+     * @param {object} event The load event.
+     */
+    _onloaditem: (event: object) => void;
+    /**
+     * Data load callback.
+     *
+     * @param {object} event The load event.
+     */
+    _onload: (event: object) => void;
+    /**
+     * Data load end callback.
+     *
+     * @param {object} event The load end event.
+     */
+    _onloadend: (event: object) => void;
+    /**
+     * Data load error callback.
+     *
+     * @param {object} event The error event.
+     */
+    _onloaderror: (event: object) => void;
+    /**
+     * Data load abort callback.
+     *
+     * @param {object} event The abort event.
+     */
+    _onloadabort: (event: object) => void;
+    /**
+     * Bind layer group events to app.
+     *
+     * @param {object} group The layer group.
+     */
+    _bindLayerGroupToApp(group: object): void;
+    /**
+     * Add a view layer.
+     *
+     * @param {string} dataId The data id.
+     * @param {ViewConfig} viewConfig The data view config.
+     */
+    _addViewLayer(dataId: string, viewConfig: ViewConfig): void;
+    /**
+     * Get the view flip flags: offset (x, y) and scale (x, y, z) flags.
+     *
+     * @param {Matrix33} imageOrientation The image orientation.
+     * @param {string} viewConfigOrientation The view config orientation.
+     * @returns {object} Offset and scale flip flags.
+     */
+    _getViewFlipFlags(imageOrientation: Matrix33, viewConfigOrientation: string): object;
 }
 
 /**
@@ -608,7 +739,7 @@ export declare namespace BLACK {
  * Build a multipart message.
  *
  * Ref:
- * - {@link https://en.wikipedia.org/wiki/MIME#Multipart_messages},
+ * - {@link https://en.wikipedia.org/wiki/MIME_Multipart_messages},
  * - {@link https://hg.orthanc-server.com/orthanc-dicomweb/file/tip/Resources/Samples/JavaScript/stow-rs.js}.
  *
  * @param {Array} parts The message parts as an array of object containing
@@ -630,6 +761,42 @@ export declare class ChangeSegmentColourCommand {
      */
     constructor(mask: Image_2, segment: MaskSegment, newColour: RGB | number, silent?: boolean);
     /**
+     * The associated mask.
+     *
+     * @type {Image}
+     */
+    _mask: Image_2;
+    /**
+     * The segment to modify.
+     *
+     * @type {MaskSegment}
+     */
+    _segment: MaskSegment;
+    /**
+     * The new segment colour.
+     *
+     * @type {RGB|number}
+     */
+    _newColour: RGB | number;
+    /**
+     * The previous segment colour.
+     *
+     * @type {RGB|number}
+     */
+    _previousColour: RGB | number;
+    /**
+     * Flag to send creation events.
+     *
+     * @type {boolean}
+     */
+    _isSilent: boolean;
+    /**
+     * List of offsets.
+     *
+     * @type {number[]}
+     */
+    _offsets: number[];
+    /**
      * Get the command name.
      *
      * @returns {string} The command name.
@@ -644,13 +811,13 @@ export declare class ChangeSegmentColourCommand {
     /**
      * Execute the command.
      *
-     * @fires ChangeSegmentColourCommand#changemasksegmentcolour
+     * @fires ChangeSegmentColourCommand_changemasksegmentcolour
      */
     execute(): void;
     /**
      * Undo the command.
      *
-     * @fires ChangeSegmentColourCommand#changemasksegmentcolour
+     * @fires ChangeSegmentColourCommand_changemasksegmentcolour
      */
     undo(): void;
     /**
@@ -665,7 +832,6 @@ export declare class ChangeSegmentColourCommand {
      * @param {object} _event The undo event with type and id.
      */
     onUndo(_event: object): void;
-
 }
 
 /**
@@ -740,6 +906,118 @@ export declare namespace customUI {
     export function openRoiDialog(data: any, callback: Function): void;
 }
 
+declare class DataController {
+    /**
+     * List of DICOM data.
+     *
+     * @type {Object<string, DicomData>}
+     */
+    _dataList: {
+        [x: string]: DicomData;
+    };
+    /**
+     * Distinct data loaded counter.
+     *
+     * @type {number}
+     */
+    _dataIdCounter: number;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
+     * Get the next data id.
+     *
+     * @returns {string} The data id.
+     */
+    getNextDataId(): string;
+    /**
+     * Get the list of ids in the data storage.
+     *
+     * @returns {string[]} The list of data ids.
+     */
+    getDataIds(): string[];
+    /**
+     * Reset the class: empty the data storage.
+     */
+    reset(): void;
+    /**
+     * Get a data at a given index.
+     *
+     * @param {string} dataId The data id.
+     * @returns {DicomData|undefined} The DICOM data.
+     */
+    get(dataId: string): DicomData | undefined;
+    /**
+     * Get the list of dataIds that contain the input UIDs.
+     *
+     * @param {string[]} uids A list of UIDs.
+     * @returns {string[]} The list of dataIds that contain the UIDs.
+     */
+    getDataIdsFromSopUids(uids: string[]): string[];
+    /**
+     * Set the image at a given index.
+     *
+     * @param {string} dataId The data id.
+     * @param {Image} image The image to set.
+     */
+    setImage(dataId: string, image: Image_2): void;
+    /**
+     * Add a new data.
+     *
+     * @param {string} dataId The data id.
+     * @param {Image} image The image.
+     * @param {object} meta The image meta.
+     */
+    addNew(dataId: string, image: Image_2, meta: object): void;
+    /**
+     * Remove a data from the list.
+     *
+     * @param {string} dataId The data id.
+     */
+    remove(dataId: string): void;
+    /**
+     * Update the current data.
+     *
+     * @param {string} dataId The data id.
+     * @param {Image} image The image.
+     * @param {object} meta The image meta.
+     */
+    update(dataId: string, image: Image_2, meta: object): void;
+    /**
+     * Add an event listener to this class.
+     *
+     * @param {string} type The event type.
+     * @param {Function} callback The function associated with the provided
+     *   event type, will be called with the fired event.
+     */
+    addEventListener(type: string, callback: Function): void;
+    /**
+     * Remove an event listener from this class.
+     *
+     * @param {string} type The event type.
+     * @param {Function} callback The function associated with the provided
+     *   event type.
+     */
+    removeEventListener(type: string, callback: Function): void;
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+    /**
+     * Get a fireEvent function that adds the input data id
+     * to the event value.
+     *
+     * @param {string} dataId The data id.
+     * @returns {Function} A fireEvent function.
+     */
+    _getFireEvent(dataId: string): Function;
+}
+
 /**
  * DICOM data element.
  */
@@ -799,6 +1077,414 @@ export declare class DataElement {
 }
 
 /**
+ * List of DICOM data elements indexed via a 8 character string formed from
+ * the group and element numbers.
+ */
+declare type DataElements = {
+    [x: string]: DataElement;
+};
+
+/**
+ * Data reader.
+ */
+declare class DataReader {
+    /**
+     * @param {ArrayBuffer} buffer The input array buffer.
+     * @param {boolean} [isLittleEndian] Flag to tell if the data is little
+     *   or big endian (default: true).
+     */
+    constructor(buffer: ArrayBuffer, isLittleEndian?: boolean);
+    /**
+     * The input buffer.
+     *
+     * @type {ArrayBuffer}
+     */
+    _buffer: ArrayBuffer;
+    /**
+     * Is the endianness Little Endian.
+     *
+     * @type {boolean}
+     */
+    _isLittleEndian: boolean;
+    /**
+     * Is the Native endianness Little Endian.
+     *
+     * @type {boolean}
+     */
+    _isNativeLittleEndian: boolean;
+    /**
+     * Flag to know if the TypedArray data needs flipping.
+     *
+     * @type {boolean}
+     */
+    _needFlip: boolean;
+    /**
+     * The main data view.
+     *
+     * @type {DataView}
+     */
+    _view: DataView;
+    /**
+     * Read Uint16 (2 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {number} The read data.
+     */
+    readUint16(byteOffset: number): number;
+    /**
+     * Read Int16 (2 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {number} The read data.
+     */
+    readInt16(byteOffset: number): number;
+    /**
+     * Read Uint32 (4 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {number} The read data.
+     */
+    readUint32(byteOffset: number): number;
+    /**
+     * Read BigUint64 (8 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {bigint} The read data.
+     */
+    readBigUint64(byteOffset: number): bigint;
+    /**
+     * Read Int32 (4 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {number} The read data.
+     */
+    readInt32(byteOffset: number): number;
+    /**
+     * Read BigInt64 (8 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {bigint} The read data.
+     */
+    readBigInt64(byteOffset: number): bigint;
+    /**
+     * Read Float32 (4 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {number} The read data.
+     */
+    readFloat32(byteOffset: number): number;
+    /**
+     * Read Float64 (8 bytes) data.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {number} The read data.
+     */
+    readFloat64(byteOffset: number): number;
+    /**
+     * Read binary (0/1) array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Uint8Array} The read data.
+     */
+    readBinaryArray(byteOffset: number, size: number): Uint8Array;
+    /**
+     * Read Uint8 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Uint8Array} The read data.
+     */
+    readUint8Array(byteOffset: number, size: number): Uint8Array;
+    /**
+     * Read Int8 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Int8Array} The read data.
+     */
+    readInt8Array(byteOffset: number, size: number): Int8Array;
+    /**
+     * Read Uint16 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Uint16Array} The read data.
+     */
+    readUint16Array(byteOffset: number, size: number): Uint16Array;
+    /**
+     * Read Int16 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Int16Array} The read data.
+     */
+    readInt16Array(byteOffset: number, size: number): Int16Array;
+    /**
+     * Read Uint32 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Uint32Array} The read data.
+     */
+    readUint32Array(byteOffset: number, size: number): Uint32Array;
+    /**
+     * Read Uint64 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {BigUint64Array} The read data.
+     */
+    readUint64Array(byteOffset: number, size: number): BigUint64Array;
+    /**
+     * Read Int32 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Int32Array} The read data.
+     */
+    readInt32Array(byteOffset: number, size: number): Int32Array;
+    /**
+     * Read Int64 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {BigInt64Array} The read data.
+     */
+    readInt64Array(byteOffset: number, size: number): BigInt64Array;
+    /**
+     * Read Float32 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Float32Array} The read data.
+     */
+    readFloat32Array(byteOffset: number, size: number): Float32Array;
+    /**
+     * Read Float64 array.
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @param {number} size The size of the array.
+     * @returns {Float64Array} The read data.
+     */
+    readFloat64Array(byteOffset: number, size: number): Float64Array;
+    /**
+     * Read data as an hexadecimal string of length 4 (no '0x' prefix).
+     *
+     * @param {number} byteOffset The offset to start reading from.
+     * @returns {string} The read data ('####').
+     */
+    readHex(byteOffset: number): string;
+}
+
+/**
+ * List of ViewConfigs indexed by dataIds.
+ */
+declare type DataViewConfigs = {
+    [x: string]: ViewConfig[];
+};
+
+/**
+ * Data writer.
+ */
+declare class DataWriter {
+    /**
+     * @param {ArrayBuffer} buffer The input array buffer.
+     * @param {boolean} [isLittleEndian] Flag to tell if the data is
+     *   little or big endian.
+     */
+    constructor(buffer: ArrayBuffer, isLittleEndian?: boolean);
+    /**
+     * Is the endianness Little Endian.
+     *
+     * @type {boolean}
+     */
+    _isLittleEndian: boolean;
+    /**
+     * The main data view.
+     *
+     * @type {DataView}
+     */
+    _view: DataView;
+    /**
+     * Write Uint8 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint8(byteOffset: number, value: number): number;
+    /**
+     * Write Int8 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt8(byteOffset: number, value: number): number;
+    /**
+     * Write Uint16 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint16(byteOffset: number, value: number): number;
+    /**
+     * Write Int16 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt16(byteOffset: number, value: number): number;
+    /**
+     * Write Uint32 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint32(byteOffset: number, value: number): number;
+    /**
+     * Write Uint64 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {bigint} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint64(byteOffset: number, value: bigint): number;
+    /**
+     * Write Int32 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt32(byteOffset: number, value: number): number;
+    /**
+     * Write Int64 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {bigint} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt64(byteOffset: number, value: bigint): number;
+    /**
+     * Write Float32 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeFloat32(byteOffset: number, value: number): number;
+    /**
+     * Write Float64 data.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {number} value The data to write.
+     * @returns {number} The new offset position.
+     */
+    writeFloat64(byteOffset: number, value: number): number;
+    /**
+     * Write string data of length 4 as hexadecimal (no '0x' prefix).
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {string} str The hexadecimal string to write ('####').
+     * @returns {number} The new offset position.
+     */
+    writeHex(byteOffset: number, str: string): number;
+    /**
+     * Write a boolean array as binary.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeBinaryArray(byteOffset: number, array: any[]): number;
+    /**
+     * Write Uint8 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array|Uint8Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint8Array(byteOffset: number, array: any[] | Uint8Array): number;
+    /**
+     * Write Int8 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt8Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Uint16 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint16Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Int16 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt16Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Uint32 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint32Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Uint64 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeUint64Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Int32 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt32Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Int64 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeInt64Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Float32 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeFloat32Array(byteOffset: number, array: any[]): number;
+    /**
+     * Write Float64 array.
+     *
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} array The array to write.
+     * @returns {number} The new offset position.
+     */
+    writeFloat64Array(byteOffset: number, array: any[]): number;
+}
+
+/**
  * Decoder scripts to be passed to web workers for image decoding.
  */
 export declare const decoderScripts: {
@@ -828,6 +1514,32 @@ export declare namespace defaults {
 }
 
 /**
+ * Default text decoder.
+ */
+declare class DefaultTextDecoder {
+    /**
+     * Decode an input string buffer.
+     *
+     * @param {Uint8Array} buffer The buffer to decode.
+     * @returns {string} The decoded string.
+     */
+    decode(buffer: Uint8Array): string;
+}
+
+/**
+ * Default text encoder.
+ */
+declare class DefaultTextEncoder {
+    /**
+     * Encode an input string.
+     *
+     * @param {string} str The string to encode.
+     * @returns {Uint8Array} The encoded string.
+     */
+    encode(str: string): Uint8Array;
+}
+
+/**
  * Delete segment command.
  */
 export declare class DeleteSegmentCommand {
@@ -837,6 +1549,30 @@ export declare class DeleteSegmentCommand {
      * @param {boolean} [silent] Whether to send a creation event or not.
      */
     constructor(mask: Image_2, segment: MaskSegment, silent?: boolean);
+    /**
+     * The associated mask.
+     *
+     * @type {Image}
+     */
+    _mask: Image_2;
+    /**
+     * The segment to remove.
+     *
+     * @type {MaskSegment}
+     */
+    _segment: MaskSegment;
+    /**
+     * Flag to send creation events.
+     *
+     * @type {boolean}
+     */
+    _isSilent: boolean;
+    /**
+     * List of offsets.
+     *
+     * @type {number[]}
+     */
+    _offsets: number[];
     /**
      * Get the command name.
      *
@@ -852,13 +1588,13 @@ export declare class DeleteSegmentCommand {
     /**
      * Execute the command.
      *
-     * @fires DeleteSegmentCommand#masksegmentdelete
+     * @fires DeleteSegmentCommand_masksegmentdelete
      */
     execute(): void;
     /**
      * Undo the command.
      *
-     * @fires DeleteSegmentCommand#masksegmentredraw
+     * @fires DeleteSegmentCommand_masksegmentredraw
      */
     undo(): void;
     /**
@@ -873,7 +1609,6 @@ export declare class DeleteSegmentCommand {
      * @param {object} _event The undo event with type and id.
      */
     onUndo(_event: object): void;
-
 }
 
 /**
@@ -919,6 +1654,29 @@ export declare class DicomCode {
 }
 
 /**
+ * DICOM data: meta and possible image.
+ */
+declare class DicomData {
+    /**
+     * @param {object} meta The DICOM meta data.
+     * @param {Image} image The DICOM image.
+     */
+    constructor(meta: object, image: Image_2);
+    /**
+     * DICOM meta data.
+     *
+     * @type {object}
+     */
+    meta: object;
+    /**
+     * DICOM image.
+     *
+     * @type {Image|undefined}
+     */
+    image: Image_2 | undefined;
+}
+
+/**
  * DicomParser class.
  *
  * @example
@@ -946,6 +1704,44 @@ export declare class DicomCode {
  */
 export declare class DicomParser {
     /**
+     * The list of DICOM elements.
+     *
+     * @type {DataElements}
+     */
+    _dataElements: DataElements;
+    /**
+     * Default character set (optional).
+     *
+     * @type {string}
+     */
+    _defaultCharacterSet: string;
+    /**
+     * Default text decoder.
+     *
+     * @type {DefaultTextDecoder}
+     */
+    _defaultTextDecoder: DefaultTextDecoder;
+    /**
+     * Special text decoder.
+     *
+     * @type {DefaultTextDecoder|TextDecoder}
+     */
+    _textDecoder: DefaultTextDecoder | TextDecoder;
+    /**
+     * Decode an input string buffer using the default text decoder.
+     *
+     * @param {Uint8Array} buffer The buffer to decode.
+     * @returns {string} The decoded string.
+     */
+    _decodeString(buffer: Uint8Array): string;
+    /**
+     * Decode an input string buffer using the 'special' text decoder.
+     *
+     * @param {Uint8Array} buffer The buffer to decode.
+     * @returns {string} The decoded string.
+     */
+    _decodeSpecialString(buffer: Uint8Array): string;
+    /**
      * Get the default character set.
      *
      * @returns {string} The default character set.
@@ -972,13 +1768,71 @@ export declare class DicomParser {
         [x: string]: DataElement;
     };
     /**
+     * Read a DICOM tag.
+     *
+     * @param {DataReader} reader The raw data reader.
+     * @param {number} offset The offset where to start to read.
+     * @returns {object} An object containing the tag and the end offset.
+     */
+    _readTag(reader: DataReader, offset: number): object;
+    /**
+     * Read an item data element.
+     *
+     * @param {DataReader} reader The raw data reader.
+     * @param {number} offset The offset where to start to read.
+     * @param {boolean} implicit Is the DICOM VR implicit?
+     * @returns {object} The item data as a list of data elements.
+     */
+    _readItemDataElement(reader: DataReader, offset: number, implicit: boolean): object;
+    /**
+     * Read the pixel item data element.
+     * Ref: [Single frame fragments]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_A.4.html_table_A.4-1}.
+     *
+     * @param {DataReader} reader The raw data reader.
+     * @param {number} offset The offset where to start to read.
+     * @param {boolean} implicit Is the DICOM VR implicit?
+     * @returns {object} The item data as an array of data elements.
+     */
+    _readPixelItemDataElement(reader: DataReader, offset: number, implicit: boolean): object;
+    /**
+     * Read a DICOM data element.
+     *
+     * Reference: [DICOM VRs]{@link http://dicom.nema.org/medical/dicom/2022a/output/chtml/part05/sect_6.2.html_table_6.2-1}.
+     *
+     * @param {DataReader} reader The raw data reader.
+     * @param {number} offset The offset where to start to read.
+     * @param {boolean} implicit Is the DICOM VR implicit?
+     * @returns {DataElement} The data element.
+     */
+    _readDataElement(reader: DataReader, offset: number, implicit: boolean): DataElement;
+    /**
+     * Interpret the data of an element.
+     *
+     * @param {DataElement} element The data element.
+     * @param {DataReader} reader The raw data reader.
+     * @param {number} [pixelRepresentation] PixelRepresentation 0->unsigned,
+     *   1->signed (needed for pixel data or VR=xs).
+     * @param {number} [bitsAllocated] Bits allocated (needed for pixel data).
+     * @returns {object} The interpreted data.
+     */
+    _interpretElement(element: DataElement, reader: DataReader, pixelRepresentation?: number, bitsAllocated?: number): object;
+    /**
+     * Interpret the data of a list of elements.
+     *
+     * @param {DataElements} elements A list of data elements.
+     * @param {DataReader} reader The raw data reader.
+     * @param {number} pixelRepresentation PixelRepresentation 0->unsigned,
+     *   1->signed.
+     * @param {number} bitsAllocated Bits allocated.
+     */
+    _interpret(elements: DataElements, reader: DataReader, pixelRepresentation: number, bitsAllocated: number): void;
+    /**
      * Parse the complete DICOM file (given as input to the class).
      * Fills in the member object 'dataElements'.
      *
      * @param {ArrayBuffer} buffer The input array buffer.
      */
     parse(buffer: ArrayBuffer): void;
-
 }
 
 /**
@@ -1014,6 +1868,54 @@ export declare class DicomParser {
  */
 export declare class DicomWriter {
     /**
+     * Flag to use VR=UN for private sequences, default to false
+     * (mainly used in tests).
+     *
+     * @type {boolean}
+     */
+    _useUnVrForPrivateSq: boolean;
+    /**
+     * Flag to activate or not the vr=UN tag check and fix
+     * if present in the dictionary. Default to true.
+     *
+     * @type {boolean}
+     */
+    _fixUnknownVR: boolean;
+    /**
+     * Default rules: just copy.
+     *
+     * @type {Object<string, WriterRule>}
+     */
+    _defaultRules: {
+        [x: string]: WriterRule;
+    };
+    /**
+     * Writing rules.
+     *
+     * @type {Object<string, WriterRule>}
+     */
+    _rules: {
+        [x: string]: WriterRule;
+    };
+    /**
+     * List of compulsory tags keys.
+     *
+     * @type {string[]}
+     */
+    _compulsoryTags: string[];
+    /**
+     * Default text encoder.
+     *
+     * @type {DefaultTextEncoder}
+     */
+    _defaultTextEncoder: DefaultTextEncoder;
+    /**
+     * Special text encoder.
+     *
+     * @type {DefaultTextEncoder|TextEncoder}
+     */
+    _textEncoder: DefaultTextEncoder | TextEncoder;
+    /**
      * Set the use UN VR for private sequence flag.
      *
      * @param {boolean} flag True to use UN VR.
@@ -1042,6 +1944,20 @@ export declare class DicomWriter {
         [x: string]: WriterRule;
     }, addMissingTags?: boolean): void;
     /**
+     * Encode string data.
+     *
+     * @param {string} str The string to encode.
+     * @returns {Uint8Array} The encoded string.
+     */
+    _encodeString(str: string): Uint8Array;
+    /**
+     * Encode data as a UTF-8.
+     *
+     * @param {string} str The string to write.
+     * @returns {Uint8Array} The encoded string.
+     */
+    _encodeSpecialString(str: string): Uint8Array;
+    /**
      * Use a TextEncoder instead of the default text decoder.
      */
     useSpecialTextEncoder(): void;
@@ -1054,6 +1970,48 @@ export declare class DicomWriter {
      */
     getElementToWrite(element: DataElement): DataElement | null;
     /**
+     * Write a list of items.
+     *
+     * @param {DataWriter} writer The raw data writer.
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} items The list of items to write.
+     * @param {boolean} isImplicit Is the DICOM VR implicit?
+     * @returns {number} The new offset position.
+     */
+    _writeDataElementItems(writer: DataWriter, byteOffset: number, items: any[], isImplicit: boolean): number;
+    /**
+     * Write data with a specific Value Representation (VR).
+     *
+     * @param {DataWriter} writer The raw data writer.
+     * @param {DataElement} element The element to write.
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} value The array to write.
+     * @param {boolean} isImplicit Is the DICOM VR implicit?
+     * @returns {number} The new offset position.
+     */
+    _writeDataElementValue(writer: DataWriter, element: DataElement, byteOffset: number, value: any[], isImplicit: boolean): number;
+    /**
+     * Write a pixel data element.
+     *
+     * @param {DataWriter} writer The raw data writer.
+     * @param {DataElement} element The element to write.
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {Array} value The array to write.
+     * @param {boolean} isImplicit Is the DICOM VR implicit?
+     * @returns {number} The new offset position.
+     */
+    _writePixelDataElementValue(writer: DataWriter, element: DataElement, byteOffset: number, value: any[], isImplicit: boolean): number;
+    /**
+     * Write a data element.
+     *
+     * @param {DataWriter} writer The raw data writer.
+     * @param {DataElement} element The DICOM data element to write.
+     * @param {number} byteOffset The offset to start writing from.
+     * @param {boolean} isImplicit Is the DICOM VR implicit?
+     * @returns {number} The new offset position.
+     */
+    _writeDataElement(writer: DataWriter, element: DataElement, byteOffset: number, isImplicit: boolean): number;
+    /**
      * Get the ArrayBuffer corresponding to input DICOM elements.
      *
      * @param {Object<string, DataElement>} dataElements The elements to write.
@@ -1062,7 +2020,16 @@ export declare class DicomWriter {
     getBuffer(dataElements: {
         [x: string]: DataElement;
     }): ArrayBuffer;
-
+    /**
+     * Set a DICOM element value according to its VR (Value Representation).
+     *
+     * @param {DataElement} element The DICOM element to set the value.
+     * @param {object} value The value to set.
+     * @param {boolean} isImplicit Does the data use implicit VR?
+     * @param {number} [bitsAllocated] Bits allocated used for pixel data.
+     * @returns {number} The total element size.
+     */
+    _setElementValue(element: DataElement, value: object, isImplicit: boolean, bitsAllocated?: number): number;
 }
 
 /**
@@ -1073,6 +2040,24 @@ export declare class DrawController {
      * @param {DrawLayer} drawLayer The draw layer.
      */
     constructor(drawLayer: DrawLayer);
+    /**
+     * The draw layer.
+     *
+     * @type {DrawLayer}
+     */
+    _drawLayer: DrawLayer;
+    /**
+     * The Konva layer.
+     *
+     * @type {Konva.Layer}
+     */
+    _konvaLayer: Konva.Layer;
+    /**
+     * Current position group id.
+     *
+     * @type {string}
+     */
+    _currentPosGroupId: string;
     /**
      * Get the current position group.
      *
@@ -1160,7 +2145,6 @@ export declare class DrawController {
      * @returns {number} The total number of draws.
      */
     getNumberOfDraws(): number;
-
 }
 
 /**
@@ -1186,7 +2170,7 @@ export declare class DrawDetails {
      */
     type: string;
     /**
-     * The draw color: for example 'green', '#00ff00' or 'rgb(0,255,0)'.
+     * The draw color: for example 'green', '_00ff00' or 'rgb(0,255,0)'.
      *
      * @type {string}
      */
@@ -1209,11 +2193,95 @@ export declare class DrawLayer {
      */
     constructor(containerDiv: HTMLDivElement);
     /**
+     * The container div.
+     *
+     * @type {HTMLDivElement}
+     */
+    _containerDiv: HTMLDivElement;
+    /**
+     * Konva stage.
+     *
+     * @type {Konva.Stage}
+     */
+    _konvaStage: Konva.Stage;
+    /**
+     * The layer base size as {x,y}.
+     *
+     * @type {Scalar2D}
+     */
+    _baseSize: Scalar2D;
+    /**
+     * The layer base spacing as {x,y}.
+     *
+     * @type {Scalar2D}
+     */
+    _baseSpacing: Scalar2D;
+    /**
+     * The layer fit scale.
+     *
+     * @type {Scalar2D}
+     */
+    _fitScale: Scalar2D;
+    /**
+     * The layer flip scale.
+     *
+     * @type {Scalar3D}
+     */
+    _flipScale: Scalar3D;
+    /**
+     * The base layer offset.
+     *
+     * @type {Scalar2D}
+     */
+    _baseOffset: Scalar2D;
+    /**
+     * The view offset.
+     *
+     * @type {Scalar2D}
+     */
+    _viewOffset: Scalar2D;
+    /**
+     * The zoom offset.
+     *
+     * @type {Scalar2D}
+     */
+    _zoomOffset: Scalar2D;
+    /**
+     * The flip offset.
+     *
+     * @type {Scalar2D}
+     */
+    _flipOffset: Scalar2D;
+    /**
+     * The draw controller.
+     *
+     * @type {object}
+     */
+    _drawController: object;
+    /**
+     * The plane helper.
+     *
+     * @type {PlaneHelper}
+     */
+    _planeHelper: PlaneHelper;
+    /**
+     * The associated data id.
+     *
+     * @type {string}
+     */
+    _dataId: string;
+    /**
      * Get the associated data id.
      *
      * @returns {string} The id.
      */
     getDataId(): string;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
     /**
      * Get the Konva stage.
      *
@@ -1408,7 +2476,19 @@ export declare class DrawLayer {
      *   event type.
      */
     removeEventListener(type: string, callback: Function): void;
-
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+    /**
+     * Update label scale: compensate for it so
+     *   that label size stays visually the same.
+     *
+     * @param {Scalar2D} scale The scale to compensate for as {x,y}.
+     */
+    _updateLabelScale(scale: Scalar2D): void;
 }
 
 /**
@@ -1443,6 +2523,50 @@ export declare class Geometry {
      * @param {number} [time] Optional time index.
      */
     constructor(origin: Point3D, size: Size, spacing: Spacing, orientation?: Matrix33, time?: number);
+    /**
+     * Array of origins.
+     *
+     * @type {Point3D[]}
+     */
+    _origins: Point3D[];
+    /**
+     * Data size.
+     *
+     * @type {Size}
+     */
+    _size: Size;
+    /**
+     * Data spacing.
+     *
+     * @type {Spacing}
+     */
+    _spacing: Spacing;
+    /**
+     * Local helper object for time points.
+     *
+     * @type {Object<string, Point3D[]>}
+     */
+    _timeOrigins: {
+        [x: string]: Point3D[];
+    };
+    /**
+     * Initial time index.
+     *
+     * @type {number}
+     */
+    _initialTime: number;
+    /**
+     * Data orientation.
+     *
+     * @type {Matrix33}
+     */
+    _orientation: Matrix33;
+    /**
+     * Flag to know if new origins were added.
+     *
+     * @type {boolean}
+     */
+    _newOrigins: boolean;
     /**
      * Get the time value that was passed at construction.
      *
@@ -1503,6 +2627,11 @@ export declare class Geometry {
      * @returns {Size} The object size.
      */
     getSize(viewOrientation?: Matrix33): Size;
+    /**
+     * Calculate slice spacing from origins and replace current
+     *   if needed.
+     */
+    _updateSliceSpacing(): void;
     /**
      * Get the object spacing.
      * Warning: the spacing comes as stored in DICOM, meaning that it could
@@ -1609,7 +2738,6 @@ export declare class Geometry {
      * @returns {Point3D} The corresponding point.
      */
     worldToPoint(point: Point): Point3D;
-
 }
 
 /**
@@ -1748,7 +2876,7 @@ export declare function getUID(tagName: string): string;
  * Check that an input buffer includes the DICOM prefix 'DICM'
  *   after the 128 bytes preamble.
  *
- * Ref: [DICOM File Meta]{@link https://dicom.nema.org/medical/dicom/2022a/output/chtml/part10/chapter_7.html#sect_7.1}.
+ * Ref: [DICOM File Meta]{@link https://dicom.nema.org/medical/dicom/2022a/output/chtml/part10/chapter_7.html_sect_7.1}.
  *
  * @param {ArrayBuffer} buffer The buffer to check.
  * @returns {boolean} True if the buffer includes the prefix.
@@ -1811,6 +2939,108 @@ declare class Image_2 {
      */
     constructor(geometry: Geometry, buffer: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array, imageUids?: string[]);
     /**
+     * Data geometry.
+     *
+     * @type {Geometry}
+     */
+    _geometry: Geometry;
+    /**
+     * List of compatible typed arrays.
+     *
+     * @typedef {(
+         *   Uint8Array | Int8Array |
+         *   Uint16Array | Int16Array |
+         *   Uint32Array | Int32Array
+         * )} TypedArray
+     */
+    /**
+     * Data buffer.
+     *
+     * @type {TypedArray}
+     */
+    _buffer: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array;
+    /**
+     * Image UIDs.
+     *
+     * @type {string[]}
+     */
+    _imageUids: string[];
+    /**
+     * Constant rescale slope and intercept (default).
+     *
+     * @type {RescaleSlopeAndIntercept}
+     */
+    _rsi: RescaleSlopeAndIntercept;
+    /**
+     * Varying rescale slope and intercept.
+     *
+     * @type {RescaleSlopeAndIntercept[]}
+     */
+    _rsis: RescaleSlopeAndIntercept[];
+    /**
+     * Flag to know if the RSIs are all identity (1,0).
+     *
+     * @type {boolean}
+     */
+    _isIdentityRSI: boolean;
+    /**
+     * Flag to know if the RSIs are all equals.
+     *
+     * @type {boolean}
+     */
+    _isConstantRSI: boolean;
+    /**
+     * Photometric interpretation (MONOCHROME, RGB...).
+     *
+     * @type {string}
+     */
+    _photometricInterpretation: string;
+    /**
+     * Planar configuration for RGB data (`0:RGBRGBRGBRGB...` or
+     *   `1:RRR...GGG...BBB...`).
+     *
+     * @type {number}
+     */
+    _planarConfiguration: number;
+    /**
+     * Number of components.
+     *
+     * @type {number}
+     */
+    _numberOfComponents: number;
+    /**
+     * Meta information.
+     *
+     * @type {Object<string, any>}
+     */
+    _meta: {
+        [x: string]: any;
+    };
+    /**
+     * Data range.
+     *
+     * @type {NumberRange}
+     */
+    _dataRange: NumberRange;
+    /**
+     * Rescaled data range.
+     *
+     * @type {NumberRange}
+     */
+    _rescaledDataRange: NumberRange;
+    /**
+     * Histogram.
+     *
+     * @type {Array}
+     */
+    _histogram: any[];
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
      * Get the image UID at a given index.
      *
      * @param {Index} [index] The index at which to get the id.
@@ -1865,6 +3095,12 @@ declare class Image_2 {
      */
     canScroll(viewOrientation: Matrix33): boolean;
     /**
+     * Get the secondary offset max.
+     *
+     * @returns {number} The maximum offset.
+     */
+    _getSecondaryOffsetMax(): number;
+    /**
      * Get the secondary offset: an offset that takes into account
      *   the slice and above dimension numbers.
      *
@@ -1879,6 +3115,13 @@ declare class Image_2 {
      * @returns {RescaleSlopeAndIntercept} The rescale slope and intercept.
      */
     getRescaleSlopeAndIntercept(index?: Index): RescaleSlopeAndIntercept;
+    /**
+     * Get the rsi at a specified (secondary) offset.
+     *
+     * @param {number} offset The desired (secondary) offset.
+     * @returns {RescaleSlopeAndIntercept} The coresponding rsi.
+     */
+    _getRescaleSlopeAndInterceptAtOffset(offset: number): RescaleSlopeAndIntercept;
     /**
      * Set the rescale slope and intercept.
      *
@@ -1976,10 +3219,16 @@ declare class Image_2 {
      */
     clone(): Image_2;
     /**
+     * Re-allocate buffer memory to an input size.
+     *
+     * @param {number} size The new size.
+     */
+    _realloc(size: number): void;
+    /**
      * Append a slice to the image.
      *
      * @param {Image} rhs The slice to append.
-     * @fires Image#imagegeometrychange
+     * @fires Image_imagegeometrychange
      */
     appendSlice(rhs: Image_2): void;
     /**
@@ -2031,11 +3280,17 @@ declare class Image_2 {
      */
     removeEventListener(type: string, callback: Function): void;
     /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+    /**
      * Set the inner buffer values at given offsets.
      *
      * @param {number[]} offsets List of offsets where to set the data.
      * @param {number|RGB} value The value to set at the given offsets.
-     * @fires Image#imagecontentchange
+     * @fires Image_imagecontentchange
      */
     setAtOffsets(offsets: number[], value: number | RGB): void;
     /**
@@ -2046,7 +3301,7 @@ declare class Image_2 {
      * @param {RGB} value The value to set at the given offsets.
      * @returns {Array} A list of objects representing the original values before
      *  replacing them.
-     * @fires Image#imagecontentchange
+     * @fires Image_imagecontentchange
      */
     setAtOffsetsAndGetOriginals(offsetsLists: number[][], value: RGB): any[];
     /**
@@ -2055,7 +3310,7 @@ declare class Image_2 {
      * @param {number[][]} offsetsLists List of offset lists
      *   where to set the data.
      * @param {RGB|Array} value The value to set at the given offsets.
-     * @fires Image#imagecontentchange
+     * @fires Image_imagecontentchange
      */
     setAtOffsetsWithIterator(offsetsLists: number[][], value: RGB | any[]): void;
     /**
@@ -2162,7 +3417,6 @@ declare class Image_2 {
      * Note: Uses the raw buffer values.
      */
     compose(rhs: Image_2, operator: Function): Image_2;
-
 }
 export { Image_2 as Image }
 
@@ -2176,6 +3430,12 @@ export declare class Index {
      * @param {number[]} values The index values.
      */
     constructor(values: number[]);
+    /**
+     * Index values.
+     *
+     * @type {number[]}
+     */
+    _values: number[];
     /**
      * Get the index value at the given array index.
      *
@@ -2238,13 +3498,12 @@ export declare class Index {
      */
     getWithNew2D(i: number, j: number): Index;
     /**
-     * Get a string id from the index values in the form of: '#0-1_#1-2'.
+     * Get a string id from the index values in the form of: '_0-1__1-2'.
      *
      * @param {number[]} [dims] Optional list of dimensions to use.
      * @returns {string} The string id.
      */
     toStringId(dims?: number[]): string;
-
 }
 
 /**
@@ -2287,6 +3546,84 @@ export declare class LayerGroup {
      */
     constructor(containerDiv: HTMLElement);
     /**
+     * The container div.
+     *
+     * @type {HTMLElement}
+     */
+    _containerDiv: HTMLElement;
+    /**
+     * List of layers.
+     *
+     * @type {Array<ViewLayer|DrawLayer>}
+     */
+    _layers: Array<ViewLayer | DrawLayer>;
+    /**
+     * The layer scale as {x,y,z}.
+     *
+     * @type {Scalar3D}
+     */
+    _scale: Scalar3D;
+    /**
+     * The base scale as {x,y,z}: all posterior scale will be on top of this one.
+     *
+     * @type {Scalar3D}
+     */
+    _baseScale: Scalar3D;
+    /**
+     * The layer offset as {x,y,z}.
+     *
+     * @type {Scalar3D}
+     */
+    _offset: Scalar3D;
+    /**
+     * Active view layer index.
+     *
+     * @type {number}
+     */
+    _activeViewLayerIndex: number;
+    /**
+     * Active draw layer index.
+     *
+     * @type {number}
+     */
+    _activeDrawLayerIndex: number;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
+     * Flag to activate crosshair or not.
+     *
+     * @type {boolean}
+     */
+    _showCrosshair: boolean;
+    /**
+     * Crosshair HTML elements.
+     *
+     * @type {HTMLElement[]}
+     */
+    _crosshairHtmlElements: HTMLElement[];
+    /**
+     * Tooltip HTML element.
+     *
+     * @type {HTMLElement}
+     */
+    _tooltipHtmlElement: HTMLElement;
+    /**
+     * The current position used for the crosshair.
+     *
+     * @type {Point}
+     */
+    _currentPosition: Point;
+    /**
+     * Image smoothing flag.
+     *
+     * @type {boolean}
+     */
+    _imageSmoothing: boolean;
+    /**
      * Get the showCrosshair flag.
      *
      * @returns {boolean} True to display the crosshair.
@@ -2304,6 +3641,12 @@ export declare class LayerGroup {
      * @param {boolean} flag True to enable smoothing.
      */
     setImageSmoothing(flag: boolean): void;
+    /**
+     * Update crosshair on offset or zoom change.
+     *
+     * @param {object} _event The change event.
+     */
+    _updateCrosshairOnChange: (_event: object) => void;
     /**
      * Get the Id of the container div.
      *
@@ -2440,6 +3783,36 @@ export declare class LayerGroup {
      */
     addDrawLayer(): DrawLayer;
     /**
+     * Bind view layer events to this.
+     *
+     * @param {ViewLayer} viewLayer The view layer to bind.
+     */
+    _bindViewLayer(viewLayer: ViewLayer): void;
+    /**
+     * Un-bind a view layer events to this.
+     *
+     * @param {ViewLayer} viewLayer The view layer to unbind.
+     */
+    _unbindViewLayer(viewLayer: ViewLayer): void;
+    /**
+     * Bind draw layer events to this.
+     *
+     * @param {DrawLayer} drawLayer The draw layer to bind.
+     */
+    _bindDrawLayer(drawLayer: DrawLayer): void;
+    /**
+     * Un-bind a draw layer events to this.
+     *
+     * @param {DrawLayer} drawLayer The draw layer to unbind.
+     */
+    _unbindDrawLayer(drawLayer: DrawLayer): void;
+    /**
+     * Get the next layer DOM div.
+     *
+     * @returns {HTMLDivElement} A DOM div.
+     */
+    _getNextLayerDiv(): HTMLDivElement;
+    /**
      * Empty the layer list.
      */
     empty(): void;
@@ -2458,6 +3831,17 @@ export declare class LayerGroup {
      * @param {ViewLayer | DrawLayer} layer The layer to remove.
      */
     removeLayer(layer: ViewLayer | DrawLayer): void;
+    /**
+     * Show a crosshair at a given position.
+     *
+     * @param {Point} [position] The position where to show the crosshair,
+     *   defaults to current position.
+     */
+    _showCrosshairDiv(position?: Point): void;
+    /**
+     * Remove crosshair divs.
+     */
+    _removeCrosshairDiv(): void;
     /**
      * Displays a tooltip in a temporary `span`.
      * Works with css to hide/show the span only on mouse hover.
@@ -2540,7 +3924,7 @@ export declare class LayerGroup {
      *
      * @param {Scalar3D} newScale The scale to apply as {x,y,z}.
      * @param {Point3D} [center] The scale center Point3D.
-     * @fires LayerGroup#zoomchange
+     * @fires LayerGroup_zoomchange
      */
     setScale(newScale: Scalar3D, center?: Point3D): void;
     /**
@@ -2553,7 +3937,7 @@ export declare class LayerGroup {
      * Set the layers' offset.
      *
      * @param {Scalar3D} newOffset The offset as {x,y,z}.
-     * @fires LayerGroup#offsetchange
+     * @fires LayerGroup_offsetchange
      */
     setOffset(newOffset: Scalar3D): void;
     /**
@@ -2586,7 +3970,212 @@ export declare class LayerGroup {
      *   event type.
      */
     removeEventListener(type: string, callback: Function): void;
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+}
 
+/**
+ * ListenerHandler class: handles add/removing and firing listeners.
+ *
+ * Ref: {@link https://developer.mozilla.org/en-US/docs/Web/API/EventTarget_example}.
+ */
+declare class ListenerHandler {
+    /**
+     * Listeners.
+     *
+     * @type {object}
+     */
+    _listeners: object;
+    /**
+     * Add an event listener.
+     *
+     * @param {string} type The event type.
+     * @param {object} callback The method associated with the provided
+     *    event type, will be called with the fired event.
+     */
+    add(type: string, callback: object): void;
+    /**
+     * Remove an event listener.
+     *
+     * @param {string} type The event type.
+     * @param {object} callback The method associated with the provided
+     *   event type.
+     */
+    remove(type: string, callback: object): void;
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    fireEvent: (event: object) => void;
+}
+
+/**
+ * Load controller.
+ */
+declare class LoadController {
+    /**
+     * @param {string} defaultCharacterSet The default character set.
+     */
+    constructor(defaultCharacterSet: string);
+    /**
+     * The default character set.
+     *
+     * @type {string}
+     */
+    _defaultCharacterSet: string;
+    /**
+     * List of current loaders.
+     *
+     * @type {object}
+     */
+    _currentLoaders: object;
+    /**
+     * Load a list of files. Can be image files or a state file.
+     *
+     * @param {File[]} files The list of files to load.
+     * @param {string} dataId The data Id.
+     */
+    loadFiles(files: File[], dataId: string): void;
+    /**
+     * Load a list of URLs. Can be image files or a state file.
+     *
+     * @param {string[]} urls The list of urls to load.
+     * @param {string} dataId The data Id.
+     * @param {object} [options] The load options:
+     * - requestHeaders: an array of {name, value} to use as request headers.
+     * - withCredentials: credentials flag to pass to the request.
+     */
+    loadURLs(urls: string[], dataId: string, options?: object): void;
+    /**
+     * Load a list of ArrayBuffers.
+     *
+     * @param {Array} data The list of ArrayBuffers to load
+     *   in the form of [{name: '', filename: '', data: data}].
+     * @param {string} dataId The data Id.
+     */
+    loadImageObject(data: any[], dataId: string): void;
+    /**
+     * Get the currently loaded data ids.
+     *
+     * @returns {string[]} The data ids.
+     */
+    getLoadingDataIds(): string[];
+    /**
+     * Abort an individual current loader.
+     *
+     * @param {string} dataId The data to stop loading.
+     */
+    abort(dataId: string): void;
+    /**
+     * Load a list of image files.
+     *
+     * @param {File[]} files The list of image files to load.
+     * @param {string} dataId The data Id.
+     */
+    _loadImageFiles(files: File[], dataId: string): void;
+    /**
+     * Load a list of image URLs.
+     *
+     * @param {string[]} urls The list of urls to load.
+     * @param {string} [dataId] The data Id.
+     * @param {object} [options] The load options:
+     * - requestHeaders: an array of {name, value} to use as request headers.
+     * - withCredentials: credentials flag to pass to the request.
+     */
+    _loadImageUrls(urls: string[], dataId?: string, options?: object): void;
+    /**
+     * Load a State file.
+     *
+     * @param {File} file The state file to load.
+     * @param {string} dataId The data Id.
+     */
+    _loadStateFile(file: File, dataId: string): void;
+    /**
+     * Load a State url.
+     *
+     * @param {string} url The state url to load.
+     * @param {string} [dataId] The data Id.
+     * @param {object} [options] The load options:
+     * - requestHeaders: an array of {name, value} to use as request headers.
+     * - withCredentials: credentials flag to pass to the request.
+     */
+    _loadStateUrl(url: string, dataId?: string, options?: object): void;
+    /**
+     * Load a list of data.
+     *
+     * @param {string[]|File[]|Array} data Array of data to load.
+     * @param {object} loader The data loader.
+     * @param {string} loadType The data load type: 'image' or 'state'.
+     * @param {string} dataId The data id.
+     * @param {object} [options] Options passed to the final loader.
+     */
+    _loadData(data: string[] | File[] | any[], loader: object, loadType: string, dataId: string, options?: object): void;
+    /**
+     * Augment a callback event: adds loadtype to the event
+     *  passed to a callback.
+     *
+     * @param {object} callback The callback to update.
+     * @param {object} info Info object to append to the event.
+     * @returns {object} A function representing the modified callback.
+     */
+    _augmentCallbackEvent(callback: object, info: object): object;
+    /**
+     * Handle a load start event.
+     * Default does nothing.
+     *
+     * @param {object} _event The load start event.
+     */
+    onloadstart(_event: object): void;
+    /**
+     * Handle a load progress event.
+     * Default does nothing.
+     *
+     * @param {object} _event The progress event.
+     */
+    onprogress(_event: object): void;
+    /**
+     * Handle a load event.
+     * Default does nothing.
+     *
+     * @param {object} _event The load event fired
+     *   when a file has been loaded successfully.
+     */
+    onload(_event: object): void;
+    /**
+     * Handle a load item event.
+     * Default does nothing.
+     *
+     * @param {object} _event The load event fired
+     *   when an item has been loaded successfully.
+     */
+    onloaditem(_event: object): void;
+    /**
+     * Handle a load end event.
+     * Default does nothing.
+     *
+     * @param {object} _event The load end event fired
+     *  when a file load has completed, successfully or not.
+     */
+    onloadend(_event: object): void;
+    /**
+     * Handle an error event.
+     * Default does nothing.
+     *
+     * @param {object} _event The error event.
+     */
+    onerror(_event: object): void;
+    /**
+     * Handle an abort event.
+     * Default does nothing.
+     *
+     * @param {object} _event The abort event.
+     */
+    onabort(_event: object): void;
 }
 
 export declare namespace logger {
@@ -2618,6 +4207,12 @@ export declare const luts: {
  * Mask {@link Image} factory.
  */
 export declare class MaskFactory {
+    /**
+     * Possible warning created by checkElements.
+     *
+     * @type {string|undefined}
+     */
+    _warning: string | undefined;
     /**
      * Get a warning string if elements are not as expected.
      * Created by checkElements.
@@ -2660,7 +4255,6 @@ export declare class MaskFactory {
     }): {
         [x: string]: DataElement;
     };
-
 }
 
 /**
@@ -2750,6 +4344,25 @@ export declare class MaskSegmentHelper {
      */
     constructor(mask: Image_2);
     /**
+     * The associated mask.
+     *
+     * @type {Image}
+     */
+    _mask: Image_2;
+    /**
+     * The segments: array of segment description.
+     *
+     * @type {MaskSegment[]}
+     */
+    _segments: MaskSegment[];
+    /**
+     * Find the index of a segment in the segments list.
+     *
+     * @param {number} segmentNumber The number to find.
+     * @returns {number} The index in the segments list, -1 if not found.
+     */
+    _findSegmentIndex(segmentNumber: number): number;
+    /**
      * Check if a segment is part of the segments list.
      *
      * @param {number} segmentNumber The segment number.
@@ -2789,13 +4402,26 @@ export declare class MaskSegmentHelper {
      * @param {MaskSegment} segment The segment to update.
      */
     updateSegment(segment: MaskSegment): void;
-
 }
 
 /**
  * Mask segment view helper: handles hidden segments.
  */
 export declare class MaskSegmentViewHelper {
+    /**
+     * List of hidden segments.
+     *
+     * @type {MaskSegment[]}
+     */
+    _hiddenSegments: MaskSegment[];
+    _isMonochrome: any;
+    /**
+     * Get the index of a segment in the hidden list.
+     *
+     * @param {number} segmentNumber The segment number.
+     * @returns {number} The index in the array, -1 if not found.
+     */
+    _findHiddenIndex(segmentNumber: number): number;
     /**
      * Check if a segment is in the hidden list.
      *
@@ -2827,7 +4453,6 @@ export declare class MaskSegmentViewHelper {
      * @returns {alphaFn} The corresponding alpha function.
      */
     getAlphaFunc(): (value: number[] | number, index: number) => number;
-
 }
 
 /**
@@ -2838,6 +4463,18 @@ export declare class Matrix33 {
      * @param {number[]} values Row-major ordered 9 values.
      */
     constructor(values: number[]);
+    /**
+     * Matrix values.
+     *
+     * @type {number[]}
+     */
+    _values: number[];
+    /**
+     * Matrix inverse, calculated at first ask.
+     *
+     * @type {Matrix33}
+     */
+    _inverse: Matrix33;
     /**
      * Get a value of the matrix.
      *
@@ -2935,7 +4572,65 @@ export declare class Matrix33 {
      * @returns {number} The index of the absolute maximum of the last column.
      */
     getThirdColMajorDirection(): number;
+}
 
+/**
+ * Modality LUT class: compensates for any modality-specific presentation.
+ * Typically consists of a rescale slope and intercept to
+ * rescale the data range.
+ *
+ * Ref: {@link https://dicom.nema.org/medical/dicom/2022a/output/chtml/part03/sect_C.11.html}.
+ */
+declare class ModalityLut {
+    /**
+     * @param {RescaleSlopeAndIntercept} rsi The rescale slope and intercept.
+     * @param {number} bitsStored The number of bits used to store the data.
+     */
+    constructor(rsi: RescaleSlopeAndIntercept, bitsStored: number);
+    /**
+     * The rescale slope.
+     *
+     * @type {RescaleSlopeAndIntercept}
+     */
+    _rsi: RescaleSlopeAndIntercept;
+    /**
+     * Is the RSI an identity one.
+     *
+     * @type {boolean}
+     */
+    _isIdRsi: boolean;
+    /**
+     * The size of the LUT array.
+     *
+     * @type {number}
+     */
+    _length: number;
+    /**
+     * The internal LUT array.
+     *
+     * @type {Float32Array}
+     */
+    _lut: Float32Array;
+    /**
+     * Get the Rescale Slope and Intercept (RSI).
+     *
+     * @returns {RescaleSlopeAndIntercept} The rescale slope and intercept object.
+     */
+    getRSI(): RescaleSlopeAndIntercept;
+    /**
+     * Get the length of the LUT array.
+     *
+     * @returns {number} The length of the LUT array.
+     */
+    getLength(): number;
+    /**
+     * Get the value of the LUT at the given offset.
+     *
+     * @param {number} offset The input offset in [0,2^bitsStored] range
+     *   or full range for ID rescale.
+     * @returns {number} The float32 value of the LUT at the given offset.
+     */
+    getValue(offset: number): number;
 }
 
 /**
@@ -2974,6 +4669,54 @@ export declare class OverlayData {
      */
     constructor(app: App, dataId: string, configs: object);
     /**
+     * Associated app.
+     *
+     * @type {App}
+     */
+    _app: App;
+    /**
+     * Associated data id.
+     *
+     * @type {string}
+     */
+    _dataId: string;
+    /**
+     * Overlay config.
+     *
+     * @type {object}
+     */
+    _configs: object;
+    /**
+     * List of event used by the config.
+     *
+     * @type {string[]}
+     */
+    _eventNames: string[];
+    /**
+     * Flag to know if listening to app.
+     *
+     * @type {boolean}
+     */
+    _isListening: boolean;
+    /**
+     * Overlay data.
+     *
+     * @type {Array}
+     */
+    _data: any[];
+    /**
+     * Current data uid: set on pos change.
+     *
+     * @type {number}
+     */
+    _currentDataUid: number;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
      * Reset the data.
      */
     reset(): void;
@@ -2983,6 +4726,19 @@ export declare class OverlayData {
      * @param {object} data The item meta data.
      */
     addItemMeta(data: object): void;
+    /**
+     * Handle a changed slice event.
+     *
+     * @param {object} event The slicechange event.
+     */
+    _onSliceChange: (event: object) => void;
+    /**
+     * Update the overlay data.
+     *
+     * @param {object} event An event defined by the overlay map and
+     *   registered in toggleListeners.
+     */
+    _updateData: (event: object) => void;
     /**
      * Is this class listening to app events.
      *
@@ -3013,7 +4769,12 @@ export declare class OverlayData {
      *   event type.
      */
     removeEventListener(type: string, callback: object): void;
-
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent(event: object): void;
 }
 
 /**
@@ -3026,6 +4787,30 @@ export declare class PlaneHelper {
      * @param {Matrix33} viewOrientation The view orientation.
      */
     constructor(spacing: Spacing, imageOrientation: Matrix33, viewOrientation: Matrix33);
+    /**
+     * The associated spacing.
+     *
+     * @type {Spacing}
+     */
+    _spacing: Spacing;
+    /**
+     * The image orientation.
+     *
+     * @type {Matrix33}
+     */
+    _imageOrientation: Matrix33;
+    /**
+     * The viewe orientation.
+     *
+     * @type {Matrix33}
+     */
+    _viewOrientation: Matrix33;
+    /**
+     * The target orientation.
+     *
+     * @type {Matrix33}
+     */
+    _targetOrientation: Matrix33;
     /**
      * Get a 3D offset from a plane one.
      *
@@ -3108,7 +4893,6 @@ export declare class PlaneHelper {
      * @returns {number} The index.
      */
     getNativeScrollIndex(): number;
-
 }
 
 /**
@@ -3121,6 +4905,12 @@ export declare class Point {
      * @param {number[]} values The point values.
      */
     constructor(values: number[]);
+    /**
+     * Point values.
+     *
+     * @type {number[]}
+     */
+    _values: number[];
     /**
      * Get the index value at the given array index.
      *
@@ -3187,7 +4977,6 @@ export declare class Point {
      * @returns {Point} The merge result.
      */
     mergeWith3D(rhs: Point3D): Point;
-
 }
 
 /**
@@ -3199,6 +4988,18 @@ export declare class Point2D {
      * @param {number} y The Y coordinate for the point.
      */
     constructor(x: number, y: number);
+    /**
+     * X position.
+     *
+     * @type {number}
+     */
+    _x: number;
+    /**
+     * Y position.
+     *
+     * @type {number}
+     */
+    _y: number;
     /**
      * Get the X position of the point.
      *
@@ -3224,7 +5025,6 @@ export declare class Point2D {
      * @returns {string} The point as a string.
      */
     toString(): string;
-
 }
 
 /**
@@ -3237,6 +5037,24 @@ export declare class Point3D {
      * @param {number} z The Z coordinate for the point.
      */
     constructor(x: number, y: number, z: number);
+    /**
+     * X position.
+     *
+     * @type {number}
+     */
+    _x: number;
+    /**
+     * Y position.
+     *
+     * @type {number}
+     */
+    _y: number;
+    /**
+     * Z position.
+     *
+     * @type {number}
+     */
+    _z: number;
     /**
      * Get the X position of the point.
      *
@@ -3285,6 +5103,14 @@ export declare class Point3D {
      */
     getDistance(point3D: Point3D): number;
     /**
+     * Get the square of the distance between this and
+     * an input point. Used for sorting.
+     *
+     * @param {Point3D} point3D The input point.
+     * @returns {number} The square of the distance.
+     */
+    _getSquaredDistance(point3D: Point3D): number;
+    /**
      * Get the closest point to this in a Point3D list.
      *
      * @param {Point3D[]} pointList The list to check.
@@ -3298,7 +5124,6 @@ export declare class Point3D {
      * @returns {Vector3D} The 3D vector from the input point to this one.
      */
     minus(point3D: Point3D): Vector3D;
-
 }
 
 /**
@@ -3325,6 +5150,18 @@ export declare class RescaleSlopeAndIntercept {
      * @param {number} intercept The intercept of the RSI.
      */
     constructor(slope: number, intercept: number);
+    /**
+     * The slope.
+     *
+     * @type {number}
+     */
+    _slope: number;
+    /**
+     * The intercept.
+     *
+     * @type {number}
+     */
+    _intercept: number;
     /**
      * Get the slope of the RSI.
      *
@@ -3357,7 +5194,6 @@ export declare class RescaleSlopeAndIntercept {
      * @returns {boolean} True if the RSI has a slope of 1 and no intercept.
      */
     isID(): boolean;
-
 }
 
 /**
@@ -3433,6 +5269,41 @@ export declare class Scalar3D {
 }
 
 /**
+ * Class to sum wheel events and know if that sum
+ * corresponds to a 'tick'.
+ */
+declare class ScrollSum {
+    /**
+     * The scroll sum.
+     *
+     * @type {number}
+     */
+    _sum: number;
+    /**
+     * Get the scroll sum.
+     *
+     * @returns {number} The scroll sum.
+     */
+    getSum(): number;
+    /**
+     * Add scroll.
+     *
+     * @param {object} event The wheel event.
+     */
+    add(event: object): void;
+    /**
+     * Clear the scroll sum.
+     */
+    clear(): void;
+    /**
+     * Does the accumulated scroll correspond to a 'tick'.
+     *
+     * @returns {boolean} True if the sum corresponds to a 'tick'.
+     */
+    isTick(): boolean;
+}
+
+/**
  * Scroll wheel class: provides a wheel event handler
  *   that scroll the corresponding data.
  */
@@ -3442,12 +5313,23 @@ export declare class ScrollWheel {
      */
     constructor(app: App);
     /**
+     * Associated app.
+     *
+     * @type {App}
+     */
+    _app: App;
+    /**
+     * Accumulated scroll.
+     *
+     * @type {ScrollSum}
+     */
+    _scrollSum: ScrollSum;
+    /**
      * Handle mouse wheel event.
      *
      * @param {WheelEvent} event The mouse wheel event.
      */
     wheel(event: WheelEvent): void;
-
 }
 
 /**
@@ -3460,6 +5342,12 @@ export declare class Size {
      * @param {number[]} values The size values.
      */
     constructor(values: number[]);
+    /**
+     * The size values.
+     *
+     * @type {number[]}
+     */
+    _values: number[];
     /**
      * Get the size value at the given array index.
      *
@@ -3558,7 +5446,6 @@ export declare class Size {
      * @returns {Scalar2D} The 2D base [0,1] as {x,y}.
      */
     get2D(): Scalar2D;
-
 }
 
 /**
@@ -3571,6 +5458,12 @@ export declare class Spacing {
      * @param {number[]} values The spacing values.
      */
     constructor(values: number[]);
+    /**
+     * The spacing values.
+     *
+     * @type {number[]}
+     */
+    _values: number[];
     /**
      * Get the spacing value at the given array index.
      *
@@ -3609,7 +5502,6 @@ export declare class Spacing {
      * @returns {Scalar2D} The 2D base [col,row] as {x,y}.
      */
     get2D(): Scalar2D;
-
 }
 
 /**
@@ -3621,6 +5513,348 @@ export declare class Spacing {
 export declare function srgbToCielab(triplet: RGB): object;
 
 /**
+ * Stage: controls a list of layer groups and their
+ * synchronisation.
+ */
+declare class Stage {
+    /**
+     * Associated layer groups.
+     *
+     * @type {LayerGroup[]}
+     */
+    _layerGroups: LayerGroup[];
+    /**
+     * Active layer group index.
+     *
+     * @type {number|undefined}
+     */
+    _activeLayerGroupIndex: number | undefined;
+    /**
+     * Image smoothing flag.
+     *
+     * @type {boolean}
+     */
+    _imageSmoothing: boolean;
+    _binders: any[];
+    _callbackStore: any;
+    /**
+     * Get the layer group at the given index.
+     *
+     * @param {number} index The index.
+     * @returns {LayerGroup|undefined} The layer group.
+     */
+    getLayerGroup(index: number): LayerGroup | undefined;
+    /**
+     * Get the number of layer groups that form the stage.
+     *
+     * @returns {number} The number of layer groups.
+     */
+    getNumberOfLayerGroups(): number;
+    /**
+     * Get the active layer group.
+     *
+     * @returns {LayerGroup|undefined} The layer group.
+     */
+    getActiveLayerGroup(): LayerGroup | undefined;
+    /**
+     * Set the active layer group.
+     *
+     * @param {number} index The layer group index.
+     */
+    setActiveLayerGroup(index: number): void;
+    /**
+     * Get the view layers associated to a data id.
+     *
+     * @param {string} dataId The data id.
+     * @returns {ViewLayer[]} The layers.
+     */
+    getViewLayersByDataId(dataId: string): ViewLayer[];
+    /**
+     * Get the draw layers associated to a data id.
+     *
+     * @param {string} dataId The data id.
+     * @returns {DrawLayer[]} The layers.
+     */
+    getDrawLayersByDataId(dataId: string): DrawLayer[];
+    /**
+     * Add a layer group to the list.
+     *
+     * The new layer group will be marked as the active layer group.
+     *
+     * @param {object} htmlElement The HTML element of the layer group.
+     * @returns {LayerGroup} The newly created layer group.
+     */
+    addLayerGroup(htmlElement: object): LayerGroup;
+    /**
+     * Get a layer group from an HTML element id.
+     *
+     * @param {string} id The element id to find.
+     * @returns {LayerGroup} The layer group.
+     */
+    getLayerGroupByDivId(id: string): LayerGroup;
+    /**
+     * Set the layer groups binders.
+     *
+     * @param {Array} list The list of binder objects.
+     */
+    setBinders(list: any[]): void;
+    /**
+     * Empty the layer group list.
+     */
+    empty(): void;
+    /**
+     * Remove all layers for a specific data.
+     *
+     * @param {string} dataId The data to remove its layers.
+     */
+    removeLayersByDataId(dataId: string): void;
+    /**
+     * Remove a layer group from this stage.
+     *
+     * @param {LayerGroup} layerGroup The layer group to remove.
+     */
+    removeLayerGroup(layerGroup: LayerGroup): void;
+    /**
+     * Reset the stage: calls reset on all layer groups.
+     */
+    reset(): void;
+    /**
+     * Draw the stage: calls draw on all layer groups.
+     */
+    draw(): void;
+    /**
+     * Fit to container: synchronise the div to world size ratio
+     *   of the group layers.
+     */
+    fitToContainer(): void;
+    /**
+     * Bind the layer groups of the stage.
+     */
+    bindLayerGroups(): void;
+    /**
+     * Unbind the layer groups of the stage.
+     */
+    unbindLayerGroups(): void;
+    /**
+     * Set the imageSmoothing flag value.
+     *
+     * @param {boolean} flag True to enable smoothing.
+     */
+    setImageSmoothing(flag: boolean): void;
+    /**
+     * Get the binder callback function for a given layer group index.
+     * The function is created if not yet stored.
+     *
+     * @param {object} binder The layer binder.
+     * @param {number} index The index of the associated layer group.
+     * @returns {Function} The binder function.
+     */
+    _getBinderCallback(binder: object, index: number): Function;
+    /**
+     * Add event listeners for a given layer group index and binder.
+     *
+     * @param {number} index The index of the associated layer group.
+     * @param {object} binder The layer binder.
+     */
+    _addEventListeners(index: number, binder: object): void;
+    /**
+     * Remove event listeners for a given layer group index and binder.
+     *
+     * @param {number} index The index of the associated layer group.
+     * @param {object} binder The layer binder.
+     */
+    _removeEventListeners(index: number, binder: object): void;
+}
+
+/**
+ * Style class.
+ */
+declare class Style {
+    /**
+     * Font size.
+     *
+     * @type {number}
+     */
+    _fontSize: number;
+    /**
+     * Font family.
+     *
+     * @type {string}
+     */
+    _fontFamily: string;
+    /**
+     * Text colour.
+     *
+     * @type {string}
+     */
+    _textColour: string;
+    /**
+     * Line colour.
+     *
+     * @type {string}
+     */
+    _lineColour: string;
+    /**
+     * Base scale.
+     *
+     * @type {Scalar2D}
+     */
+    _baseScale: Scalar2D;
+    /**
+     * Zoom scale.
+     *
+     * @type {Scalar2D}
+     */
+    _zoomScale: Scalar2D;
+    /**
+     * Stroke width.
+     *
+     * @type {number}
+     */
+    _strokeWidth: number;
+    /**
+     * Shadow offset.
+     *
+     * @type {Scalar2D}
+     */
+    _shadowOffset: Scalar2D;
+    /**
+     * Tag opacity.
+     *
+     * @type {number}
+     */
+    _tagOpacity: number;
+    /**
+     * Text padding.
+     *
+     * @type {number}
+     */
+    _textPadding: number;
+    /**
+     * Get the font family.
+     *
+     * @returns {string} The font family.
+     */
+    getFontFamily(): string;
+    /**
+     * Get the font size.
+     *
+     * @returns {number} The font size.
+     */
+    getFontSize(): number;
+    /**
+     * Get the stroke width.
+     *
+     * @returns {number} The stroke width.
+     */
+    getStrokeWidth(): number;
+    /**
+     * Get the text colour.
+     *
+     * @returns {string} The text colour.
+     */
+    getTextColour(): string;
+    /**
+     * Get the line colour.
+     *
+     * @returns {string} The line colour.
+     */
+    getLineColour(): string;
+    /**
+     * Set the line colour.
+     *
+     * @param {string} colour The line colour.
+     */
+    setLineColour(colour: string): void;
+    /**
+     * Set the base scale.
+     *
+     * @param {Scalar2D} scale The scale as {x,y}.
+     */
+    setBaseScale(scale: Scalar2D): void;
+    /**
+     * Set the zoom scale.
+     *
+     * @param {Scalar2D} scale The scale as {x,y}.
+     */
+    setZoomScale(scale: Scalar2D): void;
+    /**
+     * Get the base scale.
+     *
+     * @returns {Scalar2D} The scale as {x,y}.
+     */
+    getBaseScale(): Scalar2D;
+    /**
+     * Get the zoom scale.
+     *
+     * @returns {Scalar2D} The scale as {x,y}.
+     */
+    getZoomScale(): Scalar2D;
+    /**
+     * Scale an input value using the base scale.
+     *
+     * @param {number} value The value to scale.
+     * @returns {number} The scaled value.
+     */
+    scale(value: number): number;
+    /**
+     * Apply zoom scale on an input value.
+     *
+     * @param {number} value The value to scale.
+     * @returns {Scalar2D} The scaled value as {x,y}.
+     */
+    applyZoomScale(value: number): Scalar2D;
+    /**
+     * Get the shadow offset.
+     *
+     * @returns {Scalar2D} The offset as {x,y}.
+     */
+    getShadowOffset(): Scalar2D;
+    /**
+     * Get the tag opacity.
+     *
+     * @returns {number} The opacity.
+     */
+    getTagOpacity(): number;
+    /**
+     * Get the text padding.
+     *
+     * @returns {number} The padding.
+     */
+    getTextPadding(): number;
+    /**
+     * Get the font definition string.
+     *
+     * @returns {string} The font definition string.
+     */
+    getFontStr(): string;
+    /**
+     * Get the line height.
+     *
+     * @returns {number} The line height.
+     */
+    getLineHeight(): number;
+    /**
+     * Get the font size scaled to the display.
+     *
+     * @returns {number} The scaled font size.
+     */
+    getScaledFontSize(): number;
+    /**
+     * Get the stroke width scaled to the display.
+     *
+     * @returns {number} The scaled stroke width.
+     */
+    getScaledStrokeWidth(): number;
+    /**
+     * Get the shadow line colour.
+     *
+     * @returns {string} The shadow line colour.
+     */
+    getShadowLineColour(): string;
+}
+
+/**
  * Immutable tag.
  */
 export declare class Tag {
@@ -3629,6 +5863,18 @@ export declare class Tag {
      * @param {string} element The tag element as '####'.
      */
     constructor(group: string, element: string);
+    /**
+     * The tag group.
+     *
+     * @type {string}
+     */
+    _group: string;
+    /**
+     * The tag element.
+     *
+     * @type {string}
+     */
+    _element: string;
     /**
      * Get the tag group.
      *
@@ -3677,12 +5923,18 @@ export declare class Tag {
     /**
      * Is the tag group a private tag group ?
      *
-     * See: {@link http://dicom.nema.org/medical/dicom/2022a/output/html/part05.html#sect_7.8}.
+     * See: {@link http://dicom.nema.org/medical/dicom/2022a/output/html/part05.html_sect_7.8}.
      *
      * @returns {boolean} True if the tag group is private,
      *   ie if its group is an odd number.
      */
     isPrivate(): boolean;
+    /**
+     * Get the tag info from the dicom dictionary.
+     *
+     * @returns {string[]|undefined} The info as [vr, multiplicity, name].
+     */
+    _getInfoFromDictionary(): string[] | undefined;
     /**
      * Get the tag Value Representation (VR) from the dicom dictionary.
      *
@@ -3695,7 +5947,6 @@ export declare class Tag {
      * @returns {string|undefined} The VR.
      */
     getNameFromDictionary(): string | undefined;
-
 }
 
 /**
@@ -3723,6 +5974,30 @@ export declare class ToolboxController {
      * @param {object} toolList The list of tool objects.
      */
     constructor(toolList: object);
+    /**
+     * List of tools to control.
+     *
+     * @type {object}
+     */
+    _toolList: object;
+    /**
+     * Selected tool.
+     *
+     * @type {object}
+     */
+    _selectedTool: object;
+    /**
+     * Callback store to allow attach/detach.
+     *
+     * @type {Array}
+     */
+    _callbackStore: any[];
+    /**
+     * Current layers bound to tool.
+     *
+     * @type {object}
+     */
+    _boundLayers: object;
     /**
      * Initialise.
      */
@@ -3780,7 +6055,42 @@ export declare class ToolboxController {
      * @param {ViewLayer|DrawLayer} layer The layer to listen to.
      */
     bindLayerGroup(layerGroup: LayerGroup, layer: ViewLayer | DrawLayer): void;
-
+    /**
+     * Bind a layer group to this controller.
+     *
+     * @param {string} layerGroupDivId The layer group div id.
+     * @param {ViewLayer|DrawLayer} layer The layer.
+     */
+    _internalBindLayerGroup(layerGroupDivId: string, layer: ViewLayer | DrawLayer): void;
+    /**
+     * Get an active layer change handler.
+     *
+     * @param {string} divId The associated layer group div id.
+     * @returns {Function} The event handler.
+     */
+    _getActiveLayerChangeHandler(divId: string): Function;
+    /**
+     * Add canvas mouse and touch listeners to a layer.
+     *
+     * @param {ViewLayer|DrawLayer} layer The layer to start listening to.
+     */
+    _bindLayer(layer: ViewLayer | DrawLayer): void;
+    /**
+     * Remove canvas mouse and touch listeners to a layer.
+     *
+     * @param {ViewLayer|DrawLayer} layer The layer to stop listening to.
+     */
+    _unbindLayer(layer: ViewLayer | DrawLayer): void;
+    /**
+     * Mou(se) and (T)ouch event handler. This function just determines
+     * the mouse/touch position relative to the canvas element.
+     * It then passes it to the current tool.
+     *
+     * @param {string} layerId The layer id.
+     * @param {string} eventType The event type.
+     * @returns {object} A callback for the provided layer and event.
+     */
+    _getCallback(layerId: string, eventType: string): object;
 }
 
 /**
@@ -3812,6 +6122,83 @@ export declare const toolList: {
 };
 
 /**
+ * UndoStack class.
+ */
+declare class UndoStack {
+    /**
+     * Array of commands.
+     *
+     * @type {Array}
+     */
+    _stack: any[];
+    /**
+     * Current command index.
+     *
+     * @type {number}
+     */
+    _curCmdIndex: number;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
+     * Get the stack size.
+     *
+     * @returns {number} The size of the stack.
+     */
+    getStackSize(): number;
+    /**
+     * Get the current stack index.
+     *
+     * @returns {number} The stack index.
+     */
+    getCurrentStackIndex(): number;
+    /**
+     * Add a command to the stack.
+     *
+     * @param {object} cmd The command to add.
+     * @fires UndoStack_undoadd
+     */
+    add(cmd: object): void;
+    /**
+     * Undo the last command.
+     *
+     * @fires UndoStack_undo
+     */
+    undo(): void;
+    /**
+     * Redo the last command.
+     *
+     * @fires UndoStack_redo
+     */
+    redo(): void;
+    /**
+     * Add an event listener to this class.
+     *
+     * @param {string} type The event type.
+     * @param {Function} callback The function associated with the provided
+     *    event type, will be called with the fired event.
+     */
+    addEventListener(type: string, callback: Function): void;
+    /**
+     * Remove an event listener from this class.
+     *
+     * @param {string} type The event type.
+     * @param {Function} callback The function associated with the provided
+     *   event type.
+     */
+    removeEventListener(type: string, callback: Function): void;
+    /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+}
+
+/**
  * Immutable 3D vector.
  */
 export declare class Vector3D {
@@ -3821,6 +6208,24 @@ export declare class Vector3D {
      * @param {number} z The Z component of the vector.
      */
     constructor(x: number, y: number, z: number);
+    /**
+     * X coordinate.
+     *
+     * @type {number}
+     */
+    _x: number;
+    /**
+     * Y coordinate.
+     *
+     * @type {number}
+     */
+    _y: number;
+    /**
+     * Z coordinate.
+     *
+     * @type {number}
+     */
+    _z: number;
     /**
      * Get the X component of the vector.
      *
@@ -3885,7 +6290,6 @@ export declare class Vector3D {
      * @returns {boolean} True if codirectional, false is opposite.
      */
     isCodirectional(vector3D: Vector3D): boolean;
-
 }
 
 /**
@@ -3931,6 +6335,68 @@ export declare class View {
      */
     constructor(image: Image_2);
     /**
+     * The associated image.
+     *
+     * @type {Image}
+     */
+    _image: Image_2;
+    /**
+     * Window lookup tables, indexed per Rescale Slope and Intercept (RSI).
+     *
+     * @type {WindowLut}
+     */
+    _windowLut: WindowLut;
+    /**
+     * Flag for image constant RSI.
+     *
+     * @type {boolean}
+     */
+    _isConstantRSI: boolean;
+    /**
+     * Window presets.
+     * Minmax will be filled at first use (see view.setWindowLevelPreset).
+     *
+     * @type {object}
+     */
+    _windowPresets: object;
+    /**
+     * Current window preset name.
+     *
+     * @type {string}
+     */
+    _currentPresetName: string;
+    /**
+     * Current window level.
+     *
+     * @type {WindowLevel}
+     */
+    _currentWl: WindowLevel;
+    /**
+     * Colour map name.
+     *
+     * @type {string}
+     */
+    _colourMapName: string;
+    /**
+     * Current position as a Point.
+     * Store position and not index to stay geometry independent.
+     *
+     * @type {Point}
+     */
+    _currentPosition: Point;
+    /**
+     * View orientation. Undefined will use the original slice ordering.
+     *
+     * @type {Matrix33}
+     */
+    _orientation: Matrix33;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
      * Get the associated image.
      *
      * @returns {Image} The associated image.
@@ -3970,6 +6436,15 @@ export declare class View {
      */
     getPlaybackMilliseconds(recommendedDisplayFrameRate: number): number;
     /**
+     * Per value alpha function.
+     *
+     * @param {number[]|number} _value The pixel value.
+     *   Can be a number for monochrome data or an array for RGB data.
+     * @param {number} _index The index of the value.
+     * @returns {number} The coresponding alpha [0,255].
+     */
+    _alphaFunction: (_value: number[] | number, _index: number) => number;
+    /**
      * @callback alphaFn@callback alphaFn
      * @param {number[]|number} value The pixel value.
      * @param {number} index The values' index.
@@ -3985,9 +6460,17 @@ export declare class View {
      * Set alpha function.
      *
      * @param {alphaFn} func The function.
-     * @fires View#alphafuncchange
+     * @fires View_alphafuncchange
      */
     setAlphaFunction(func: (value: number[] | number, index: number) => number): void;
+    /**
+     * Get the window LUT of the image.
+     * Warning: can be undefined in no window/level was set.
+     *
+     * @returns {WindowLut} The window LUT of the image.
+     * @fires View_wlchange
+     */
+    _getCurrentWindowLut(): WindowLut;
     /**
      * Get the window presets.
      *
@@ -4025,10 +6508,16 @@ export declare class View {
      */
     getColourMap(): string;
     /**
+     * Get the colour map object.
+     *
+     * @returns {ColourMap} The colour map.
+     */
+    _getColourMapLut(): ColourMap;
+    /**
      * Set the colour map of the image.
      *
      * @param {string} name The colour map name.
-     * @fires View#colourmapchange
+     * @fires View_colourmapchange
      */
     setColourMap(name: string): void;
     /**
@@ -4064,7 +6553,7 @@ export declare class View {
      * @param {Point} position The new position.
      * @param {boolean} silent Flag to fire event or not.
      * @returns {boolean} False if not in bounds.
-     * @fires View#positionchange
+     * @fires View_positionchange
      */
     setCurrentPosition(position: Point, silent: boolean): boolean;
     /**
@@ -4073,7 +6562,7 @@ export declare class View {
      * @param {Index} index The new index.
      * @param {boolean} [silent] Flag to fire event or not.
      * @returns {boolean} False if not in bounds.
-     * @fires View#positionchange
+     * @fires View_positionchange
      */
     setCurrentIndex(index: Index, silent?: boolean): boolean;
     /**
@@ -4083,7 +6572,7 @@ export declare class View {
      * @param {string} [name] Associated preset name, defaults to 'manual'.
      * Warning: uses the latest set rescale LUT or the default linear one.
      * @param {boolean} [silent] Flag to launch events with skipGenerate.
-     * @fires View#wlchange
+     * @fires View_wlchange
      */
     setWindowLevel(wl: WindowLevel, name?: string, silent?: boolean): void;
     /**
@@ -4123,6 +6612,12 @@ export declare class View {
      */
     removeEventListener(type: string, callback: Function): void;
     /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+    /**
      * Get the image window/level that covers the full data range.
      * Warning: uses the latest set rescale LUT or the default linear one.
      *
@@ -4148,7 +6643,6 @@ export declare class View {
      * @returns {number} The index.
      */
     getScrollIndex(): number;
-
 }
 
 /**
@@ -4213,9 +6707,32 @@ export declare class ViewConfig {
 export declare class ViewController {
     /**
      * @param {View} view The associated view.
-     * @param {string} dataId The associated data id.
      */
-    constructor(view: View, dataId: string);
+    constructor(view: View);
+    /**
+     * Associated View.
+     *
+     * @type {View}
+     */
+    _view: View;
+    /**
+     * Plane helper.
+     *
+     * @type {PlaneHelper}
+     */
+    _planeHelper: PlaneHelper;
+    /**
+     * Third dimension player ID (created by setInterval).
+     *
+     * @type {number|undefined}
+     */
+    _playerID: number | undefined;
+    /**
+     * Is DICOM seg mask flag.
+     *
+     * @type {boolean}
+     */
+    _isMask: boolean;
     /**
      * Get the plane helper.
      *
@@ -4324,9 +6841,8 @@ export declare class ViewController {
      * Set the associated image.
      *
      * @param {Image} img The associated image.
-     * @param {string} dataId The data id of the image.
      */
-    setImage(img: Image_2, dataId: string): void;
+    setImage(img: Image_2): void;
     /**
      * Get the current view (2D) spacing.
      *
@@ -4347,6 +6863,16 @@ export declare class ViewController {
      * @returns {string} The unit.
      */
     getPixelUnit(): string;
+    /**
+     * Extract a slice from an image at the given index and orientation.
+     *
+     * @param {Image} image The image to parse.
+     * @param {Index} index The current index.
+     * @param {boolean} isRescaled Flag for rescaled values (default false).
+     * @param {Matrix33} orientation The desired orientation.
+     * @returns {Image} The extracted slice.
+     */
+    _getSlice(image: Image_2, index: Index, isRescaled: boolean, orientation: Matrix33): Image_2;
     /**
      * Get some values from the associated image in a region.
      *
@@ -4476,6 +7002,32 @@ export declare class ViewController {
      */
     getOffset3DFromPlaneOffset(offset2D: Scalar2D): Vector3D;
     /**
+     * Get the current index incremented in the input direction.
+     *
+     * @param {number} dim The direction in which to increment.
+     * @returns {Index} The resulting index.
+     */
+    _getIncrementIndex(dim: number): Index;
+    /**
+     * Get the current index decremented in the input direction.
+     *
+     * @param {number} dim The direction in which to decrement.
+     * @returns {Index} The resulting index.
+     */
+    _getDecrementIndex(dim: number): Index;
+    /**
+     * Get the current index incremented in the scroll direction.
+     *
+     * @returns {Index} The resulting index.
+     */
+    _getIncrementScrollIndex(): Index;
+    /**
+     * Get the current index decremented in the scroll direction.
+     *
+     * @returns {Index} The resulting index.
+     */
+    _getDecrementScrollIndex(): Index;
+    /**
      * Get the current position incremented in the input direction.
      *
      * @param {number} dim The direction in which to increment.
@@ -4593,23 +7145,6 @@ export declare class ViewController {
      * @param {ViewLayer} viewLayer The layer to bind.
      */
     unbindImageAndLayer(viewLayer: ViewLayer): void;
-    /**
-     * Add an event listener to this class.
-     *
-     * @param {string} type The event type.
-     * @param {Function} callback The function associated with the provided
-     *   event type, will be called with the fired event.
-     */
-    addEventListener(type: string, callback: Function): void;
-    /**
-     * Remove an event listener from this class.
-     *
-     * @param {string} type The event type.
-     * @param {Function} callback The function associated with the provided
-     *   event type.
-     */
-    removeEventListener(type: string, callback: Function): void;
-
 }
 
 /**
@@ -4621,6 +7156,152 @@ export declare class ViewLayer {
      *   as this layer id.
      */
     constructor(containerDiv: HTMLElement);
+    /**
+     * Container div.
+     *
+     * @type {HTMLElement}
+     */
+    _containerDiv: HTMLElement;
+    /**
+     * The view controller.
+     *
+     * @type {ViewController}
+     */
+    _viewController: ViewController;
+    /**
+     * The main display canvas.
+     *
+     * @type {object}
+     */
+    _canvas: object;
+    /**
+     * The offscreen canvas: used to store the raw, unscaled pixel data.
+     *
+     * @type {object}
+     */
+    _offscreenCanvas: object;
+    /**
+     * The associated CanvasRenderingContext2D.
+     *
+     * @type {object}
+     */
+    _context: object;
+    /**
+     * Flag to know if the current position is valid.
+     *
+     * @type {boolean}
+     */
+    _isValidPosition: boolean;
+    /**
+     * The image data array.
+     *
+     * @type {ImageData}
+     */
+    _imageData: ImageData;
+    /**
+     * The layer base size as {x,y}.
+     *
+     * @type {Scalar2D}
+     */
+    _baseSize: Scalar2D;
+    /**
+     * The layer base spacing as {x,y}.
+     *
+     * @type {Scalar2D}
+     */
+    _baseSpacing: Scalar2D;
+    /**
+     * The layer opacity.
+     *
+     * @type {number}
+     */
+    _opacity: number;
+    /**
+     * The layer scale.
+     *
+     * @type {Scalar2D}
+     */
+    _scale: Scalar2D;
+    /**
+     * The layer fit scale.
+     *
+     * @type {Scalar2D}
+     */
+    _fitScale: Scalar2D;
+    /**
+     * The layer flip scale.
+     *
+     * @type {Scalar3D}
+     */
+    _flipScale: Scalar3D;
+    /**
+     * The layer offset.
+     *
+     * @type {Scalar2D}
+     */
+    _offset: Scalar2D;
+    /**
+     * The base layer offset.
+     *
+     * @type {Scalar2D}
+     */
+    _baseOffset: Scalar2D;
+    /**
+     * The view offset.
+     *
+     * @type {Scalar2D}
+     */
+    _viewOffset: Scalar2D;
+    /**
+     * The zoom offset.
+     *
+     * @type {Scalar2D}
+     */
+    _zoomOffset: Scalar2D;
+    /**
+     * The flip offset.
+     *
+     * @type {Scalar2D}
+     */
+    _flipOffset: Scalar2D;
+    /**
+     * Data update flag.
+     *
+     * @type {boolean}
+     */
+    _needsDataUpdate: boolean;
+    /**
+     * The associated data id.
+     *
+     * @type {string}
+     */
+    _dataId: string;
+    /**
+     * Listener handler.
+     *
+     * @type {ListenerHandler}
+     */
+    _listenerHandler: ListenerHandler;
+    /**
+     * Image smoothing flag.
+     *
+     * See: {@link https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/imageSmoothingEnabled}.
+     *
+     * @type {boolean}
+     */
+    _imageSmoothing: boolean;
+    /**
+     * Layer group origin.
+     *
+     * @type {Point3D}
+     */
+    _layerGroupOrigin: Point3D;
+    /**
+     * Layer group first origin.
+     *
+     * @type {Point3D}
+     */
+    _layerGroupOrigin0: Point3D;
     /**
      * Get the associated data id.
      *
@@ -4830,8 +7511,8 @@ export declare class ViewLayer {
      * Draw the content (imageData) of the layer.
      * The imageData variable needs to be set.
      *
-     * @fires App#renderstart
-     * @fires App#renderend
+     * @fires App_renderstart
+     * @fires App_renderend
      */
     draw(): void;
     /**
@@ -4842,6 +7523,12 @@ export declare class ViewLayer {
      * @param {number} alpha The initial data opacity.
      */
     initialise(size: Scalar2D, spacing: Scalar2D, alpha: number): void;
+    /**
+     * Set the base size of the layer.
+     *
+     * @param {Scalar2D} size The size as {x,y}.
+     */
+    _setBaseSize(size: Scalar2D): void;
     /**
      * Fit the layer to its parent container.
      *
@@ -4875,6 +7562,40 @@ export declare class ViewLayer {
      */
     removeEventListener(type: string, callback: Function): void;
     /**
+     * Fire an event: call all associated listeners with the input event object.
+     *
+     * @param {object} event The event to fire.
+     */
+    _fireEvent: (event: object) => void;
+    /**
+     * Update the canvas image data.
+     */
+    _updateImageData(): void;
+    /**
+     * Handle window/level change.
+     *
+     * @param {object} event The event fired when changing the window/level.
+     */
+    _onWLChange: (event: object) => void;
+    /**
+     * Handle colour map change.
+     *
+     * @param {object} event The event fired when changing the colour map.
+     */
+    _onColourMapChange: (event: object) => void;
+    /**
+     * Handle position change.
+     *
+     * @param {object} event The event fired when changing the position.
+     */
+    _onPositionChange: (event: object) => void;
+    /**
+     * Handle alpha function change.
+     *
+     * @param {object} event The event fired when changing the function.
+     */
+    _onAlphaFuncChange: (event: object) => void;
+    /**
      * Set the current position.
      *
      * @param {Point} position The new position.
@@ -4886,7 +7607,98 @@ export declare class ViewLayer {
      * Clear the context.
      */
     clear(): void;
+}
 
+/**
+ * VOI (Values of Interest) LUT class: apply window centre and width.
+ *
+ * ```
+ * if (x <= c - 0.5 - (w-1)/2) then y = ymin
+ * else if (x > c - 0.5 + (w-1)/2) then y = ymax
+ * else y = ((x - (c - 0.5)) / (w-1) + 0.5) * (ymax - ymin) + ymin
+ * ```
+ *
+ * Ref: {@link https://dicom.nema.org/medical/dicom/2022a/output/chtml/part03/sect_C.11.2.html}.
+ */
+declare class VoiLut {
+    /**
+     * @param {WindowLevel} wl The window center and width.
+     */
+    constructor(wl: WindowLevel);
+    /**
+     * The window and level.
+     *
+     * @type {WindowLevel}
+     */
+    _windowLevel: WindowLevel;
+    /**
+     * Signed data offset. Defaults to 0.
+     *
+     * @type {number}
+     */
+    _signedOffset: number;
+    /**
+     * Output value minimum. Defaults to 0.
+     *
+     * @type {number}
+     */
+    _ymin: number;
+    /**
+     * Output value maximum. Defaults to 255.
+     *
+     * @type {number}
+     */
+    _ymax: number;
+    /**
+     * Input value minimum (calculated).
+     *
+     * @type {number}
+     */
+    _xmin: number;
+    /**
+     * Input value maximum (calculated).
+     *
+     * @type {number}
+     */
+    _xmax: number;
+    /**
+     * Window level equation slope (calculated).
+     *
+     * @type {number}
+     */
+    _slope: number;
+    /**
+     * Window level equation intercept (calculated).
+     *
+     * @type {number}
+     */
+    _inter: number;
+    /**
+     * Get the window and level.
+     *
+     * @returns {WindowLevel} The window center and width.
+     */
+    getWindowLevel(): WindowLevel;
+    /**
+     * Initialise members. Called at construction.
+     *
+     */
+    _init(): void;
+    /**
+     * Set the signed offset.
+     *
+     * @param {number} offset The signed data offset,
+     *   typically: slope * ( size / 2).
+     */
+    setSignedOffset(offset: number): void;
+    /**
+     * Apply the window level on an input value.
+     *
+     * @param {number} value The value to rescale as an integer.
+     * @returns {number} The leveled value, in the
+     *  [ymin, ymax] range (default [0,255]).
+     */
+    apply(value: number): number;
 }
 
 /**
@@ -4917,6 +7729,78 @@ export declare class WindowLevel {
      * @returns {boolean} True if both objects are equal.
      */
     equals(rhs: WindowLevel): boolean;
+}
+
+/**
+ * Window LUT class: combines a modality LUT and a VOI LUT.
+ */
+declare class WindowLut {
+    /**
+     * Construct a window LUT object, VOI LUT is set with
+     *   the 'setVoiLut' method.
+     *
+     * @param {ModalityLut} modalityLut The associated rescale LUT.
+     * @param {boolean} isSigned Flag to know if the data is signed or not.
+     * @param {boolean} isDiscrete Flag to know if the input data is discrete.
+     */
+    constructor(modalityLut: ModalityLut, isSigned: boolean, isDiscrete: boolean);
+    /**
+     * The modality LUT.
+     *
+     * @type {ModalityLut}
+     */
+    _modalityLut: ModalityLut;
+    /**
+     * The VOI LUT.
+     *
+     * @type {VoiLut}
+     */
+    _voiLut: VoiLut;
+    /**
+     * The internal LUT array: Uint8ClampedArray clamps between 0 and 255.
+     *
+     * @type {Uint8ClampedArray}
+     */
+    _lut: Uint8ClampedArray;
+    /**
+     * Shift for signed data.
+     *
+     * @type {number}
+     */
+    _signedShift: number;
+    /**
+     * Is the RSI discrete.
+     *
+     * @type {boolean}
+     */
+    _isDiscrete: boolean;
+    /**
+     * Get the VOI LUT.
+     *
+     * @returns {VoiLut} The VOI LUT.
+     */
+    getVoiLut(): VoiLut;
+    /**
+     * Get the modality LUT.
+     *
+     * @returns {ModalityLut} The modality LUT.
+     */
+    getModalityLut(): ModalityLut;
+    /**
+     * Set the VOI LUT.
+     *
+     * @param {VoiLut} lut The VOI LUT.
+     */
+    setVoiLut(lut: VoiLut): void;
+    /**
+     * Get the value of the LUT at the given offset.
+     *
+     * @param {number} offset The input offset in [0,2^bitsStored] range
+     *   for discrete data or full range for non discrete.
+     * @returns {number} The integer value (default [0,255]) of the LUT
+     *   at the given offset.
+     */
+    getValue(offset: number): number;
 }
 
 /**

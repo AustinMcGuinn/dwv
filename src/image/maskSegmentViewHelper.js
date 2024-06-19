@@ -15,9 +15,9 @@ export class MaskSegmentViewHelper {
    *
    * @type {MaskSegment[]}
    */
-  #hiddenSegments = [];
+  _hiddenSegments = [];
 
-  #isMonochrome;
+  _isMonochrome;
 
   /**
    * Get the index of a segment in the hidden list.
@@ -25,8 +25,8 @@ export class MaskSegmentViewHelper {
    * @param {number} segmentNumber The segment number.
    * @returns {number} The index in the array, -1 if not found.
    */
-  #findHiddenIndex(segmentNumber) {
-    return this.#hiddenSegments.findIndex(function (item) {
+  _findHiddenIndex(segmentNumber) {
+    return this._hiddenSegments.findIndex(function (item) {
       return item.number === segmentNumber;
     });
   }
@@ -38,7 +38,7 @@ export class MaskSegmentViewHelper {
    * @returns {boolean} True if the segment is in the list.
    */
   isHidden(segmentNumber) {
-    return this.#findHiddenIndex(segmentNumber) !== -1;
+    return this._findHiddenIndex(segmentNumber) !== -1;
   }
 
   /**
@@ -48,9 +48,9 @@ export class MaskSegmentViewHelper {
    */
   addToHidden(segment) {
     if (!this.isHidden(segment.number)) {
-      this.#hiddenSegments.push(segment);
+      this._hiddenSegments.push(segment);
       // base flag on latest added
-      this.#isMonochrome = typeof segment.displayValue !== 'undefined';
+      this._isMonochrome = typeof segment.displayValue !== 'undefined';
     } else {
       logger.warn(
         'Not hidding segment, it is allready in the hidden list: ' +
@@ -64,9 +64,9 @@ export class MaskSegmentViewHelper {
    * @param {number} segmentNumber The segment number.
    */
   removeFromHidden(segmentNumber) {
-    const index = this.#findHiddenIndex(segmentNumber);
+    const index = this._findHiddenIndex(segmentNumber);
     if (index !== -1) {
-      this.#hiddenSegments.splice(index, 1);
+      this._hiddenSegments.splice(index, 1);
     } else {
       logger.warn(
         'Cannot remove segment, it is not in the hidden list: ' +
@@ -89,13 +89,13 @@ export class MaskSegmentViewHelper {
   getAlphaFunc() {
     // get colours
     const hiddenColours = [];
-    if (this.#isMonochrome) {
+    if (this._isMonochrome) {
       hiddenColours[0] = 0;
     } else {
       hiddenColours[0] = {r: 0, g: 0, b: 0};
     }
-    for (const segment of this.#hiddenSegments) {
-      if (this.#isMonochrome) {
+    for (const segment of this._hiddenSegments) {
+      if (this._isMonochrome) {
         hiddenColours.push(segment.displayValue);
       } else {
         hiddenColours.push(segment.displayRGBValue);
@@ -104,7 +104,7 @@ export class MaskSegmentViewHelper {
 
     // create alpha function
     let resultFn;
-    if (this.#isMonochrome) {
+    if (this._isMonochrome) {
       resultFn = function (value/*, index*/) {
         for (let i = 0; i < hiddenColours.length; ++i) {
           if (value === hiddenColours[i]) {

@@ -37,20 +37,20 @@ export class Matrix33 {
    *
    * @type {number[]}
    */
-  #values;
+  _values;
 
   /**
    * Matrix inverse, calculated at first ask.
    *
    * @type {Matrix33}
    */
-  #inverse;
+  _inverse;
 
   /**
    * @param {number[]} values Row-major ordered 9 values.
    */
   constructor(values) {
-    this.#values = values;
+    this._values = values;
   }
 
   /**
@@ -61,7 +61,7 @@ export class Matrix33 {
    * @returns {number|undefined} The value at the position.
    */
   get(row, col) {
-    return this.#values[row * 3 + col];
+    return this._values[row * 3 + col];
   }
 
   /**
@@ -71,10 +71,10 @@ export class Matrix33 {
    *   if the determinant is zero.
    */
   getInverse() {
-    if (typeof this.#inverse === 'undefined') {
-      this.#inverse = getMatrixInverse(this);
+    if (typeof this._inverse === 'undefined') {
+      this._inverse = getMatrixInverse(this);
     }
-    return this.#inverse;
+    return this._inverse;
   }
 
   /**
@@ -291,7 +291,7 @@ export class Matrix33 {
  * Get the inverse of an input 3*3 matrix.
  *
  * Ref:
- * - {@link https://en.wikipedia.org/wiki/Invertible_matrix#Inversion_of_3_%C3%97_3_matrices},
+ * - {@link https://en.wikipedia.org/wiki/Invertible_matrix_Inversion_of_3_%C3%97_3_matrices},
  * - {@link https://github.com/willnode/N-Matrix-Programmer}.
  *
  * @param {Matrix33} m The input matrix.

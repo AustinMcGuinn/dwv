@@ -131,7 +131,7 @@ export function replaceFlags(inputStr, values) {
       let valueStr = valueObj.value.toPrecision(4);
       // add unit if available
       // space or no space? Yes apart from degree...
-      // check: https://en.wikipedia.org/wiki/Space_(punctuation)#Spaces_and_unit_symbols
+      // check: https://en.wikipedia.org/wiki/Space_(punctuation)_Spaces_and_unit_symbols
       if (valueObj.unit !== null &&
         typeof valueObj.unit !== 'undefined' &&
         valueObj.unit.length !== 0) {

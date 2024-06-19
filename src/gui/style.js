@@ -14,70 +14,70 @@ export class Style {
    *
    * @type {number}
    */
-  #fontSize = 10;
+  _fontSize = 10;
 
   /**
    * Font family.
    *
    * @type {string}
    */
-  #fontFamily = 'Verdana';
+  _fontFamily = 'Verdana';
 
   /**
    * Text colour.
    *
    * @type {string}
    */
-  #textColour = '#fff';
+  _textColour = '_fff';
 
   /**
    * Line colour.
    *
    * @type {string}
    */
-  #lineColour = '#ffff80';
+  _lineColour = '_ffff80';
 
   /**
    * Base scale.
    *
    * @type {Scalar2D}
    */
-  #baseScale = {x: 1, y: 1};
+  _baseScale = {x: 1, y: 1};
 
   /**
    * Zoom scale.
    *
    * @type {Scalar2D}
    */
-  #zoomScale = {x: 1, y: 1};
+  _zoomScale = {x: 1, y: 1};
 
   /**
    * Stroke width.
    *
    * @type {number}
    */
-  #strokeWidth = 2;
+  _strokeWidth = 2;
 
   /**
    * Shadow offset.
    *
    * @type {Scalar2D}
    */
-  #shadowOffset = {x: 0.25, y: 0.25};
+  _shadowOffset = {x: 0.25, y: 0.25};
 
   /**
    * Tag opacity.
    *
    * @type {number}
    */
-  #tagOpacity = 0.2;
+  _tagOpacity = 0.2;
 
   /**
    * Text padding.
    *
    * @type {number}
    */
-  #textPadding = 3;
+  _textPadding = 3;
 
   /**
    * Get the font family.
@@ -85,7 +85,7 @@ export class Style {
    * @returns {string} The font family.
    */
   getFontFamily() {
-    return this.#fontFamily;
+    return this._fontFamily;
   }
 
   /**
@@ -94,7 +94,7 @@ export class Style {
    * @returns {number} The font size.
    */
   getFontSize() {
-    return this.#fontSize;
+    return this._fontSize;
   }
 
   /**
@@ -103,7 +103,7 @@ export class Style {
    * @returns {number} The stroke width.
    */
   getStrokeWidth() {
-    return this.#strokeWidth;
+    return this._strokeWidth;
   }
 
   /**
@@ -112,7 +112,7 @@ export class Style {
    * @returns {string} The text colour.
    */
   getTextColour() {
-    return this.#textColour;
+    return this._textColour;
   }
 
   /**
@@ -121,7 +121,7 @@ export class Style {
    * @returns {string} The line colour.
    */
   getLineColour() {
-    return this.#lineColour;
+    return this._lineColour;
   }
 
   /**
@@ -130,7 +130,7 @@ export class Style {
    * @param {string} colour The line colour.
    */
   setLineColour(colour) {
-    this.#lineColour = colour;
+    this._lineColour = colour;
   }
 
   /**
@@ -139,7 +139,7 @@ export class Style {
    * @param {Scalar2D} scale The scale as {x,y}.
    */
   setBaseScale(scale) {
-    this.#baseScale = scale;
+    this._baseScale = scale;
   }
 
   /**
@@ -148,7 +148,7 @@ export class Style {
    * @param {Scalar2D} scale The scale as {x,y}.
    */
   setZoomScale(scale) {
-    this.#zoomScale = scale;
+    this._zoomScale = scale;
   }
 
   /**
@@ -157,7 +157,7 @@ export class Style {
    * @returns {Scalar2D} The scale as {x,y}.
    */
   getBaseScale() {
-    return this.#baseScale;
+    return this._baseScale;
   }
 
   /**
@@ -166,7 +166,7 @@ export class Style {
    * @returns {Scalar2D} The scale as {x,y}.
    */
   getZoomScale() {
-    return this.#zoomScale;
+    return this._zoomScale;
   }
 
   /**
@@ -177,7 +177,7 @@ export class Style {
    */
   scale(value) {
     // TODO: 2D?
-    return value / this.#baseScale.x;
+    return value / this._baseScale.x;
   }
 
   /**
@@ -190,8 +190,8 @@ export class Style {
     // times 2 so that the font size 10 looks like a 10...
     // (same logic as in the DrawController::updateLabelScale)
     return {
-      x: 2 * value / this.#zoomScale.x,
-      y: 2 * value / this.#zoomScale.y
+      x: 2 * value / this._zoomScale.x,
+      y: 2 * value / this._zoomScale.y
     };
   }
 
@@ -201,7 +201,7 @@ export class Style {
    * @returns {Scalar2D} The offset as {x,y}.
    */
   getShadowOffset() {
-    return this.#shadowOffset;
+    return this._shadowOffset;
   }
 
   /**
@@ -210,7 +210,7 @@ export class Style {
    * @returns {number} The opacity.
    */
   getTagOpacity() {
-    return this.#tagOpacity;
+    return this._tagOpacity;
   }
 
   /**
@@ -219,7 +219,7 @@ export class Style {
    * @returns {number} The padding.
    */
   getTextPadding() {
-    return this.#textPadding;
+    return this._textPadding;
   }
 
   /**

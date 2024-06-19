@@ -117,7 +117,7 @@ export class Image {
    *
    * @type {Geometry}
    */
-  #geometry;
+  _geometry;
 
   /**
    * List of compatible typed arrays.
@@ -134,49 +134,49 @@ export class Image {
    *
    * @type {TypedArray}
    */
-  #buffer;
+  _buffer;
 
   /**
    * Image UIDs.
    *
    * @type {string[]}
    */
-  #imageUids;
+  _imageUids;
 
   /**
    * Constant rescale slope and intercept (default).
    *
    * @type {RescaleSlopeAndIntercept}
    */
-  #rsi = new RescaleSlopeAndIntercept(1, 0);
+  _rsi = new RescaleSlopeAndIntercept(1, 0);
 
   /**
    * Varying rescale slope and intercept.
    *
    * @type {RescaleSlopeAndIntercept[]}
    */
-  #rsis = null;
+  _rsis = null;
 
   /**
    * Flag to know if the RSIs are all identity (1,0).
    *
    * @type {boolean}
    */
-  #isIdentityRSI = true;
+  _isIdentityRSI = true;
 
   /**
    * Flag to know if the RSIs are all equals.
    *
    * @type {boolean}
    */
-  #isConstantRSI = true;
+  _isConstantRSI = true;
 
   /**
    * Photometric interpretation (MONOCHROME, RGB...).
    *
    * @type {string}
    */
-  #photometricInterpretation = 'MONOCHROME2';
+  _photometricInterpretation = 'MONOCHROME2';
 
   /**
    * Planar configuration for RGB data (`0:RGBRGBRGBRGB...` or
@@ -184,49 +184,49 @@ export class Image {
    *
    * @type {number}
    */
-  #planarConfiguration = 0;
+  _planarConfiguration = 0;
 
   /**
    * Number of components.
    *
    * @type {number}
    */
-  #numberOfComponents;
+  _numberOfComponents;
 
   /**
    * Meta information.
    *
    * @type {Object<string, any>}
    */
-  #meta = {};
+  _meta = {};
 
   /**
    * Data range.
    *
    * @type {NumberRange}
    */
-  #dataRange = null;
+  _dataRange = null;
 
   /**
    * Rescaled data range.
    *
    * @type {NumberRange}
    */
-  #rescaledDataRange = null;
+  _rescaledDataRange = null;
 
   /**
    * Histogram.
    *
    * @type {Array}
    */
-  #histogram = null;
+  _histogram = null;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * @param {Geometry} geometry The geometry of the image.
@@ -234,12 +234,12 @@ export class Image {
    * @param {string[]} [imageUids] An array of Uids indexed to slice number.
    */
   constructor(geometry, buffer, imageUids) {
-    this.#geometry = geometry;
-    this.#buffer = buffer;
-    this.#imageUids = imageUids;
+    this._geometry = geometry;
+    this._buffer = buffer;
+    this._imageUids = imageUids;
 
-    this.#numberOfComponents = this.#buffer.length / (
-      this.#geometry.getSize().getTotalSize());
+    this._numberOfComponents = this._buffer.length / (
+      this._geometry.getSize().getTotalSize());
   }
 
   /**
@@ -249,9 +249,9 @@ export class Image {
    * @returns {string} The UID.
    */
   getImageUid(index) {
-    let uid = this.#imageUids[0];
-    if (this.#imageUids.length !== 1 && typeof index !== 'undefined') {
-      uid = this.#imageUids[this.getSecondaryOffset(index)];
+    let uid = this._imageUids[0];
+    if (this._imageUids.length !== 1 && typeof index !== 'undefined') {
+      uid = this._imageUids[this.getSecondaryOffset(index)];
     }
     return uid;
   }
@@ -263,7 +263,7 @@ export class Image {
    * @returns {boolean} True if all uids are in this image uids.
    */
   containsImageUids(uids) {
-    return arrayContains(this.#imageUids, uids);
+    return arrayContains(this._imageUids, uids);
   }
 
   /**
@@ -272,7 +272,7 @@ export class Image {
    * @returns {Geometry} The geometry.
    */
   getGeometry() {
-    return this.#geometry;
+    return this._geometry;
   }
 
   /**
@@ -282,7 +282,7 @@ export class Image {
    * @returns {TypedArray} The data buffer of the image.
    */
   getBuffer() {
-    return this.#buffer;
+    return this._buffer;
   }
 
   /**
@@ -325,8 +325,8 @@ export class Image {
     const size = this.getGeometry().getSize();
     // also check the numberOfFiles in case we are in the middle of a load
     let nFiles = 1;
-    if (typeof this.#meta.numberOfFiles !== 'undefined') {
-      nFiles = this.#meta.numberOfFiles;
+    if (typeof this._meta.numberOfFiles !== 'undefined') {
+      nFiles = this._meta.numberOfFiles;
     }
     return size.canScroll(viewOrientation) || nFiles !== 1;
   }
@@ -336,8 +336,8 @@ export class Image {
    *
    * @returns {number} The maximum offset.
    */
-  #getSecondaryOffsetMax() {
-    return this.#geometry.getSize().getTotalSize(2);
+  _getSecondaryOffsetMax() {
+    return this._geometry.getSize().getTotalSize(2);
   }
 
   /**
@@ -348,7 +348,7 @@ export class Image {
    * @returns {number} The offset.
    */
   getSecondaryOffset(index) {
-    return this.#geometry.getSize().indexToOffset(index, 2);
+    return this._geometry.getSize().indexToOffset(index, 2);
   }
 
   /**
@@ -358,14 +358,14 @@ export class Image {
    * @returns {RescaleSlopeAndIntercept} The rescale slope and intercept.
    */
   getRescaleSlopeAndIntercept(index) {
-    let res = this.#rsi;
+    let res = this._rsi;
     if (!this.isConstantRSI()) {
       if (typeof index === 'undefined') {
         throw new Error('Cannot get non constant RSI with empty slice index.');
       }
       const offset = this.getSecondaryOffset(index);
-      if (typeof this.#rsis[offset] !== 'undefined') {
-        res = this.#rsis[offset];
+      if (typeof this._rsis[offset] !== 'undefined') {
+        res = this._rsis[offset];
       } else {
         logger.warn('undefined non constant rsi at ' + offset);
       }
@@ -379,8 +379,8 @@ export class Image {
    * @param {number} offset The desired (secondary) offset.
    * @returns {RescaleSlopeAndIntercept} The coresponding rsi.
    */
-  #getRescaleSlopeAndInterceptAtOffset(offset) {
-    return this.#rsis[offset];
+  _getRescaleSlopeAndInterceptAtOffset(offset) {
+    return this._rsis[offset];
   }
 
   /**
@@ -392,31 +392,31 @@ export class Image {
    */
   setRescaleSlopeAndIntercept(inRsi, offset) {
     // update identity flag
-    this.#isIdentityRSI = this.#isIdentityRSI && inRsi.isID();
+    this._isIdentityRSI = this._isIdentityRSI && inRsi.isID();
     // update constant flag
-    if (!this.#isConstantRSI) {
+    if (!this._isConstantRSI) {
       if (typeof offset === 'undefined') {
         throw new Error(
           'Cannot store non constant RSI with empty slice index.');
       }
-      this.#rsis.splice(offset, 0, inRsi);
+      this._rsis.splice(offset, 0, inRsi);
     } else {
-      if (!this.#rsi.equals(inRsi)) {
+      if (!this._rsi.equals(inRsi)) {
         if (typeof offset === 'undefined') {
           // no slice index, replace existing
-          this.#rsi = inRsi;
+          this._rsi = inRsi;
         } else {
           // first non constant rsi
-          this.#isConstantRSI = false;
+          this._isConstantRSI = false;
           // switch to non constant mode
-          this.#rsis = [];
+          this._rsis = [];
           // initialise RSIs
-          for (let i = 0, leni = this.#getSecondaryOffsetMax(); i < leni; ++i) {
-            this.#rsis.push(this.#rsi);
+          for (let i = 0, leni = this._getSecondaryOffsetMax(); i < leni; ++i) {
+            this._rsis.push(this._rsi);
           }
           // store
-          this.#rsi = null;
-          this.#rsis.splice(offset, 0, inRsi);
+          this._rsi = null;
+          this._rsis.splice(offset, 0, inRsi);
         }
       }
     }
@@ -428,7 +428,7 @@ export class Image {
    * @returns {boolean} True if they are.
    */
   isIdentityRSI() {
-    return this.#isIdentityRSI;
+    return this._isIdentityRSI;
   }
 
   /**
@@ -437,7 +437,7 @@ export class Image {
    * @returns {boolean} True if they are.
    */
   isConstantRSI() {
-    return this.#isConstantRSI;
+    return this._isConstantRSI;
   }
 
   /**
@@ -446,7 +446,7 @@ export class Image {
    * @returns {string} The photometricInterpretation of the image.
    */
   getPhotometricInterpretation() {
-    return this.#photometricInterpretation;
+    return this._photometricInterpretation;
   }
 
   /**
@@ -455,7 +455,7 @@ export class Image {
    * @param {string} interp The photometricInterpretation of the image.
    */
   setPhotometricInterpretation(interp) {
-    this.#photometricInterpretation = interp;
+    this._photometricInterpretation = interp;
   }
 
   /**
@@ -464,7 +464,7 @@ export class Image {
    * @returns {number} The planarConfiguration of the image.
    */
   getPlanarConfiguration() {
-    return this.#planarConfiguration;
+    return this._planarConfiguration;
   }
 
   /**
@@ -473,7 +473,7 @@ export class Image {
    * @param {number} config The planarConfiguration of the image.
    */
   setPlanarConfiguration(config) {
-    this.#planarConfiguration = config;
+    this._planarConfiguration = config;
   }
 
   /**
@@ -482,7 +482,7 @@ export class Image {
    * @returns {number} The numberOfComponents of the image.
    */
   getNumberOfComponents() {
-    return this.#numberOfComponents;
+    return this._numberOfComponents;
   }
 
   /**
@@ -491,7 +491,7 @@ export class Image {
    * @returns {Object<string, any>} The meta information of the image.
    */
   getMeta() {
-    return this.#meta;
+    return this._meta;
   }
 
   /**
@@ -500,7 +500,7 @@ export class Image {
    * @param {Object<string, any>} rhs The meta information of the image.
    */
   setMeta(rhs) {
-    this.#meta = rhs;
+    this._meta = rhs;
   }
 
   /**
@@ -510,7 +510,7 @@ export class Image {
    * @returns {number} The value at offset.
    */
   getValueAtOffset(offset) {
-    return this.#buffer[offset];
+    return this._buffer[offset];
   }
 
   /**
@@ -524,7 +524,7 @@ export class Image {
     // value to array
     let bufferValue;
     if (typeof value === 'number') {
-      if (this.#numberOfComponents !== 1) {
+      if (this._numberOfComponents !== 1) {
         throw new Error(
           'Number of components is not 1 for getting single value.');
       }
@@ -532,7 +532,7 @@ export class Image {
     } else if (typeof value.r !== 'undefined' &&
       typeof value.g !== 'undefined' &&
       typeof value.b !== 'undefined') {
-      if (this.#numberOfComponents !== 3) {
+      if (this._numberOfComponents !== 3) {
         throw new Error(
           'Number of components is not 3 for getting RGB value.');
       }
@@ -542,10 +542,10 @@ export class Image {
     // main loop
     const offsets = [];
     let equal;
-    for (let i = 0; i < this.#buffer.length; i = i + this.#numberOfComponents) {
+    for (let i = 0; i < this._buffer.length; i = i + this._numberOfComponents) {
       equal = true;
-      for (let j = 0; j < this.#numberOfComponents; ++j) {
-        if (this.#buffer[i + j] !== bufferValue[j]) {
+      for (let j = 0; j < this._numberOfComponents; ++j) {
+        if (this._buffer[i + j] !== bufferValue[j]) {
           equal = false;
           break;
         }
@@ -574,9 +574,9 @@ export class Image {
     // final array value
     const finalValues = [];
     for (let v1 = 0; v1 < values.length; ++v1) {
-      if (this.#numberOfComponents === 1) {
+      if (this._numberOfComponents === 1) {
         finalValues.push([values[v1]]);
-      } else if (this.#numberOfComponents === 3) {
+      } else if (this._numberOfComponents === 3) {
         finalValues.push([
           values[v1].r,
           values[v1].g,
@@ -586,11 +586,11 @@ export class Image {
     }
     // find callback
     let equalFunc;
-    if (this.#numberOfComponents === 1) {
+    if (this._numberOfComponents === 1) {
       equalFunc = function (a, b) {
         return a[0] === b[0];
       };
-    } else if (this.#numberOfComponents === 3) {
+    } else if (this._numberOfComponents === 3) {
       equalFunc = function (a, b) {
         return a[0] === b[0] &&
           a[1] === b[1] &&
@@ -608,14 +608,14 @@ export class Image {
     const valuesToFind = finalValues.slice();
     let equal;
     let indicesToRemove;
-    for (let i = 0, leni = this.#buffer.length;
-      i < leni; i = i + this.#numberOfComponents) {
+    for (let i = 0, leni = this._buffer.length;
+      i < leni; i = i + this._numberOfComponents) {
       indicesToRemove = [];
       for (let v = 0; v < valuesToFind.length; ++v) {
         equal = true;
         // check value(s)
-        for (let j = 0; j < this.#numberOfComponents; ++j) {
-          if (this.#buffer[i + j] !== valuesToFind[v][j]) {
+        for (let j = 0; j < this._numberOfComponents; ++j) {
+          if (this._buffer[i + j] !== valuesToFind[v][j]) {
             equal = false;
             break;
           }
@@ -648,16 +648,16 @@ export class Image {
    */
   clone() {
     // clone the image buffer
-    const clonedBuffer = this.#buffer.slice(0);
+    const clonedBuffer = this._buffer.slice(0);
     // create the image copy
-    const copy = new Image(this.getGeometry(), clonedBuffer, this.#imageUids);
+    const copy = new Image(this.getGeometry(), clonedBuffer, this._imageUids);
     // copy the RSI(s)
     if (this.isConstantRSI()) {
       copy.setRescaleSlopeAndIntercept(this.getRescaleSlopeAndIntercept());
     } else {
-      for (let i = 0; i < this.#getSecondaryOffsetMax(); ++i) {
+      for (let i = 0; i < this._getSecondaryOffsetMax(); ++i) {
         copy.setRescaleSlopeAndIntercept(
-          this.#getRescaleSlopeAndInterceptAtOffset(i), i);
+          this._getRescaleSlopeAndInterceptAtOffset(i), i);
       }
     }
     // copy extras
@@ -673,19 +673,19 @@ export class Image {
    *
    * @param {number} size The new size.
    */
-  #realloc(size) {
+  _realloc(size) {
     // save buffer
-    let tmpBuffer = this.#buffer;
+    let tmpBuffer = this._buffer;
     // create new
-    this.#buffer = getTypedArray(
-      this.#buffer.BYTES_PER_ELEMENT * 8,
-      this.#meta.IsSigned ? 1 : 0,
+    this._buffer = getTypedArray(
+      this._buffer.BYTES_PER_ELEMENT * 8,
+      this._meta.IsSigned ? 1 : 0,
       size);
-    if (this.#buffer === null) {
+    if (this._buffer === null) {
       throw new Error('Cannot reallocate data for image.');
     }
     // put old in new
-    this.#buffer.set(tmpBuffer);
+    this._buffer.set(tmpBuffer);
     // clean
     tmpBuffer = null;
   }
@@ -694,7 +694,7 @@ export class Image {
    * Append a slice to the image.
    *
    * @param {Image} rhs The slice to append.
-   * @fires Image#imagegeometrychange
+   * @fires Image_imagegeometrychange
    */
   appendSlice(rhs) {
     // check input
@@ -702,7 +702,7 @@ export class Image {
       throw new Error('Cannot append null slice');
     }
     const rhsSize = rhs.getGeometry().getSize();
-    let size = this.#geometry.getSize();
+    let size = this._geometry.getSize();
     if (rhsSize.get(2) !== 1) {
       throw new Error('Cannot append more than one slice');
     }
@@ -712,37 +712,37 @@ export class Image {
     if (size.get(1) !== rhsSize.get(1)) {
       throw new Error('Cannot append a slice with different number of rows');
     }
-    if (!this.#geometry.getOrientation().equals(
+    if (!this._geometry.getOrientation().equals(
       rhs.getGeometry().getOrientation(), 0.0001)) {
       throw new Error('Cannot append a slice with different orientation');
     }
-    if (this.#photometricInterpretation !==
+    if (this._photometricInterpretation !==
       rhs.getPhotometricInterpretation()) {
       throw new Error(
         'Cannot append a slice with different photometric interpretation');
     }
     // all meta should be equal
-    for (const key in this.#meta) {
+    for (const key in this._meta) {
       if (key === 'windowPresets' || key === 'numberOfFiles' ||
         key === 'custom') {
         continue;
       }
-      if (this.#meta[key] !== rhs.getMeta()[key]) {
+      if (this._meta[key] !== rhs.getMeta()[key]) {
         throw new Error('Cannot append a slice with different ' + key +
-          ': ' + this.#meta[key] + ' != ' + rhs.getMeta()[key]);
+          ': ' + this._meta[key] + ' != ' + rhs.getMeta()[key]);
       }
     }
 
     // update ranges
     const rhsRange = rhs.getDataRange();
     const range = this.getDataRange();
-    this.#dataRange = {
+    this._dataRange = {
       min: Math.min(rhsRange.min, range.min),
       max: Math.max(rhsRange.max, range.max),
     };
     const rhsResRange = rhs.getRescaledDataRange();
     const resRange = this.getRescaledDataRange();
-    this.#rescaledDataRange = {
+    this._rescaledDataRange = {
       min: Math.min(rhsResRange.min, resRange.min),
       max: Math.max(rhsResRange.max, resRange.max),
     };
@@ -753,28 +753,28 @@ export class Image {
     // append frame if needed
     let isNewFrame = false;
     if (typeof timeId !== 'undefined' &&
-      !this.#geometry.hasSlicesAtTime(timeId)) {
+      !this._geometry.hasSlicesAtTime(timeId)) {
       // update grometry
       this.appendFrame(timeId, rhs.getGeometry().getOrigin());
       // update size
-      size = this.#geometry.getSize();
+      size = this._geometry.getSize();
       // update flag
       isNewFrame = true;
     }
 
     // get slice index
-    const index = getSliceIndex(this.#geometry, rhs.getGeometry());
+    const index = getSliceIndex(this._geometry, rhs.getGeometry());
 
     // calculate slice size
-    const sliceSize = this.#numberOfComponents * size.getDimSize(2);
+    const sliceSize = this._numberOfComponents * size.getDimSize(2);
 
     // create full buffer if not done yet
-    if (typeof this.#meta.numberOfFiles === 'undefined') {
+    if (typeof this._meta.numberOfFiles === 'undefined') {
       throw new Error('Missing number of files for buffer manipulation.');
     }
-    const fullBufferSize = sliceSize * this.#meta.numberOfFiles;
-    if (this.#buffer.length !== fullBufferSize) {
-      this.#realloc(fullBufferSize);
+    const fullBufferSize = sliceSize * this._meta.numberOfFiles;
+    if (this._buffer.length !== fullBufferSize) {
+      this._realloc(fullBufferSize);
     }
 
     // slice index
@@ -784,25 +784,25 @@ export class Image {
     let fullSliceIndex = sliceIndex;
     if (typeof timeId !== 'undefined') {
       fullSliceIndex +=
-        this.#geometry.getCurrentNumberOfSlicesBeforeTime(timeId);
+        this._geometry.getCurrentNumberOfSlicesBeforeTime(timeId);
     }
     // offset of the input slice
     const indexOffset = fullSliceIndex * sliceSize;
     const maxOffset =
-      this.#geometry.getCurrentTotalNumberOfSlices() * sliceSize;
+      this._geometry.getCurrentTotalNumberOfSlices() * sliceSize;
     // move content if needed
     if (indexOffset < maxOffset) {
-      this.#buffer.set(
-        this.#buffer.subarray(indexOffset, maxOffset),
+      this._buffer.set(
+        this._buffer.subarray(indexOffset, maxOffset),
         indexOffset + sliceSize
       );
     }
     // add new slice content
-    this.#buffer.set(rhs.getBuffer(), indexOffset);
+    this._buffer.set(rhs.getBuffer(), indexOffset);
 
     // update geometry
     if (!isNewFrame) {
-      this.#geometry.appendOrigin(
+      this._geometry.appendOrigin(
         rhs.getGeometry().getOrigin(), sliceIndex, timeId);
     }
     // update rsi
@@ -811,14 +811,14 @@ export class Image {
       rhs.getRescaleSlopeAndIntercept(), fullSliceIndex);
 
     // current number of images
-    const numberOfImages = this.#imageUids.length;
+    const numberOfImages = this._imageUids.length;
 
     // insert sop instance UIDs
-    this.#imageUids.splice(fullSliceIndex, 0, rhs.getImageUid());
+    this._imageUids.splice(fullSliceIndex, 0, rhs.getImageUid());
 
     // update window presets
-    if (typeof this.#meta.windowPresets !== 'undefined') {
-      const windowPresets = this.#meta.windowPresets;
+    if (typeof this._meta.windowPresets !== 'undefined') {
+      const windowPresets = this._meta.windowPresets;
       const rhsPresets = rhs.getMeta().windowPresets;
       const keys = Object.keys(rhsPresets);
       let pkey = null;
@@ -855,10 +855,10 @@ export class Image {
     /**
      * Image geometry change event.
      *
-     * @event Image#imagegeometrychange
+     * @event Image_imagegeometrychange
      * @type {object}
      */
-    this.#fireEvent({type: 'imagegeometrychange'});
+    this._fireEvent({type: 'imagegeometrychange'});
   }
 
   /**
@@ -869,23 +869,23 @@ export class Image {
    */
   appendFrameBuffer(frameBuffer, frameIndex) {
     // create full buffer if not done yet
-    const size = this.#geometry.getSize();
-    const frameSize = this.#numberOfComponents * size.getDimSize(2);
-    if (typeof this.#meta.numberOfFiles === 'undefined') {
+    const size = this._geometry.getSize();
+    const frameSize = this._numberOfComponents * size.getDimSize(2);
+    if (typeof this._meta.numberOfFiles === 'undefined') {
       throw new Error('Missing number of files for frame buffer manipulation.');
     }
-    const fullBufferSize = frameSize * this.#meta.numberOfFiles;
-    if (this.#buffer.length !== fullBufferSize) {
-      this.#realloc(fullBufferSize);
+    const fullBufferSize = frameSize * this._meta.numberOfFiles;
+    if (this._buffer.length !== fullBufferSize) {
+      this._realloc(fullBufferSize);
     }
     // check index
-    if (frameIndex >= this.#meta.numberOfFiles) {
+    if (frameIndex >= this._meta.numberOfFiles) {
       logger.warn('Ignoring frame at index ' + frameIndex +
-        ' (size: ' + this.#meta.numberOfFiles + ')');
+        ' (size: ' + this._meta.numberOfFiles + ')');
       return;
     }
     // append
-    this.#buffer.set(frameBuffer, frameSize * frameIndex);
+    this._buffer.set(frameBuffer, frameSize * frameIndex);
     // update geometry
     this.appendFrame(frameIndex, new Point3D(0, 0, 0));
   }
@@ -897,8 +897,8 @@ export class Image {
    * @param {Point3D} origin The origin of the frame.
    */
   appendFrame(time, origin) {
-    this.#geometry.appendFrame(origin, time);
-    this.#fireEvent({type: 'appendframe'});
+    this._geometry.appendFrame(origin, time);
+    this._fireEvent({type: 'appendframe'});
     // memory will be updated at the first appendSlice or appendFrameBuffer
   }
 
@@ -908,10 +908,10 @@ export class Image {
    * @returns {NumberRange} The data range.
    */
   getDataRange() {
-    if (!this.#dataRange) {
-      this.#dataRange = this.calculateDataRange();
+    if (!this._dataRange) {
+      this._dataRange = this.calculateDataRange();
     }
-    return this.#dataRange;
+    return this._dataRange;
   }
 
   /**
@@ -920,10 +920,10 @@ export class Image {
    * @returns {NumberRange} The rescaled data range.
    */
   getRescaledDataRange() {
-    if (!this.#rescaledDataRange) {
-      this.#rescaledDataRange = this.calculateRescaledDataRange();
+    if (!this._rescaledDataRange) {
+      this._rescaledDataRange = this.calculateRescaledDataRange();
     }
-    return this.#rescaledDataRange;
+    return this._rescaledDataRange;
   }
 
   /**
@@ -932,13 +932,13 @@ export class Image {
    * @returns {Array} The histogram.
    */
   getHistogram() {
-    if (!this.#histogram) {
+    if (!this._histogram) {
       const res = this.calculateHistogram();
-      this.#dataRange = res.dataRange;
-      this.#rescaledDataRange = res.rescaledDataRange;
-      this.#histogram = res.histogram;
+      this._dataRange = res.dataRange;
+      this._rescaledDataRange = res.rescaledDataRange;
+      this._histogram = res.histogram;
     }
-    return this.#histogram;
+    return this._histogram;
   }
 
   /**
@@ -949,7 +949,7 @@ export class Image {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -960,7 +960,7 @@ export class Image {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -968,8 +968,8 @@ export class Image {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   // ****************************************
@@ -981,13 +981,13 @@ export class Image {
    *
    * @param {number[]} offsets List of offsets where to set the data.
    * @param {number|RGB} value The value to set at the given offsets.
-   * @fires Image#imagecontentchange
+   * @fires Image_imagecontentchange
    */
   setAtOffsets(offsets, value) {
     // value to array
     let bufferValue;
     if (typeof value === 'number') {
-      if (this.#numberOfComponents !== 1) {
+      if (this._numberOfComponents !== 1) {
         throw new Error(
           'Number of components is not 1 for setting single value.');
       }
@@ -995,7 +995,7 @@ export class Image {
     } else if (typeof value.r !== 'undefined' &&
       typeof value.g !== 'undefined' &&
       typeof value.b !== 'undefined') {
-      if (this.#numberOfComponents !== 3) {
+      if (this._numberOfComponents !== 3) {
         throw new Error(
           'Number of components is not 3 for setting RGB value.');
       }
@@ -1005,12 +1005,12 @@ export class Image {
     let offset;
     for (let i = 0, leni = offsets.length; i < leni; ++i) {
       offset = offsets[i];
-      for (let j = 0; j < this.#numberOfComponents; ++j) {
-        this.#buffer[offset + j] = bufferValue[j];
+      for (let j = 0; j < this._numberOfComponents; ++j) {
+        this._buffer[offset + j] = bufferValue[j];
       }
     }
     // fire imagecontentchange
-    this.#fireEvent({type: 'imagecontentchange'});
+    this._fireEvent({type: 'imagecontentchange'});
   }
 
   /**
@@ -1021,7 +1021,7 @@ export class Image {
    * @param {RGB} value The value to set at the given offsets.
    * @returns {Array} A list of objects representing the original values before
    *  replacing them.
-   * @fires Image#imagecontentchange
+   * @fires Image_imagecontentchange
    */
   setAtOffsetsAndGetOriginals(offsetsLists, value) {
     const originalColoursLists = [];
@@ -1032,9 +1032,9 @@ export class Image {
       // first colour
       let offset = offsets[0] * 3;
       let previousColour = {
-        r: this.#buffer[offset],
-        g: this.#buffer[offset + 1],
-        b: this.#buffer[offset + 2]
+        r: this._buffer[offset],
+        g: this._buffer[offset + 1],
+        b: this._buffer[offset + 2]
       };
       // original value storage
       const originalColours = [];
@@ -1045,9 +1045,9 @@ export class Image {
       for (let i = 0; i < offsets.length; ++i) {
         offset = offsets[i] * 3;
         const currentColour = {
-          r: this.#buffer[offset],
-          g: this.#buffer[offset + 1],
-          b: this.#buffer[offset + 2]
+          r: this._buffer[offset],
+          g: this._buffer[offset + 1],
+          b: this._buffer[offset + 2]
         };
         // check if new colour
         if (previousColour.r !== currentColour.r ||
@@ -1061,14 +1061,14 @@ export class Image {
           previousColour = currentColour;
         }
         // write update colour
-        this.#buffer[offset] = value.r;
-        this.#buffer[offset + 1] = value.g;
-        this.#buffer[offset + 2] = value.b;
+        this._buffer[offset] = value.r;
+        this._buffer[offset + 1] = value.g;
+        this._buffer[offset + 2] = value.b;
       }
       originalColoursLists.push(originalColours);
     }
     // fire imagecontentchange
-    this.#fireEvent({type: 'imagecontentchange'});
+    this._fireEvent({type: 'imagecontentchange'});
     return originalColoursLists;
   }
 
@@ -1078,7 +1078,7 @@ export class Image {
    * @param {number[][]} offsetsLists List of offset lists
    *   where to set the data.
    * @param {RGB|Array} value The value to set at the given offsets.
-   * @fires Image#imagecontentchange
+   * @fires Image_imagecontentchange
    */
   setAtOffsetsWithIterator(offsetsLists, value) {
     for (let j = 0; j < offsetsLists.length; ++j) {
@@ -1101,19 +1101,19 @@ export class Image {
       let ival = iterator.next();
       while (!ival.done) {
         const offset = offsets[ival.index] * 3;
-        this.#buffer[offset] = ival.value.r;
-        this.#buffer[offset + 1] = ival.value.g;
-        this.#buffer[offset + 2] = ival.value.b;
+        this._buffer[offset] = ival.value.r;
+        this._buffer[offset + 1] = ival.value.g;
+        this._buffer[offset + 2] = ival.value.b;
         ival = iterator.next();
       }
     }
     /**
      * Image change event.
      *
-     * @event Image#imagecontentchange
+     * @event Image_imagecontentchange
      * @type {object}
      */
-    this.#fireEvent({type: 'imagecontentchange'});
+    this._fireEvent({type: 'imagecontentchange'});
   }
 
   /**

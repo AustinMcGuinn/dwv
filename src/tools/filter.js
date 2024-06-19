@@ -20,13 +20,13 @@ export class Filter {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -34,21 +34,21 @@ export class Filter {
    *
    * @type {object}
    */
-  #filterList = null;
+  _filterList = null;
 
   /**
    * Selected filter.
    *
    * @type {object}
    */
-  #selectedFilter = 0;
+  _selectedFilter = 0;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Activate the tool.
@@ -57,15 +57,15 @@ export class Filter {
    */
   activate(bool) {
     // setup event listening
-    for (const key in this.#filterList) {
+    for (const key in this._filterList) {
       if (bool) {
-        this.#filterList[key].addEventListener('filterrun', this.#fireEvent);
-        this.#filterList[key].addEventListener('filter-undo', this.#fireEvent);
+        this._filterList[key].addEventListener('filterrun', this._fireEvent);
+        this._filterList[key].addEventListener('filter-undo', this._fireEvent);
       } else {
-        this.#filterList[key].removeEventListener(
-          'filterrun', this.#fireEvent);
-        this.#filterList[key].removeEventListener(
-          'filter-undo', this.#fireEvent);
+        this._filterList[key].removeEventListener(
+          'filterrun', this._fireEvent);
+        this._filterList[key].removeEventListener(
+          'filter-undo', this._fireEvent);
       }
     }
   }
@@ -76,10 +76,10 @@ export class Filter {
    * @param {object} options The list of filter names amd classes.
    */
   setOptions(options) {
-    this.#filterList = {};
+    this._filterList = {};
     // try to instanciate filters from the options
     for (const key in options) {
-      this.#filterList[key] = new options[key](this.#app);
+      this._filterList[key] = new options[key](this._app);
     }
   }
 
@@ -98,8 +98,8 @@ export class Filter {
    */
   init() {
     // setup event listening
-    for (const key in this.#filterList) {
-      this.#filterList[key].init();
+    for (const key in this._filterList) {
+      this._filterList[key].init();
     }
   }
 
@@ -110,7 +110,7 @@ export class Filter {
    */
   keydown = (event) => {
     event.context = 'Filter';
-    this.#app.onKeydown(event);
+    this._app.onKeydown(event);
   };
 
   /**
@@ -130,7 +130,7 @@ export class Filter {
    *   event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -141,7 +141,7 @@ export class Filter {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -149,8 +149,8 @@ export class Filter {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   /**
@@ -159,7 +159,7 @@ export class Filter {
    * @returns {object} The selected filter.
    */
   getSelectedFilter() {
-    return this.#selectedFilter;
+    return this._selectedFilter;
   }
 
   /**
@@ -174,13 +174,13 @@ export class Filter {
         throw new Error('Unknown filter: \'' + features.filterName + '\'');
       }
       // de-activate last selected
-      if (this.#selectedFilter) {
-        this.#selectedFilter.activate(false);
+      if (this._selectedFilter) {
+        this._selectedFilter.activate(false);
       }
       // enable new one
-      this.#selectedFilter = this.#filterList[features.filterName];
+      this._selectedFilter = this._filterList[features.filterName];
       // activate the selected filter
-      this.#selectedFilter.activate(true);
+      this._selectedFilter.activate(true);
     }
     if (typeof features.run !== 'undefined' && features.run) {
       let args = {};
@@ -197,7 +197,7 @@ export class Filter {
    * @returns {Array} The list of filter objects.
    */
   getFilterList() {
-    return this.#filterList;
+    return this._filterList;
   }
 
   /**
@@ -207,7 +207,7 @@ export class Filter {
    * @returns {string} The filter list element for the given name.
    */
   hasFilter(name) {
-    return this.#filterList[name];
+    return this._filterList[name];
   }
 
 } // class Filter
@@ -221,13 +221,13 @@ export class Threshold {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -235,21 +235,21 @@ export class Threshold {
    *
    * @type {object}
    */
-  #filter = new ThresholdFilter();
+  _filter = new ThresholdFilter();
 
   /**
    * Flag to know wether to reset the image or not.
    *
    * @type {boolean}
    */
-  #resetImage = true;
+  _resetImage = true;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Activate the filter.
@@ -259,7 +259,7 @@ export class Threshold {
   activate(bool) {
     // reset the image when the tool is activated
     if (bool) {
-      this.#resetImage = true;
+      this._resetImage = true;
     }
   }
 
@@ -279,19 +279,19 @@ export class Threshold {
     if (typeof args.dataId === 'undefined') {
       throw new Error('No dataId to run threshod filter on.');
     }
-    this.#filter.setMin(args.min);
-    this.#filter.setMax(args.max);
+    this._filter.setMin(args.min);
+    this._filter.setMax(args.max);
     // reset the image if asked
-    if (this.#resetImage) {
-      this.#filter.setOriginalImage(this.#app.getImage(args.dataId));
-      this.#resetImage = false;
+    if (this._resetImage) {
+      this._filter.setOriginalImage(this._app.getImage(args.dataId));
+      this._resetImage = false;
     }
-    const command = new RunFilterCommand(this.#filter, args.dataId, this.#app);
-    command.onExecute = this.#fireEvent;
-    command.onUndo = this.#fireEvent;
+    const command = new RunFilterCommand(this._filter, args.dataId, this._app);
+    command.onExecute = this._fireEvent;
+    command.onUndo = this._fireEvent;
     command.execute();
     // save command in undo stack
-    this.#app.addToUndoStack(command);
+    this._app.addToUndoStack(command);
   }
 
   /**
@@ -302,7 +302,7 @@ export class Threshold {
    *  event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -313,7 +313,7 @@ export class Threshold {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -321,8 +321,8 @@ export class Threshold {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
 } // class Threshold
@@ -336,13 +336,13 @@ export class Sharpen {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -350,7 +350,7 @@ export class Sharpen {
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Activate the filter.
@@ -378,13 +378,13 @@ export class Sharpen {
       throw new Error('No dataId to run sharpen filter on.');
     }
     const filter = new SharpenFilter();
-    filter.setOriginalImage(this.#app.getImage(args.dataId));
-    const command = new RunFilterCommand(filter, args.dataId, this.#app);
-    command.onExecute = this.#fireEvent;
-    command.onUndo = this.#fireEvent;
+    filter.setOriginalImage(this._app.getImage(args.dataId));
+    const command = new RunFilterCommand(filter, args.dataId, this._app);
+    command.onExecute = this._fireEvent;
+    command.onUndo = this._fireEvent;
     command.execute();
     // save command in undo stack
-    this.#app.addToUndoStack(command);
+    this._app.addToUndoStack(command);
   }
 
   /**
@@ -395,7 +395,7 @@ export class Sharpen {
    *    event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -406,7 +406,7 @@ export class Sharpen {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -414,8 +414,8 @@ export class Sharpen {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
 } // filter.Sharpen
@@ -429,13 +429,13 @@ export class Sobel {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -443,7 +443,7 @@ export class Sobel {
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Activate the filter.
@@ -471,13 +471,13 @@ export class Sobel {
       throw new Error('No dataId to run sobel filter on.');
     }
     const filter = new SobelFilter();
-    filter.setOriginalImage(this.#app.getImage(args.dataId));
-    const command = new RunFilterCommand(filter, args.dataId, this.#app);
-    command.onExecute = this.#fireEvent;
-    command.onUndo = this.#fireEvent;
+    filter.setOriginalImage(this._app.getImage(args.dataId));
+    const command = new RunFilterCommand(filter, args.dataId, this._app);
+    command.onExecute = this._fireEvent;
+    command.onUndo = this._fireEvent;
     command.execute();
     // save command in undo stack
-    this.#app.addToUndoStack(command);
+    this._app.addToUndoStack(command);
   }
 
   /**
@@ -488,7 +488,7 @@ export class Sobel {
    *  event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -499,7 +499,7 @@ export class Sobel {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -507,8 +507,8 @@ export class Sobel {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
 } // class filter.Sobel
@@ -523,21 +523,21 @@ export class RunFilterCommand {
    *
    * @type {object}
    */
-  #filter;
+  _filter;
 
   /**
    * Data id.
    *
    * @type {string}
    */
-  #dataId;
+  _dataId;
 
   /**
    * Associated app.
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {object} filter The filter to run.
@@ -545,9 +545,9 @@ export class RunFilterCommand {
    * @param {App} app The associated application.
    */
   constructor(filter, dataId, app) {
-    this.#filter = filter;
-    this.#dataId = dataId;
-    this.#app = app;
+    this._filter = filter;
+    this._dataId = dataId;
+    this._app = app;
   }
 
   /**
@@ -556,23 +556,23 @@ export class RunFilterCommand {
    * @returns {string} The command name.
    */
   getName() {
-    return 'Filter-' + this.#filter.getName();
+    return 'Filter-' + this._filter.getName();
   }
 
   /**
    * Execute the command.
    *
-   * @fires RunFilterCommand#filterrun
+   * @fires RunFilterCommand_filterrun
    */
   execute() {
     // run filter and set app image
-    this.#app.setImage(this.#dataId, this.#filter.update());
+    this._app.setImage(this._dataId, this._filter.update());
     // update display
-    this.#app.render(this.#dataId);
+    this._app.render(this._dataId);
     /**
      * Filter run event.
      *
-     * @event RunFilterCommand#filterrun
+     * @event RunFilterCommand_filterrun
      * @type {object}
      * @property {string} type The event type: filterrun.
      * @property {number} id The id of the run command.
@@ -580,7 +580,7 @@ export class RunFilterCommand {
     const event = {
       type: 'filterrun',
       id: this.getName(),
-      dataId: this.#dataId
+      dataId: this._dataId
     };
     // callback
     this.onExecute(event);
@@ -589,17 +589,17 @@ export class RunFilterCommand {
   /**
    * Undo the command.
    *
-   * @fires RunFilterCommand#filterundo
+   * @fires RunFilterCommand_filterundo
    */
   undo() {
     // reset the image
-    this.#app.setImage(this.#dataId, this.#filter.getOriginalImage());
+    this._app.setImage(this._dataId, this._filter.getOriginalImage());
     // update display
-    this.#app.render(this.#dataId);
+    this._app.render(this._dataId);
     /**
      * Filter undo event.
      *
-     * @event RunFilterCommand#filterundo
+     * @event RunFilterCommand_filterundo
      * @type {object}
      * @property {string} type The event type: filterundo.
      * @property {number} id The id of the undone run command.
@@ -607,7 +607,7 @@ export class RunFilterCommand {
     const event = {
       type: 'filterundo',
       id: this.getName(),
-      dataid: this.#dataId
+      dataid: this._dataId
     }; // callback
     this.onUndo(event);
   }

@@ -11,22 +11,22 @@ export class Point2D {
    *
    * @type {number}
    */
-  #x;
+  _x;
 
   /**
    * Y position.
    *
    * @type {number}
    */
-  #y;
+  _y;
 
   /**
    * @param {number} x The X coordinate for the point.
    * @param {number} y The Y coordinate for the point.
    */
   constructor(x, y) {
-    this.#x = x;
-    this.#y = y;
+    this._x = x;
+    this._y = y;
   }
 
   /**
@@ -35,7 +35,7 @@ export class Point2D {
    * @returns {number} The X position of the point.
    */
   getX() {
-    return this.#x;
+    return this._x;
   }
 
   /**
@@ -44,7 +44,7 @@ export class Point2D {
    * @returns {number} The Y position of the point.
    */
   getY() {
-    return this.#y;
+    return this._y;
   }
 
   /**
@@ -56,8 +56,8 @@ export class Point2D {
   equals(rhs) {
     return rhs !== null &&
       typeof rhs !== 'undefined' &&
-      this.#x === rhs.getX() &&
-      this.#y === rhs.getY();
+      this._x === rhs.getX() &&
+      this._y === rhs.getY();
   }
 
   /**
@@ -66,7 +66,7 @@ export class Point2D {
    * @returns {string} The point as a string.
    */
   toString() {
-    return '(' + this.#x + ', ' + this.#y + ')';
+    return '(' + this._x + ', ' + this._y + ')';
   }
 
 } // Point2D class
@@ -81,21 +81,21 @@ export class Point3D {
    *
    * @type {number}
    */
-  #x;
+  _x;
 
   /**
    * Y position.
    *
    * @type {number}
    */
-  #y;
+  _y;
 
   /**
    * Z position.
    *
    * @type {number}
    */
-  #z;
+  _z;
 
   /**
    * @param {number} x The X coordinate for the point.
@@ -103,9 +103,9 @@ export class Point3D {
    * @param {number} z The Z coordinate for the point.
    */
   constructor(x, y, z) {
-    this.#x = x;
-    this.#y = y;
-    this.#z = z;
+    this._x = x;
+    this._y = y;
+    this._z = z;
   }
 
   /**
@@ -114,7 +114,7 @@ export class Point3D {
    * @returns {number} The X position of the point.
    */
   getX() {
-    return this.#x;
+    return this._x;
   }
 
   /**
@@ -123,7 +123,7 @@ export class Point3D {
    * @returns {number} The Y position of the point.
    */
   getY() {
-    return this.#y;
+    return this._y;
   }
 
   /**
@@ -132,7 +132,7 @@ export class Point3D {
    * @returns {number} The Z position of the point.
    */
   getZ() {
-    return this.#z;
+    return this._z;
   }
 
 
@@ -144,9 +144,9 @@ export class Point3D {
    */
   equals(rhs) {
     return rhs !== null &&
-      this.#x === rhs.getX() &&
-      this.#y === rhs.getY() &&
-      this.#z === rhs.getZ();
+      this._x === rhs.getX() &&
+      this._y === rhs.getY() &&
+      this._z === rhs.getZ();
   }
 
   /**
@@ -159,9 +159,9 @@ export class Point3D {
    */
   isSimilar(rhs, tol) {
     return rhs !== null &&
-      isSimilar(this.#x, rhs.getX(), tol) &&
-      isSimilar(this.#y, rhs.getY(), tol) &&
-      isSimilar(this.#z, rhs.getZ(), tol);
+      isSimilar(this._x, rhs.getX(), tol) &&
+      isSimilar(this._y, rhs.getY(), tol) &&
+      isSimilar(this._z, rhs.getZ(), tol);
   }
 
   /**
@@ -170,9 +170,9 @@ export class Point3D {
    * @returns {string} The point as a string.
    */
   toString() {
-    return '(' + this.#x +
-      ', ' + this.#y +
-      ', ' + this.#z + ')';
+    return '(' + this._x +
+      ', ' + this._y +
+      ', ' + this._z + ')';
   }
 
   /**
@@ -182,7 +182,7 @@ export class Point3D {
    * @returns {number} Ths distance to the input point.
    */
   getDistance(point3D) {
-    return Math.sqrt(this.#getSquaredDistance(point3D));
+    return Math.sqrt(this._getSquaredDistance(point3D));
   }
 
   /**
@@ -192,10 +192,10 @@ export class Point3D {
    * @param {Point3D} point3D The input point.
    * @returns {number} The square of the distance.
    */
-  #getSquaredDistance(point3D) {
-    const dx = this.#x - point3D.getX();
-    const dy = this.#y - point3D.getY();
-    const dz = this.#z - point3D.getZ();
+  _getSquaredDistance(point3D) {
+    const dx = this._x - point3D.getX();
+    const dy = this._y - point3D.getY();
+    const dz = this._z - point3D.getZ();
     return dx * dx + dy * dy + dz * dz;
   }
 
@@ -208,9 +208,9 @@ export class Point3D {
   getClosest(pointList) {
     let minIndex = 0;
     // the order between squared distances and distances is the same
-    let minDist = this.#getSquaredDistance(pointList[minIndex]);
+    let minDist = this._getSquaredDistance(pointList[minIndex]);
     for (let i = 0; i < pointList.length; ++i) {
-      const dist = this.#getSquaredDistance(pointList[i]);
+      const dist = this._getSquaredDistance(pointList[i]);
       if (dist < minDist) {
         minIndex = i;
         minDist = dist;
@@ -227,9 +227,9 @@ export class Point3D {
    */
   minus(point3D) {
     return new Vector3D(
-      (this.#x - point3D.getX()),
-      (this.#y - point3D.getY()),
-      (this.#z - point3D.getZ()));
+      (this._x - point3D.getX()),
+      (this._y - point3D.getY()),
+      (this._z - point3D.getZ()));
   }
 
 } // Point3D class
@@ -259,7 +259,7 @@ export class Point {
    *
    * @type {number[]}
    */
-  #values;
+  _values;
 
   /**
    * @param {number[]} values The point values.
@@ -277,7 +277,7 @@ export class Point {
     if (!values.every(valueCheck)) {
       throw new Error('Cannot create point with non number values.');
     }
-    this.#values = values;
+    this._values = values;
   }
 
   /**
@@ -287,7 +287,7 @@ export class Point {
    * @returns {number} The value.
    */
   get(i) {
-    return this.#values[i];
+    return this._values[i];
   }
 
   /**
@@ -296,7 +296,7 @@ export class Point {
    * @returns {number} The length.
    */
   length() {
-    return this.#values.length;
+    return this._values.length;
   }
 
   /**
@@ -305,7 +305,7 @@ export class Point {
    * @returns {string} The Index as a string.
    */
   toString() {
-    return '(' + this.#values.toString() + ')';
+    return '(' + this._values.toString() + ')';
   }
 
   /**
@@ -314,7 +314,7 @@ export class Point {
    * @returns {number[]} The array of values.
    */
   getValues() {
-    return this.#values.slice();
+    return this._values.slice();
   }
 
   /**

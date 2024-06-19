@@ -121,7 +121,7 @@ export class RectangleFactory {
     // debug shadow
     let kshadow;
     if (DRAW_DEBUG) {
-      kshadow = this.#getShadowRectangle(rectangle);
+      kshadow = this._getShadowRectangle(rectangle);
     }
 
     // return group
@@ -276,7 +276,7 @@ export class RectangleFactory {
     klabel.position(textPos);
 
     // update quantification
-    this.#updateRectangleQuantification(group, viewController);
+    this._updateRectangleQuantification(group, viewController);
   }
 
   /**
@@ -286,7 +286,7 @@ export class RectangleFactory {
    * @param {ViewController} viewController The associated view controller.
    */
   updateQuantification(group, viewController) {
-    this.#updateRectangleQuantification(group, viewController);
+    this._updateRectangleQuantification(group, viewController);
   }
 
   /**
@@ -296,7 +296,7 @@ export class RectangleFactory {
    * @param {Konva.Group} group The group with the shape.
    * @param {ViewController} viewController The associated view controller.
    */
-  #updateRectangleQuantification(group, viewController) {
+  _updateRectangleQuantification(group, viewController) {
     // associated shape
     const krect = group.getChildren(function (node) {
       return node.name() === 'shape';
@@ -339,7 +339,7 @@ export class RectangleFactory {
    * @param {Rectangle} rectangle The rectangle to shadow.
    * @returns {Konva.Rect} The shadow konva shape.
    */
-  #getShadowRectangle(rectangle) {
+  _getShadowRectangle(rectangle) {
     const round = rectangle.getRound();
     const rWidth = round.max.getX() - round.min.getX();
     const rHeight = round.max.getY() - round.min.getY();

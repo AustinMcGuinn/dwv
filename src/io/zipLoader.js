@@ -23,7 +23,7 @@ export class ZipLoader {
    *
    * @type {boolean}
    */
-  #isLoading = false;
+  _isLoading = false;
 
   /**
    * Set the loader options.
@@ -40,12 +40,12 @@ export class ZipLoader {
    * @returns {boolean} True if loading.
    */
   isLoading() {
-    return this.#isLoading;
+    return this._isLoading;
   }
 
-  #filename = '';
-  #files = [];
-  #zobjs = null;
+  _filename = '';
+  _files = [];
+  _zobjs = null;
 
   /**
    * JSZip.async callback.
@@ -54,12 +54,12 @@ export class ZipLoader {
    * @param {object} origin The origin of the file.
    * @param {number} index The data index.
    */
-  #zipAsyncCallback(content, origin, index) {
-    this.#files.push({filename: this.#filename, data: content});
+  _zipAsyncCallback(content, origin, index) {
+    this._files.push({filename: this._filename, data: content});
 
     // sent un-ziped progress with the data index
     // (max 50% to take into account the memory loading)
-    const unzipPercent = this.#files.length * 100 / this.#zobjs.length;
+    const unzipPercent = this._files.length * 100 / this._zobjs.length;
     this.onprogress({
       lengthComputable: true,
       loaded: (unzipPercent / 2),
@@ -73,11 +73,11 @@ export class ZipLoader {
     });
 
     // recursively call until we have all the files
-    if (this.#files.length < this.#zobjs.length) {
-      const num = this.#files.length;
-      this.#filename = this.#zobjs[num].name;
-      this.#zobjs[num].async('arrayBuffer').then((content) => {
-        this.#zipAsyncCallback(content, origin, index);
+    if (this._files.length < this._zobjs.length) {
+      const num = this._files.length;
+      this._filename = this._zobjs[num].name;
+      this._zobjs[num].async('arrayBuffer').then((content) => {
+        this._zipAsyncCallback(content, origin, index);
       });
     } else {
       const memoryIO = new MemoryLoader();
@@ -93,14 +93,14 @@ export class ZipLoader {
       memoryIO.onload = this.onload;
       memoryIO.onloadend = (event) => {
         // reset loading flag
-        this.#isLoading = false;
+        this._isLoading = false;
         // call listeners
         this.onloadend(event);
       };
       memoryIO.onerror = this.onerror;
       memoryIO.onabort = this.onabort;
       // launch
-      memoryIO.load(this.#files);
+      memoryIO.load(this._files);
     }
   }
 
@@ -117,16 +117,16 @@ export class ZipLoader {
       source: origin
     });
     // set loading flag
-    this.#isLoading = true;
+    this._isLoading = true;
 
     JSZip.loadAsync(buffer).then((zip) => {
-      this.#files = [];
-      this.#zobjs = zip.file(/.*\.dcm/);
+      this._files = [];
+      this._zobjs = zip.file(/.*\.dcm/);
       // recursively load zip files into the files array
-      const num = this.#files.length;
-      this.#filename = this.#zobjs[num].name;
-      this.#zobjs[num].async('arrayBuffer').then((content) => {
-        this.#zipAsyncCallback(content, origin, index);
+      const num = this._files.length;
+      this._filename = this._zobjs[num].name;
+      this._zobjs[num].async('arrayBuffer').then((content) => {
+        this._zipAsyncCallback(content, origin, index);
       });
     });
   }
@@ -136,7 +136,7 @@ export class ZipLoader {
    */
   abort() {
     // reset loading flag
-    this.#isLoading = false;
+    this._isLoading = false;
     // call listeners
     this.onabort({});
     this.onloadend({});

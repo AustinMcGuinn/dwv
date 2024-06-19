@@ -14,7 +14,7 @@ export class MultipartLoader {
    *
    * @type {boolean}
    */
-  #isLoading = false;
+  _isLoading = false;
 
   /**
    * Set the loader options.
@@ -31,7 +31,7 @@ export class MultipartLoader {
    * @returns {boolean} True if loading.
    */
   isLoading() {
-    return this.#isLoading;
+    return this._isLoading;
   }
 
   /**
@@ -47,7 +47,7 @@ export class MultipartLoader {
       source: origin
     });
     // set loading flag
-    this.#isLoading = true;
+    this._isLoading = true;
 
     const memoryIO = new MemoryLoader();
     // memoryIO.onloadstart: nothing to do
@@ -62,7 +62,7 @@ export class MultipartLoader {
     memoryIO.onload = this.onload;
     memoryIO.onloadend = (event) => {
       // reset loading flag
-      this.#isLoading = false;
+      this._isLoading = false;
       // call listeners
       this.onloadend(event);
     };
@@ -77,7 +77,7 @@ export class MultipartLoader {
    */
   abort() {
     // reset loading flag
-    this.#isLoading = false;
+    this._isLoading = false;
     // call listeners
     this.onabort({});
     this.onloadend({});

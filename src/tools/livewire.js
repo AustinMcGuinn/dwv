@@ -26,13 +26,13 @@ export class Livewire {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -40,89 +40,89 @@ export class Livewire {
    *
    * @type {boolean}
    */
-  #started = false;
+  _started = false;
 
   /**
    * Start point.
    *
    * @type {Point2D}
    */
-  #startPoint;
+  _startPoint;
 
   /**
    * Draw command.
    *
    * @type {object}
    */
-  #command = null;
+  _command = null;
 
   /**
    * Current shape group.
    *
    * @type {object}
    */
-  #shapeGroup = null;
+  _shapeGroup = null;
 
   /**
    * Drawing style.
    *
    * @type {Style}
    */
-  #style = new Style();
+  _style = new Style();
 
   /**
    * Path storage. Paths are stored in reverse order.
    *
    * @type {Path}
    */
-  #path = new Path();
+  _path = new Path();
 
   /**
    * Current path storage. Paths are stored in reverse order.
    *
    * @type {Path}
    */
-  #currentPath = new Path();
+  _currentPath = new Path();
 
   /**
    * List of parent points.
    *
    * @type {Array}
    */
-  #parentPoints = [];
+  _parentPoints = [];
 
   /**
    * Tolerance.
    *
    * @type {number}
    */
-  #tolerance = 5;
+  _tolerance = 5;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Clear the parent points list.
    *
    * @param {object} imageSize The image size.
    */
-  #clearParentPoints(imageSize) {
+  _clearParentPoints(imageSize) {
     const nrows = imageSize.get(1);
     for (let i = 0; i < nrows; ++i) {
-      this.#parentPoints[i] = [];
+      this._parentPoints[i] = [];
     }
   }
 
   /**
    * Clear the stored paths.
    */
-  #clearPaths() {
-    this.#path = new Path();
-    this.#currentPath = new Path();
+  _clearPaths() {
+    this._path = new Path();
+    this._currentPath = new Path();
   }
 
   /**
@@ -130,7 +130,7 @@ export class Livewire {
    *
    * @type {Scissors}
    */
-  #scissors = new Scissors();
+  _scissors = new Scissors();
 
   /**
    * Start tool interaction.
@@ -138,46 +138,46 @@ export class Livewire {
    * @param {Point2D} point The start point.
    * @param {string} divId The layer group divId.
    */
-  #start(point, divId) {
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
+  _start(point, divId) {
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
     const viewLayer = layerGroup.getActiveViewLayer();
     const imageSize = viewLayer.getViewController().getImageSize();
     const index = viewLayer.displayToPlaneIndex(point);
 
     // first time
-    if (!this.#started) {
-      this.#started = true;
-      this.#startPoint = new Point2D(index.get(0), index.get(1));
+    if (!this._started) {
+      this._started = true;
+      this._startPoint = new Point2D(index.get(0), index.get(1));
       // clear vars
-      this.#clearPaths();
-      this.#clearParentPoints(imageSize);
-      this.#shapeGroup = null;
+      this._clearPaths();
+      this._clearParentPoints(imageSize);
+      this._shapeGroup = null;
       // update zoom scale
       const drawLayer = layerGroup.getActiveDrawLayer();
-      this.#style.setZoomScale(
+      this._style.setZoomScale(
         drawLayer.getKonvaLayer().getAbsoluteScale());
       // do the training from the first point
       const p = {x: index.get(0), y: index.get(1)};
-      this.#scissors.doTraining(p);
+      this._scissors.doTraining(p);
       // add the initial point to the path
       const p0 = new Point2D(index.get(0), index.get(1));
-      this.#path.addPoint(p0);
-      this.#path.addControlPoint(p0);
+      this._path.addPoint(p0);
+      this._path.addControlPoint(p0);
     } else {
-      const diffX = Math.abs(index.get(0) - this.#startPoint.getX());
-      const diffY = Math.abs(index.get(1) - this.#startPoint.getY());
+      const diffX = Math.abs(index.get(0) - this._startPoint.getX());
+      const diffY = Math.abs(index.get(1) - this._startPoint.getY());
       // final point: at 'tolerance' of the initial point
-      if (diffX < this.#tolerance &&
-        diffY < this.#tolerance) {
+      if (diffX < this._tolerance &&
+        diffY < this._tolerance) {
         // finish
-        this.#finishShape();
+        this._finishShape();
       } else {
         // anchor point
-        this.#path = this.#currentPath;
-        this.#clearParentPoints(imageSize);
+        this._path = this._currentPath;
+        this._clearParentPoints(imageSize);
         const pn = {x: index.get(0), y: index.get(1)};
-        this.#scissors.doTraining(pn);
-        this.#path.addControlPoint(this.#currentPath.getPoint(0));
+        this._scissors.doTraining(pn);
+        this._path.addControlPoint(this._currentPath.getPoint(0));
       }
     }
   }
@@ -188,22 +188,22 @@ export class Livewire {
    * @param {Point2D} point The update point.
    * @param {string} divId The layer group divId.
    */
-  #update(point, divId) {
-    if (!this.#started) {
+  _update(point, divId) {
+    if (!this._started) {
       return;
     }
-    const layerGroup = this.#app.getLayerGroupByDivId(divId);
+    const layerGroup = this._app.getLayerGroupByDivId(divId);
     const viewLayer = layerGroup.getActiveViewLayer();
     const index = viewLayer.displayToPlaneIndex(point);
 
     // set the point to find the path to
     let p = {x: index.get(0), y: index.get(1)};
-    this.#scissors.setPoint(p);
+    this._scissors.setPoint(p);
     // do the work
     let results = [];
     let stop = false;
-    while (!this.#parentPoints[p.y][p.x] && !stop) {
-      results = this.#scissors.doWork();
+    while (!this._parentPoints[p.y][p.x] && !stop) {
+      results = this._scissors.doWork();
 
       if (results.length === 0) {
         stop = true;
@@ -212,37 +212,37 @@ export class Livewire {
         for (let i = 0; i < results.length - 1; i += 2) {
           const _p = results[i];
           const _q = results[i + 1];
-          this.#parentPoints[_p.y][_p.x] = _q;
+          this._parentPoints[_p.y][_p.x] = _q;
         }
       }
     }
 
     // get the path
-    this.#currentPath = new Path();
+    this._currentPath = new Path();
     stop = false;
     while (p && !stop) {
-      this.#currentPath.addPoint(new Point2D(p.x, p.y));
-      if (!this.#parentPoints[p.y]) {
+      this._currentPath.addPoint(new Point2D(p.x, p.y));
+      if (!this._parentPoints[p.y]) {
         stop = true;
       } else {
-        if (!this.#parentPoints[p.y][p.x]) {
+        if (!this._parentPoints[p.y][p.x]) {
           stop = true;
         } else {
-          p = this.#parentPoints[p.y][p.x];
+          p = this._parentPoints[p.y][p.x];
         }
       }
     }
-    this.#currentPath.appenPath(this.#path);
+    this._currentPath.appenPath(this._path);
 
     // remove previous draw
-    if (this.#shapeGroup) {
-      this.#shapeGroup.destroy();
+    if (this._shapeGroup) {
+      this._shapeGroup.destroy();
     }
     // create shape
     const factory = new RoiFactory();
-    this.#shapeGroup = factory.create(
-      this.#currentPath.pointArray, this.#style);
-    this.#shapeGroup.id(guid());
+    this._shapeGroup = factory.create(
+      this._currentPath.pointArray, this._style);
+    this._shapeGroup.id(guid());
 
     const drawLayer = layerGroup.getActiveDrawLayer();
     const drawController = drawLayer.getDrawController();
@@ -250,34 +250,34 @@ export class Livewire {
     // get the position group
     const posGroup = drawController.getCurrentPosGroup();
     // add shape group to position group
-    posGroup.add(this.#shapeGroup);
+    posGroup.add(this._shapeGroup);
 
     // draw shape command
-    this.#command = new DrawGroupCommand(
-      this.#shapeGroup,
+    this._command = new DrawGroupCommand(
+      this._shapeGroup,
       'livewire',
       drawLayer
     );
     // draw
-    this.#command.execute();
+    this._command.execute();
   }
 
   /**
    * Finish a livewire (roi) shape.
    */
-  #finishShape() {
+  _finishShape() {
     // fire creation event (was not propagated during draw)
-    this.#fireEvent({
+    this._fireEvent({
       type: 'drawcreate',
-      id: this.#shapeGroup.id()
+      id: this._shapeGroup.id()
     });
     // listen
-    this.#command.onExecute = this.#fireEvent;
-    this.#command.onUndo = this.#fireEvent;
+    this._command.onExecute = this._fireEvent;
+    this._command.onUndo = this._fireEvent;
     // save command in undo stack
-    this.#app.addToUndoStack(this.#command);
+    this._app.addToUndoStack(this._command);
     // set flag
-    this.#started = false;
+    this._started = false;
   }
 
   /**
@@ -288,7 +288,7 @@ export class Livewire {
   mousedown = (event) => {
     const mousePoint = getMousePoint(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#start(mousePoint, layerDetails.groupDivId);
+    this._start(mousePoint, layerDetails.groupDivId);
   };
 
   /**
@@ -299,7 +299,7 @@ export class Livewire {
   mousemove = (event) => {
     const mousePoint = getMousePoint(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#update(mousePoint, layerDetails.groupDivId);
+    this._update(mousePoint, layerDetails.groupDivId);
   };
 
   /**
@@ -326,7 +326,7 @@ export class Livewire {
    * @param {object} _event The double click event.
    */
   dblclick = (_event) => {
-    this.#finishShape();
+    this._finishShape();
   };
 
   /**
@@ -337,7 +337,7 @@ export class Livewire {
   touchstart = (event) => {
     const touchPoints = getTouchPoints(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#start(touchPoints[0], layerDetails.groupDivId);
+    this._start(touchPoints[0], layerDetails.groupDivId);
   };
 
   /**
@@ -348,7 +348,7 @@ export class Livewire {
   touchmove = (event) => {
     const touchPoints = getTouchPoints(event);
     const layerDetails = getLayerDetailsFromEvent(event);
-    this.#update(touchPoints[0], layerDetails.groupDivId);
+    this._update(touchPoints[0], layerDetails.groupDivId);
   };
 
   /**
@@ -367,7 +367,7 @@ export class Livewire {
    */
   keydown = (event) => {
     event.context = 'Livewire';
-    this.#app.onKeydown(event);
+    this._app.onKeydown(event);
   };
 
   /**
@@ -378,20 +378,20 @@ export class Livewire {
   activate(bool) {
     // start scissors if displayed
     if (bool) {
-      const layerGroup = this.#app.getActiveLayerGroup();
+      const layerGroup = this._app.getActiveLayerGroup();
       const viewLayer = layerGroup.getActiveViewLayer();
 
       //scissors = new Scissors();
       const imageSize = viewLayer.getViewController().getImageSize();
-      this.#scissors.setDimensions(
+      this._scissors.setDimensions(
         imageSize.get(0),
         imageSize.get(1));
-      this.#scissors.setData(viewLayer.getImageData().data);
+      this._scissors.setData(viewLayer.getImageData().data);
 
       // init with the app window scale
-      this.#style.setBaseScale(this.#app.getBaseScale());
+      this._style.setBaseScale(this._app.getBaseScale());
       // set the default to the first in the list
-      this.setFeatures({shapeColour: this.#style.getLineColour()});
+      this.setFeatures({shapeColour: this._style.getLineColour()});
     }
   }
 
@@ -419,7 +419,7 @@ export class Livewire {
    *    event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -430,7 +430,7 @@ export class Livewire {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -438,8 +438,8 @@ export class Livewire {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
   /**
@@ -449,7 +449,7 @@ export class Livewire {
    */
   setFeatures(features) {
     if (typeof features.shapeColour !== 'undefined') {
-      this.#style.setLineColour(features.shapeColour);
+      this._style.setLineColour(features.shapeColour);
     }
   }
 

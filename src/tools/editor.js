@@ -30,7 +30,7 @@ export function getDefaultAnchor(x, y, id, style) {
   return new Konva.Ellipse({
     x: x,
     y: y,
-    stroke: '#999',
+    stroke: '_999',
     fill: 'rgba(100,100,100,0.7',
     strokeWidth: style.getStrokeWidth(),
     strokeScaleEnabled: false,
@@ -55,13 +55,13 @@ export class ShapeEditor {
    *
    * @type {App}
    */
-  #app;
+  _app;
 
   /**
    * @param {App} app The associated application.
    */
   constructor(app) {
-    this.#app = app;
+    this._app = app;
   }
 
   /**
@@ -69,42 +69,42 @@ export class ShapeEditor {
    *
    * @type {object}
    */
-  #shapeFactoryList = null;
+  _shapeFactoryList = null;
 
   /**
    * Current shape factory.
    *
    * @type {object}
    */
-  #currentFactory = null;
+  _currentFactory = null;
 
   /**
    * Edited shape.
    *
    * @type {Konva.Shape}
    */
-  #shape = null;
+  _shape = null;
 
   /**
    * Associated draw layer. Used to bound anchor move.
    *
    * @type {DrawLayer}
    */
-  #drawLayer;
+  _drawLayer;
 
   /**
    * Associated view controller. Used for quantification update.
    *
    * @type {ViewController}
    */
-  #viewController = null;
+  _viewController = null;
 
   /**
    * Active flag.
    *
    * @type {boolean}
    */
-  #isActive = false;
+  _isActive = false;
 
   /**
    * @callback eventFn
@@ -116,7 +116,7 @@ export class ShapeEditor {
    *
    * @type {eventFn}
    */
-  #drawEventCallback = null;
+  _drawEventCallback = null;
 
   /**
    * Set the tool options.
@@ -124,7 +124,7 @@ export class ShapeEditor {
    * @param {Array} list The list of shape classes.
    */
   setFactoryList(list) {
-    this.#shapeFactoryList = list;
+    this._shapeFactoryList = list;
   }
 
   /**
@@ -135,29 +135,29 @@ export class ShapeEditor {
    * @param {ViewController} viewController The associated view controller.
    */
   setShape(inshape, drawLayer, viewController) {
-    this.#shape = inshape;
-    this.#drawLayer = drawLayer;
-    this.#viewController = viewController;
-    if (this.#shape) {
+    this._shape = inshape;
+    this._drawLayer = drawLayer;
+    this._viewController = viewController;
+    if (this._shape) {
       // remove old anchors
-      this.#removeAnchors();
+      this._removeAnchors();
       // find a factory for the input shape
-      const group = this.#shape.getParent();
-      const keys = Object.keys(this.#shapeFactoryList);
-      this.#currentFactory = null;
+      const group = this._shape.getParent();
+      const keys = Object.keys(this._shapeFactoryList);
+      this._currentFactory = null;
       for (let i = 0; i < keys.length; ++i) {
-        const factory = new this.#shapeFactoryList[keys[i]];
+        const factory = new this._shapeFactoryList[keys[i]];
         if (factory.isFactoryGroup(group)) {
-          this.#currentFactory = factory;
+          this._currentFactory = factory;
           // stop at first find
           break;
         }
       }
-      if (this.#currentFactory === null) {
+      if (this._currentFactory === null) {
         throw new Error('Could not find a factory to update shape.');
       }
       // add new anchors
-      this.#addAnchors();
+      this._addAnchors();
     }
   }
 
@@ -167,7 +167,7 @@ export class ShapeEditor {
    * @returns {Konva.Shape} The edited shape.
    */
   getShape() {
-    return this.#shape;
+    return this._shape;
   }
 
   /**
@@ -176,7 +176,7 @@ export class ShapeEditor {
    * @returns {boolean} The active flag.
    */
   isActive() {
-    return this.#isActive;
+    return this._isActive;
   }
 
   /**
@@ -185,18 +185,18 @@ export class ShapeEditor {
    * @param {eventFn} callback The callback.
    */
   setDrawEventCallback(callback) {
-    this.#drawEventCallback = callback;
+    this._drawEventCallback = callback;
   }
 
   /**
    * Enable the editor. Redraws the layer.
    */
   enable() {
-    this.#isActive = true;
-    if (this.#shape) {
-      this.#setAnchorsVisible(true);
-      if (this.#shape.getLayer()) {
-        this.#shape.getLayer().draw();
+    this._isActive = true;
+    if (this._shape) {
+      this._setAnchorsVisible(true);
+      if (this._shape.getLayer()) {
+        this._shape.getLayer().draw();
       }
     }
   }
@@ -205,11 +205,11 @@ export class ShapeEditor {
    * Disable the editor. Redraws the layer.
    */
   disable() {
-    this.#isActive = false;
-    if (this.#shape) {
-      this.#setAnchorsVisible(false);
-      if (this.#shape.getLayer()) {
-        this.#shape.getLayer().draw();
+    this._isActive = false;
+    if (this._shape) {
+      this._setAnchorsVisible(false);
+      if (this._shape.getLayer()) {
+        this._shape.getLayer().draw();
       }
     }
   }
@@ -218,9 +218,9 @@ export class ShapeEditor {
    * Reset the editor.
    */
   reset() {
-    this.#shape = undefined;
-    this.#drawLayer = undefined;
-    this.#viewController = undefined;
+    this._shape = undefined;
+    this._drawLayer = undefined;
+    this._viewController = undefined;
   }
 
   /**
@@ -228,11 +228,11 @@ export class ShapeEditor {
    */
   resetAnchors() {
     // remove previous controls
-    this.#removeAnchors();
+    this._removeAnchors();
     // add anchors
-    this.#addAnchors();
+    this._addAnchors();
     // set them visible
-    this.#setAnchorsVisible(true);
+    this._setAnchorsVisible(true);
   }
 
   /**
@@ -240,9 +240,9 @@ export class ShapeEditor {
    *
    * @param {object} func A f(shape) function.
    */
-  #applyFuncToAnchors(func) {
-    if (this.#shape && this.#shape.getParent()) {
-      const anchors = this.#shape.getParent().find('.anchor');
+  _applyFuncToAnchors(func) {
+    if (this._shape && this._shape.getParent()) {
+      const anchors = this._shape.getParent().find('.anchor');
       anchors.forEach(func);
     }
   }
@@ -252,8 +252,8 @@ export class ShapeEditor {
    *
    * @param {boolean} flag The visible flag.
    */
-  #setAnchorsVisible(flag) {
-    this.#applyFuncToAnchors(function (anchor) {
+  _setAnchorsVisible(flag) {
+    this._applyFuncToAnchors(function (anchor) {
       anchor.visible(flag);
     });
   }
@@ -267,21 +267,21 @@ export class ShapeEditor {
     let func = null;
     if (flag) {
       func = (anchor) => {
-        this.#setAnchorOn(anchor);
+        this._setAnchorOn(anchor);
       };
     } else {
       func = (anchor) => {
-        this.#setAnchorOff(anchor);
+        this._setAnchorOff(anchor);
       };
     }
-    this.#applyFuncToAnchors(func);
+    this._applyFuncToAnchors(func);
   }
 
   /**
    * Remove anchors.
    */
-  #removeAnchors() {
-    this.#applyFuncToAnchors(function (anchor) {
+  _removeAnchors() {
+    this._applyFuncToAnchors(function (anchor) {
       anchor.remove();
     });
   }
@@ -289,20 +289,20 @@ export class ShapeEditor {
   /**
    * Add the shape anchors.
    */
-  #addAnchors() {
+  _addAnchors() {
     // exit if no shape or no layer
-    if (!this.#shape || !this.#shape.getLayer()) {
+    if (!this._shape || !this._shape.getLayer()) {
       return;
     }
     // get shape group
-    const group = this.#shape.getParent();
+    const group = this._shape.getParent();
 
     // activate and add anchors to group
     const anchors =
-      this.#currentFactory.getAnchors(this.#shape, this.#app.getStyle());
+      this._currentFactory.getAnchors(this._shape, this._app.getStyle());
     for (let i = 0; i < anchors.length; ++i) {
       // set anchor on
-      this.#setAnchorOn(anchors[i]);
+      this._setAnchorOn(anchors[i]);
       // add the anchor to the group
       group.add(anchors[i]);
     }
@@ -314,7 +314,7 @@ export class ShapeEditor {
    * @param {Konva.Shape} anchor The anchor to clone.
    * @returns {object} A clone of the input anchor.
    */
-  #getClone(anchor) {
+  _getClone(anchor) {
     // create closure to properties
     const parent = anchor.getParent();
     const id = anchor.id();
@@ -342,11 +342,11 @@ export class ShapeEditor {
    *
    * @param {Konva.Ellipse} anchor The anchor to set on.
    */
-  #setAnchorOn(anchor) {
+  _setAnchorOn(anchor) {
     let startAnchor = null;
 
     // command name based on shape type
-    const shapeDisplayName = getShapeDisplayName(this.#shape);
+    const shapeDisplayName = getShapeDisplayName(this._shape);
 
     // drag start listener
     anchor.on('dragstart.edit', (event) => {
@@ -354,7 +354,7 @@ export class ShapeEditor {
       if (!(anchor instanceof Konva.Shape)) {
         return;
       }
-      startAnchor = this.#getClone(anchor);
+      startAnchor = this._getClone(anchor);
       // prevent bubbling upwards
       event.cancelBubble = true;
     });
@@ -365,10 +365,10 @@ export class ShapeEditor {
         return;
       }
       // validate the anchor position
-      validateAnchorPosition(this.#drawLayer.getBaseSize(), anchor);
+      validateAnchorPosition(this._drawLayer.getBaseSize(), anchor);
       // update shape
-      this.#currentFactory.update(
-        anchor, this.#app.getStyle(), this.#viewController);
+      this._currentFactory.update(
+        anchor, this._app.getStyle(), this._viewController);
       // redraw
       if (anchor.getLayer()) {
         anchor.getLayer().draw();
@@ -384,21 +384,21 @@ export class ShapeEditor {
       if (!(anchor instanceof Konva.Shape)) {
         return;
       }
-      const endAnchor = this.#getClone(anchor);
+      const endAnchor = this._getClone(anchor);
       // store the change command
       const chgcmd = new ChangeGroupCommand(
         shapeDisplayName,
-        this.#currentFactory,
+        this._currentFactory,
         startAnchor,
         endAnchor,
-        this.#drawLayer,
-        this.#viewController,
-        this.#app.getStyle()
+        this._drawLayer,
+        this._viewController,
+        this._app.getStyle()
       );
-      chgcmd.onExecute = this.#drawEventCallback;
-      chgcmd.onUndo = this.#drawEventCallback;
+      chgcmd.onExecute = this._drawEventCallback;
+      chgcmd.onUndo = this._drawEventCallback;
       chgcmd.execute();
-      this.#app.addToUndoStack(chgcmd);
+      this._app.addToUndoStack(chgcmd);
       // reset start anchor
       startAnchor = endAnchor;
       // prevent bubbling upwards
@@ -416,7 +416,7 @@ export class ShapeEditor {
         return;
       }
       // style is handled by the group
-      anchor.stroke('#ddd');
+      anchor.stroke('_ddd');
       if (anchor.getLayer()) {
         anchor.getLayer().draw();
       } else {
@@ -430,7 +430,7 @@ export class ShapeEditor {
         return;
       }
       // style is handled by the group
-      anchor.stroke('#999');
+      anchor.stroke('_999');
       if (anchor.getLayer()) {
         anchor.getLayer().draw();
       } else {
@@ -444,7 +444,7 @@ export class ShapeEditor {
    *
    * @param {Konva.Ellipse} anchor The anchor to set off.
    */
-  #setAnchorOff(anchor) {
+  _setAnchorOff(anchor) {
     anchor.off('dragstart.edit');
     anchor.off('dragmove.edit');
     anchor.off('dragend.edit');

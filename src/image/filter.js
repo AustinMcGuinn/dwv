@@ -12,14 +12,14 @@ export class Threshold {
    *
    * @type {number}
    */
-  #min = 0;
+  _min = 0;
 
   /**
    * Threshold maximum.
    *
    * @type {number}
    */
-  #max = 0;
+  _max = 0;
 
   /**
    * Get the threshold minimum.
@@ -27,7 +27,7 @@ export class Threshold {
    * @returns {number} The threshold minimum.
    */
   getMin() {
-    return this.#min;
+    return this._min;
   }
 
   /**
@@ -36,7 +36,7 @@ export class Threshold {
    * @param {number} val The threshold minimum.
    */
   setMin(val) {
-    this.#min = val;
+    this._min = val;
   }
 
   /**
@@ -45,7 +45,7 @@ export class Threshold {
    * @returns {number} The threshold maximum.
    */
   getMax() {
-    return this.#max;
+    return this._max;
   }
 
   /**
@@ -54,7 +54,7 @@ export class Threshold {
    * @param {number} val The threshold maximum.
    */
   setMax(val) {
-    this.#max = val;
+    this._max = val;
   }
 
   /**
@@ -71,7 +71,7 @@ export class Threshold {
    *
    * @type {Image}
    */
-  #originalImage = null;
+  _originalImage = null;
 
   /**
    * Set the original image.
@@ -79,7 +79,7 @@ export class Threshold {
    * @param {Image} image The original image.
    */
   setOriginalImage(image) {
-    this.#originalImage = image;
+    this._originalImage = image;
   }
 
   /**
@@ -88,7 +88,7 @@ export class Threshold {
    * @returns {Image} The original image.
    */
   getOriginalImage() {
-    return this.#originalImage;
+    return this._originalImage;
   }
 
   /**
@@ -129,7 +129,7 @@ export class Sharpen {
    *
    * @type {Image}
    */
-  #originalImage = null;
+  _originalImage = null;
 
   /**
    * Set the original image.
@@ -137,7 +137,7 @@ export class Sharpen {
    * @param {Image} image The original image.
    */
   setOriginalImage(image) {
-    this.#originalImage = image;
+    this._originalImage = image;
   }
 
   /**
@@ -146,7 +146,7 @@ export class Sharpen {
    * @returns {Image} The original image.
    */
   getOriginalImage() {
-    return this.#originalImage;
+    return this._originalImage;
   }
 
   /**
@@ -185,7 +185,7 @@ export class Sobel {
    *
    * @type {Image}
    */
-  #originalImage = null;
+  _originalImage = null;
 
   /**
    * Set the original image.
@@ -193,7 +193,7 @@ export class Sobel {
    * @param {Image} image The original image.
    */
   setOriginalImage(image) {
-    this.#originalImage = image;
+    this._originalImage = image;
   }
 
   /**
@@ -202,7 +202,7 @@ export class Sobel {
    * @returns {Image} The original image.
    */
   getOriginalImage() {
-    return this.#originalImage;
+    return this._originalImage;
   }
 
   /**

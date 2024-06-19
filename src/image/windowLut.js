@@ -14,35 +14,35 @@ export class WindowLut {
    *
    * @type {ModalityLut}
    */
-  #modalityLut;
+  _modalityLut;
 
   /**
    * The VOI LUT.
    *
    * @type {VoiLut}
    */
-  #voiLut;
+  _voiLut;
 
   /**
    * The internal LUT array: Uint8ClampedArray clamps between 0 and 255.
    *
    * @type {Uint8ClampedArray}
    */
-  #lut;
+  _lut;
 
   /**
    * Shift for signed data.
    *
    * @type {number}
    */
-  #signedShift = 0;
+  _signedShift = 0;
 
   /**
    * Is the RSI discrete.
    *
    * @type {boolean}
    */
-  #isDiscrete = true;
+  _isDiscrete = true;
 
   /**
    * Construct a window LUT object, VOI LUT is set with
@@ -53,16 +53,16 @@ export class WindowLut {
    * @param {boolean} isDiscrete Flag to know if the input data is discrete.
    */
   constructor(modalityLut, isSigned, isDiscrete) {
-    this.#modalityLut = modalityLut;
+    this._modalityLut = modalityLut;
 
     if (isSigned) {
-      const size = this.#modalityLut.getLength();
-      this.#signedShift = size / 2;
+      const size = this._modalityLut.getLength();
+      this._signedShift = size / 2;
     } else {
-      this.#signedShift = 0;
+      this._signedShift = 0;
     }
 
-    this.#isDiscrete = isDiscrete;
+    this._isDiscrete = isDiscrete;
   }
 
   /**
@@ -71,7 +71,7 @@ export class WindowLut {
    * @returns {VoiLut} The VOI LUT.
    */
   getVoiLut() {
-    return this.#voiLut;
+    return this._voiLut;
   }
 
   /**
@@ -80,7 +80,7 @@ export class WindowLut {
    * @returns {ModalityLut} The modality LUT.
    */
   getModalityLut() {
-    return this.#modalityLut;
+    return this._modalityLut;
   }
 
   /**
@@ -90,21 +90,21 @@ export class WindowLut {
    */
   setVoiLut(lut) {
     // store the window values
-    this.#voiLut = lut;
+    this._voiLut = lut;
 
     // possible signed shift (LUT indices are positive)
-    this.#voiLut.setSignedOffset(
-      this.#modalityLut.getRSI().getSlope() * this.#signedShift);
+    this._voiLut.setSignedOffset(
+      this._modalityLut.getRSI().getSlope() * this._signedShift);
 
     // create lut if not continous
-    if (this.#isDiscrete) {
-      const size = this.#modalityLut.getLength();
+    if (this._isDiscrete) {
+      const size = this._modalityLut.getLength();
       // use clamped array (polyfilled in env.js)
-      this.#lut = new Uint8ClampedArray(size);
+      this._lut = new Uint8ClampedArray(size);
       // by default WindowLevel returns a value in the [0,255] range
       // this is ok with regular Arrays and ClampedArray.
       for (let i = 0; i < size; ++i) {
-        this.#lut[i] = this.#voiLut.apply(this.#modalityLut.getValue(i));
+        this._lut[i] = this._voiLut.apply(this._modalityLut.getValue(i));
       }
     }
   }
@@ -118,10 +118,10 @@ export class WindowLut {
    *   at the given offset.
    */
   getValue(offset) {
-    if (this.#isDiscrete) {
-      return this.#lut[offset + this.#signedShift];
+    if (this._isDiscrete) {
+      return this._lut[offset + this._signedShift];
     } else {
-      return Math.floor(this.#voiLut.apply(offset + this.#signedShift));
+      return Math.floor(this._voiLut.apply(offset + this._signedShift));
     }
   }
 

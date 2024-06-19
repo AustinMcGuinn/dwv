@@ -9,21 +9,21 @@ export class UndoStack {
    *
    * @type {Array}
    */
-  #stack = [];
+  _stack = [];
 
   /**
    * Current command index.
    *
    * @type {number}
    */
-  #curCmdIndex = 0;
+  _curCmdIndex = 0;
 
   /**
    * Listener handler.
    *
    * @type {ListenerHandler}
    */
-  #listenerHandler = new ListenerHandler();
+  _listenerHandler = new ListenerHandler();
 
   /**
    * Get the stack size.
@@ -31,7 +31,7 @@ export class UndoStack {
    * @returns {number} The size of the stack.
    */
   getStackSize() {
-    return this.#stack.length;
+    return this._stack.length;
   }
 
   /**
@@ -40,31 +40,31 @@ export class UndoStack {
    * @returns {number} The stack index.
    */
   getCurrentStackIndex() {
-    return this.#curCmdIndex;
+    return this._curCmdIndex;
   }
 
   /**
    * Add a command to the stack.
    *
    * @param {object} cmd The command to add.
-   * @fires UndoStack#undoadd
+   * @fires UndoStack_undoadd
    */
   add(cmd) {
     // clear commands after current index
-    this.#stack = this.#stack.slice(0, this.#curCmdIndex);
+    this._stack = this._stack.slice(0, this._curCmdIndex);
     // store command
-    this.#stack.push(cmd);
+    this._stack.push(cmd);
     // increment index
-    ++this.#curCmdIndex;
+    ++this._curCmdIndex;
     /**
      * Command add to undo stack event.
      *
-     * @event UndoStack#undoadd
+     * @event UndoStack_undoadd
      * @type {object}
      * @property {string} command The name of the command added to the
      *   undo stack.
      */
-    this.#fireEvent({
+    this._fireEvent({
       type: 'undoadd',
       command: cmd.getName()
     });
@@ -73,25 +73,25 @@ export class UndoStack {
   /**
    * Undo the last command.
    *
-   * @fires UndoStack#undo
+   * @fires UndoStack_undo
    */
   undo() {
     // a bit inefficient...
-    if (this.#curCmdIndex > 0) {
+    if (this._curCmdIndex > 0) {
       // decrement command index
-      --this.#curCmdIndex;
+      --this._curCmdIndex;
       // undo last command
-      this.#stack[this.#curCmdIndex].undo();
+      this._stack[this._curCmdIndex].undo();
       /**
        * Command undo event.
        *
-       * @event UndoStack#undo
+       * @event UndoStack_undo
        * @type {object}
        * @property {string} command The name of the undone command.
        */
-      this.#fireEvent({
+      this._fireEvent({
         type: 'undo',
-        command: this.#stack[this.#curCmdIndex].getName()
+        command: this._stack[this._curCmdIndex].getName()
       });
     }
   }
@@ -99,25 +99,25 @@ export class UndoStack {
   /**
    * Redo the last command.
    *
-   * @fires UndoStack#redo
+   * @fires UndoStack_redo
    */
   redo() {
-    if (this.#curCmdIndex < this.#stack.length) {
+    if (this._curCmdIndex < this._stack.length) {
       // run last command
-      this.#stack[this.#curCmdIndex].execute();
+      this._stack[this._curCmdIndex].execute();
       /**
        * Command redo event.
        *
-       * @event UndoStack#redo
+       * @event UndoStack_redo
        * @type {object}
        * @property {string} command The name of the redone command.
        */
-      this.#fireEvent({
+      this._fireEvent({
         type: 'redo',
-        command: this.#stack[this.#curCmdIndex].getName()
+        command: this._stack[this._curCmdIndex].getName()
       });
       // increment command index
-      ++this.#curCmdIndex;
+      ++this._curCmdIndex;
     }
   }
 
@@ -129,7 +129,7 @@ export class UndoStack {
    *    event type, will be called with the fired event.
    */
   addEventListener(type, callback) {
-    this.#listenerHandler.add(type, callback);
+    this._listenerHandler.add(type, callback);
   }
 
   /**
@@ -140,7 +140,7 @@ export class UndoStack {
    *   event type.
    */
   removeEventListener(type, callback) {
-    this.#listenerHandler.remove(type, callback);
+    this._listenerHandler.remove(type, callback);
   }
 
   /**
@@ -148,8 +148,8 @@ export class UndoStack {
    *
    * @param {object} event The event to fire.
    */
-  #fireEvent = (event) => {
-    this.#listenerHandler.fireEvent(event);
+  _fireEvent = (event) => {
+    this._listenerHandler.fireEvent(event);
   };
 
 } // UndoStack class

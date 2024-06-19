@@ -52,7 +52,7 @@ export class ThreadPool {
    */
   abort() {
     // stop all threads
-    this.#stop();
+    this._stop();
     // callback
     this.onabort({type: 'work-abort'});
     this.onworkend({type: 'work-end'});
@@ -96,7 +96,7 @@ export class ThreadPool {
    */
   handleWorkerError = (event) => {
     // stop all threads
-    this.#stop();
+    this._stop();
     // callback
     this.onerror({error: event});
     this.onworkend({type: 'work-end'});
@@ -108,7 +108,7 @@ export class ThreadPool {
    * Stop the pool: stop all running threads.
    *
    */
-  #stop() {
+  _stop() {
     // clear tasks
     this.taskQueue = [];
     // cancel running workers

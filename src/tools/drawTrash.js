@@ -11,7 +11,7 @@ export class DrawTrash {
    *
    * @type {Konva.Group}
    */
-  #trash;
+  _trash;
 
   constructor() {
     this.createTrashIcon();
@@ -22,7 +22,7 @@ export class DrawTrash {
    * Creates the trash icon o positionates it.
    */
   createTrashIcon() {
-    this.#trash = new Konva.Group();
+    this._trash = new Konva.Group();
     // first line of the cross
     const trashLine1 = new Konva.Line({
       points: [-10, -10, 10, 10],
@@ -33,10 +33,10 @@ export class DrawTrash {
       points: [10, -10, -10, 10],
       stroke: 'red'
     });
-    this.#trash.width(20);
-    this.#trash.height(20);
-    this.#trash.add(trashLine1);
-    this.#trash.add(trashLine2);
+    this._trash.width(20);
+    this._trash.height(20);
+    this._trash.add(trashLine1);
+    this._trash.add(trashLine2);
   }
 
   /**
@@ -50,10 +50,10 @@ export class DrawTrash {
     const scale = stage.scale();
     const konvaLayer = drawLayer.getKonvaLayer();
     const invscale = {x: 1 / scale.x, y: 1 / scale.y};
-    this.#trash.x(stage.offset().x + (stage.width() / (2 * scale.x)));
-    this.#trash.y(stage.offset().y + (stage.height() / (15 * scale.y)));
-    this.#trash.scale(invscale);
-    konvaLayer.add(this.#trash);
+    this._trash.x(stage.offset().x + (stage.width() / (2 * scale.x)));
+    this._trash.y(stage.offset().y + (stage.height() / (15 * scale.y)));
+    this._trash.scale(invscale);
+    konvaLayer.add(this._trash);
     // draw
     konvaLayer.draw();
   }
@@ -70,12 +70,12 @@ export class DrawTrash {
   changeChildrenColourOnTrashHover(eventPosition,
     shapeGroup, originalShapeColour) {
     if (this.isOverTrash(eventPosition)) {
-      this.changeGroupChildrenColour(this.#trash, 'orange');
+      this.changeGroupChildrenColour(this._trash, 'orange');
       this.changeGroupChildrenColour(shapeGroup, 'red');
       return;
 
     }
-    this.changeGroupChildrenColour(this.#trash, 'red');
+    this.changeGroupChildrenColour(this._trash, 'red');
     this.changeGroupChildrenColour(shapeGroup, originalShapeColour);
   }
 
@@ -98,7 +98,7 @@ export class DrawTrash {
    * Removes the trash from the draw layer.
    */
   remove() {
-    this.#trash.remove();
+    this._trash.remove();
   }
 
   /**
@@ -109,11 +109,11 @@ export class DrawTrash {
    */
   isOverTrash(eventPosition) {
     const trashHalfWidth =
-        this.#trash.width() * Math.abs(this.#trash.scaleX()) / 2;
+        this._trash.width() * Math.abs(this._trash.scaleX()) / 2;
     const trashHalfHeight =
-        this.#trash.height() * Math.abs(this.#trash.scaleY()) / 2;
-    return Math.abs(eventPosition.x - this.#trash.x()) < trashHalfWidth &&
-        Math.abs(eventPosition.y - this.#trash.y()) < trashHalfHeight;
+        this._trash.height() * Math.abs(this._trash.scaleY()) / 2;
+    return Math.abs(eventPosition.x - this._trash.x()) < trashHalfWidth &&
+        Math.abs(eventPosition.y - this._trash.y()) < trashHalfHeight;
   }
 
 }

@@ -17,28 +17,28 @@ export class DeleteSegmentCommand {
    *
    * @type {Image}
    */
-  #mask;
+  _mask;
 
   /**
    * The segment to remove.
    *
    * @type {MaskSegment}
    */
-  #segment;
+  _segment;
 
   /**
    * Flag to send creation events.
    *
    * @type {boolean}
    */
-  #isSilent;
+  _isSilent;
 
   /**
    * List of offsets.
    *
    * @type {number[]}
    */
-  #offsets;
+  _offsets;
 
   /**
    * @param {Image} mask The mask image.
@@ -46,15 +46,15 @@ export class DeleteSegmentCommand {
    * @param {boolean} [silent] Whether to send a creation event or not.
    */
   constructor(mask, segment, silent) {
-    this.#mask = mask;
-    this.#segment = segment;
+    this._mask = mask;
+    this._segment = segment;
 
-    this.#isSilent = (typeof silent === 'undefined') ? false : silent;
+    this._isSilent = (typeof silent === 'undefined') ? false : silent;
     // list of offsets with the colour to delete
     if (typeof segment.displayRGBValue !== 'undefined') {
-      this.#offsets = mask.getOffsets(segment.displayRGBValue);
+      this._offsets = mask.getOffsets(segment.displayRGBValue);
     } else {
-      this.#offsets = mask.getOffsets(segment.displayValue);
+      this._offsets = mask.getOffsets(segment.displayValue);
     }
   }
 
@@ -73,37 +73,37 @@ export class DeleteSegmentCommand {
    * @returns {boolean} True if the command is valid.
    */
   isValid() {
-    return this.#offsets.length !== 0;
+    return this._offsets.length !== 0;
   }
 
   /**
    * Execute the command.
    *
-   * @fires DeleteSegmentCommand#masksegmentdelete
+   * @fires DeleteSegmentCommand_masksegmentdelete
    */
   execute() {
     // remove from image
-    if (typeof this.#segment.displayRGBValue !== 'undefined') {
-      this.#mask.setAtOffsets(this.#offsets, BLACK);
+    if (typeof this._segment.displayRGBValue !== 'undefined') {
+      this._mask.setAtOffsets(this._offsets, BLACK);
     } else {
-      this.#mask.setAtOffsets(this.#offsets, 0);
+      this._mask.setAtOffsets(this._offsets, 0);
     }
     // remove from segments
-    const segHelper = new MaskSegmentHelper(this.#mask);
-    segHelper.removeSegment(this.#segment.number);
+    const segHelper = new MaskSegmentHelper(this._mask);
+    segHelper.removeSegment(this._segment.number);
 
     // callback
-    if (!this.#isSilent) {
+    if (!this._isSilent) {
       /**
        * Segment delete event.
        *
-       * @event DeleteSegmentCommand#masksegmentdelete
+       * @event DeleteSegmentCommand_masksegmentdelete
        * @type {object}
        * @property {number} segmentnumber The segment number.
        */
       this.onExecute({
         type: 'masksegmentdelete',
-        segmentnumber: this.#segment.number
+        segmentnumber: this._segment.number
       });
     }
   }
@@ -111,30 +111,30 @@ export class DeleteSegmentCommand {
   /**
    * Undo the command.
    *
-   * @fires DeleteSegmentCommand#masksegmentredraw
+   * @fires DeleteSegmentCommand_masksegmentredraw
    */
   undo() {
     // re-draw in image
-    if (typeof this.#segment.displayRGBValue !== 'undefined') {
-      this.#mask.setAtOffsets(this.#offsets, this.#segment.displayRGBValue);
+    if (typeof this._segment.displayRGBValue !== 'undefined') {
+      this._mask.setAtOffsets(this._offsets, this._segment.displayRGBValue);
     } else {
-      this.#mask.setAtOffsets(this.#offsets, this.#segment.displayValue);
+      this._mask.setAtOffsets(this._offsets, this._segment.displayValue);
     }
     // add back to segments
-    const segHelper = new MaskSegmentHelper(this.#mask);
-    segHelper.addSegment(this.#segment);
+    const segHelper = new MaskSegmentHelper(this._mask);
+    segHelper.addSegment(this._segment);
 
     // callback
     /**
      * Segment redraw event.
      *
-     * @event DeleteSegmentCommand#masksegmentredraw
+     * @event DeleteSegmentCommand_masksegmentredraw
      * @type {object}
      * @property {number} segmentnumber The segment number.
      */
     this.onUndo({
       type: 'masksegmentredraw',
-      segmentnumber: this.#segment.number
+      segmentnumber: this._segment.number
     });
   }
 

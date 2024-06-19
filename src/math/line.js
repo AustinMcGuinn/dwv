@@ -17,14 +17,14 @@ export class Line {
    *
    * @type {Point2D}
    */
-  #begin;
+  _begin;
 
   /**
    * Line end point.
    *
    * @type {Point2D}
    */
-  #end;
+  _end;
 
   /**
    * @param {Point2D} begin A Point2D representing the beginning
@@ -32,8 +32,8 @@ export class Line {
    * @param {Point2D} end A Point2D representing the end of the line.
    */
   constructor(begin, end) {
-    this.#begin = begin;
-    this.#end = end;
+    this._begin = begin;
+    this._end = end;
   }
 
   /**
@@ -42,7 +42,7 @@ export class Line {
    * @returns {Point2D} The beginning point of the line.
    */
   getBegin() {
-    return this.#begin;
+    return this._begin;
   }
 
   /**
@@ -51,7 +51,7 @@ export class Line {
    * @returns {Point2D} The ending point of the line.
    */
   getEnd() {
-    return this.#end;
+    return this._end;
   }
 
   /**

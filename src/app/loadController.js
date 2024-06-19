@@ -12,20 +12,20 @@ export class LoadController {
    *
    * @type {string}
    */
-  #defaultCharacterSet;
+  _defaultCharacterSet;
 
   /**
    * List of current loaders.
    *
    * @type {object}
    */
-  #currentLoaders = {};
+  _currentLoaders = {};
 
   /**
    * @param {string} defaultCharacterSet The default character set.
    */
   constructor(defaultCharacterSet) {
-    this.#defaultCharacterSet = defaultCharacterSet;
+    this._defaultCharacterSet = defaultCharacterSet;
   }
 
   /**
@@ -38,9 +38,9 @@ export class LoadController {
     // has been checked for emptiness.
     const ext = files[0].name.split('.').pop().toLowerCase();
     if (ext === 'json') {
-      this.#loadStateFile(files[0], dataId);
+      this._loadStateFile(files[0], dataId);
     } else {
-      this.#loadImageFiles(files, dataId);
+      this._loadImageFiles(files, dataId);
     }
   }
 
@@ -58,9 +58,9 @@ export class LoadController {
     // has been checked for emptiness.
     const ext = urls[0].split('.').pop().toLowerCase();
     if (ext === 'json') {
-      this.#loadStateUrl(urls[0], dataId, options);
+      this._loadStateUrl(urls[0], dataId, options);
     } else {
-      this.#loadImageUrls(urls, dataId, options);
+      this._loadImageUrls(urls, dataId, options);
     }
   }
 
@@ -75,7 +75,7 @@ export class LoadController {
     // create IO
     const memoryIO = new MemoryLoader();
     // load data
-    this.#loadData(data, memoryIO, 'image', dataId);
+    this._loadData(data, memoryIO, 'image', dataId);
   }
 
   /**
@@ -84,7 +84,7 @@ export class LoadController {
    * @returns {string[]} The data ids.
    */
   getLoadingDataIds() {
-    return Object.keys(this.#currentLoaders);
+    return Object.keys(this._currentLoaders);
   }
 
   /**
@@ -93,9 +93,9 @@ export class LoadController {
    * @param {string} dataId The data to stop loading.
    */
   abort(dataId) {
-    if (typeof this.#currentLoaders[dataId] !== 'undefined') {
-      this.#currentLoaders[dataId].loader.abort();
-      delete this.#currentLoaders[dataId];
+    if (typeof this._currentLoaders[dataId] !== 'undefined') {
+      this._currentLoaders[dataId].loader.abort();
+      delete this._currentLoaders[dataId];
     }
   }
 
@@ -107,12 +107,12 @@ export class LoadController {
    * @param {File[]} files The list of image files to load.
    * @param {string} dataId The data Id.
    */
-  #loadImageFiles(files, dataId) {
+  _loadImageFiles(files, dataId) {
     // create IO
     const fileIO = new FilesLoader();
-    fileIO.setDefaultCharacterSet(this.#defaultCharacterSet);
+    fileIO.setDefaultCharacterSet(this._defaultCharacterSet);
     // load data
-    this.#loadData(files, fileIO, 'image', dataId);
+    this._loadData(files, fileIO, 'image', dataId);
   }
 
   /**
@@ -124,12 +124,12 @@ export class LoadController {
    * - requestHeaders: an array of {name, value} to use as request headers.
    * - withCredentials: credentials flag to pass to the request.
    */
-  #loadImageUrls(urls, dataId, options) {
+  _loadImageUrls(urls, dataId, options) {
     // create IO
     const urlIO = new UrlsLoader();
-    urlIO.setDefaultCharacterSet(this.#defaultCharacterSet);
+    urlIO.setDefaultCharacterSet(this._defaultCharacterSet);
     // load data
-    this.#loadData(urls, urlIO, 'image', dataId, options);
+    this._loadData(urls, urlIO, 'image', dataId, options);
   }
 
   /**
@@ -138,11 +138,11 @@ export class LoadController {
    * @param {File} file The state file to load.
    * @param {string} dataId The data Id.
    */
-  #loadStateFile(file, dataId) {
+  _loadStateFile(file, dataId) {
     // create IO
     const fileIO = new FilesLoader();
     // load data
-    this.#loadData([file], fileIO, 'state', dataId);
+    this._loadData([file], fileIO, 'state', dataId);
   }
 
 
@@ -155,11 +155,11 @@ export class LoadController {
    * - requestHeaders: an array of {name, value} to use as request headers.
    * - withCredentials: credentials flag to pass to the request.
    */
-  #loadStateUrl(url, dataId, options) {
+  _loadStateUrl(url, dataId, options) {
     // create IO
     const urlIO = new UrlsLoader();
     // load data
-    this.#loadData([url], urlIO, 'state', dataId, options);
+    this._loadData([url], urlIO, 'state', dataId, options);
   }
 
   /**
@@ -171,7 +171,7 @@ export class LoadController {
    * @param {string} dataId The data id.
    * @param {object} [options] Options passed to the final loader.
    */
-  #loadData(data, loader, loadType, dataId, options) {
+  _loadData(data, loader, loadType, dataId, options) {
     const eventInfo = {
       loadtype: loadType,
       dataid: dataId
@@ -180,39 +180,39 @@ export class LoadController {
     // set callbacks
     loader.onloadstart = (event) => {
       // store loader to allow abort
-      this.#currentLoaders[dataId] = {
+      this._currentLoaders[dataId] = {
         loader: loader,
         isFirstItem: true
       };
       // callback
-      this.#augmentCallbackEvent(this.onloadstart, eventInfo)(event);
+      this._augmentCallbackEvent(this.onloadstart, eventInfo)(event);
     };
-    loader.onprogress = this.#augmentCallbackEvent(this.onprogress, eventInfo);
+    loader.onprogress = this._augmentCallbackEvent(this.onprogress, eventInfo);
     loader.onloaditem = (event) => {
       const eventInfoItem = {
         loadtype: loadType,
         dataid: dataId
       };
-      if (typeof this.#currentLoaders[dataId] !== 'undefined') {
-        eventInfoItem.isfirstitem = this.#currentLoaders[dataId].isFirstItem;
+      if (typeof this._currentLoaders[dataId] !== 'undefined') {
+        eventInfoItem.isfirstitem = this._currentLoaders[dataId].isFirstItem;
       }
       // callback
-      this.#augmentCallbackEvent(this.onloaditem, eventInfoItem)(event);
+      this._augmentCallbackEvent(this.onloaditem, eventInfoItem)(event);
       // update loader
-      if (typeof this.#currentLoaders[dataId] !== 'undefined' &&
-        this.#currentLoaders[dataId].isFirstItem) {
-        this.#currentLoaders[dataId].isFirstItem = false;
+      if (typeof this._currentLoaders[dataId] !== 'undefined' &&
+        this._currentLoaders[dataId].isFirstItem) {
+        this._currentLoaders[dataId].isFirstItem = false;
       }
     };
-    loader.onload = this.#augmentCallbackEvent(this.onload, eventInfo);
+    loader.onload = this._augmentCallbackEvent(this.onload, eventInfo);
     loader.onloadend = (event) => {
       // reset current loader
-      delete this.#currentLoaders[dataId];
+      delete this._currentLoaders[dataId];
       // callback
-      this.#augmentCallbackEvent(this.onloadend, eventInfo)(event);
+      this._augmentCallbackEvent(this.onloadend, eventInfo)(event);
     };
-    loader.onerror = this.#augmentCallbackEvent(this.onerror, eventInfo);
-    loader.onabort = this.#augmentCallbackEvent(this.onabort, eventInfo);
+    loader.onerror = this._augmentCallbackEvent(this.onerror, eventInfo);
+    loader.onabort = this._augmentCallbackEvent(this.onabort, eventInfo);
     // launch load
     try {
       loader.load(data, options);
@@ -236,7 +236,7 @@ export class LoadController {
    * @param {object} info Info object to append to the event.
    * @returns {object} A function representing the modified callback.
    */
-  #augmentCallbackEvent(callback, info) {
+  _augmentCallbackEvent(callback, info) {
     return function (event) {
       const keys = Object.keys(info);
       for (let i = 0; i < keys.length; ++i) {
